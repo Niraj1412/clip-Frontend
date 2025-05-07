@@ -1,0 +1,233 @@
+/* ProfilePage Styles */
+.profile-page {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Profile Card Styles */
+.profile-card {
+  transition: all 0.3s ease-in-out;
+}
+
+.user-avatar {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.user-avatar:hover {
+  transform: scale(1.05);
+}
+
+/* Profile header with banner styles */
+.profile-header {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Project card hover animation */
+.project-card {
+  transition: all 0.3s ease-in-out;
+}
+
+.play-button-overlay {
+  z-index: 2;
+}
+
+.play-button-circle {
+  transform: scale(0.9);
+  transition: all 0.3s ease;
+}
+
+.video-thumbnail:hover .play-button-circle {
+  transform: scale(1);
+}
+
+/* Filter tabs */
+.filter-tabs button {
+  transition: all 0.2s ease;
+}
+
+.filter-tabs button:hover {
+  transform: translateY(-2px);
+}
+
+/* Stats items */
+.user-stats .stat-item {
+  transition: all 0.3s ease;
+}
+
+.user-stats .stat-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(108, 92, 231, 0.1);
+  border-color: rgba(108, 92, 231, 0.3);
+}
+
+/* Progress bar animation */
+.progress-bar {
+  transition: width 0.6s ease;
+}
+
+/* Empty state animation */
+.empty-state .icon-container {
+  transition: all 0.3s ease;
+}
+
+.empty-state:hover .icon-container {
+  transform: scale(1.1);
+}
+
+/* Delete modal styles */
+.delete-modal .modal-content {
+  border: 1px solid rgba(108, 92, 231, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .avatar-container {
+    margin-top: 0 !important;
+  }
+  
+  .user-stats {
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+  
+  .filter-tabs {
+    margin-top: 1rem;
+    width: 100%;
+    display: flex;
+  }
+  
+  .filter-tabs button {
+    flex: 1;
+  }
+}
+
+/* Animate progress bar on load */
+@keyframes progressAnimation {
+  0% {
+    width: 0%;
+  }
+}
+
+.progress-bar {
+  animation: progressAnimation 1s ease-out forwards;
+}
+
+/* Generate shimmer effect for loading placeholders */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.03) 100%);
+  background-size: 1000px 100%;
+}
+
+/* Enhanced animations */
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-pulse-slower {
+  animation: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-ping-slow {
+  animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-spin-slow {
+  animation: spin 15s linear infinite;
+}
+
+.mt-lg-n6 {
+  margin-top: -6rem;
+}
+
+.mt-md-n6 {
+  margin-top: -6rem;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.1;
+  }
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Text gradient animation */
+.background-animate {
+  background-size: 400%;
+  animation: gradient 8s ease infinite;
+}
+
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Pulse gradient animation for progress bar */
+@keyframes pulse-gradient {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-gradient {
+  animation: pulse-gradient 2s ease-in-out infinite;
+}
+
+/* Shadow animation */
+.shadow-pulse {
+  animation: shadow-pulse 2s infinite;
+}
+
+@keyframes shadow-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(108, 92, 231, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
+  }
+} 
