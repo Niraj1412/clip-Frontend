@@ -38,7 +38,7 @@ const TranscriptGridPage = () => {
   const { setSelectedClipsData } = useClipsData();
   const [retryCounts, setRetryCounts] = useState({}); // Track retries per video
   const [maxRetries] = useState(3); // Maximum number of retry attempts
-  const API_BASE_URL = 'http://localhost:4001/api/v1/youtube';
+  const API_BASE_URL = 'https://clip-backend-f93c.onrender.com/api/v1/youtube';
 
   useEffect(() => {
     const initializeFirstVideo = async () => {

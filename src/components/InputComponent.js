@@ -137,7 +137,7 @@ const InputComponent = () => {
           if (process.env.NODE_ENV === 'development') {
             try {
               const devResponse = await axios.post(
-                `http://localhost:4001/api/v1/youtube/video/${videoId}`,
+                `https://clip-backend-f93c.onrender.com/api/v1/youtube/video/${videoId}`,
                 null,
                 { timeout: 10000 }
               );
