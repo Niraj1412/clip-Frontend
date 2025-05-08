@@ -1,7 +1,7 @@
 const USE_EC2_SERVER = true;
 
-const LOCALHOST_API_URL = 'clip-backend-production.up.railway.app';
-const EC2_API_URL = 'clip-backend-production.up.railway.app';
+const LOCALHOST_API_URL = 'http://clip-backend-production.up.railway.app';
+const EC2_API_URL = 'http://clip-backend-production.up.railway.app';
 
 export const API_URL = USE_EC2_SERVER ? EC2_API_URL : LOCALHOST_API_URL;
 
