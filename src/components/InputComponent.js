@@ -137,7 +137,7 @@ const InputComponent = () => {
           if (process.env.NODE_ENV === 'development') {
             try {
               const devResponse = await axios.post(
-                `http://clip-backend-production.up.railway.app/api/v1/youtube/video/${videoId}`,
+                `https://clip-backend-production.up.railway.app/api/v1/youtube/video/${videoId}`,
                 null,
                 { timeout: 10000 }
               );

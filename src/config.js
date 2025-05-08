@@ -1,7 +1,7 @@
 const USE_EC2_SERVER = true;
 
-const LOCALHOST_API_URL = 'http://clip-backend-production.up.railway.app';
-const EC2_API_URL = 'http://clip-backend-production.up.railway.app';
+const LOCALHOST_API_URL = 'https://clip-backend-production.up.railway.app/';
+const EC2_API_URL = 'https://clip-backend-production.up.railway.app/';
 
 export const API_URL = USE_EC2_SERVER ? EC2_API_URL : LOCALHOST_API_URL;
 
@@ -13,7 +13,7 @@ export const PROJECTS_API = `${API_URL}/api/projects`;
 export const PYTHON_API =  USE_EC2_SERVER ?  "https://clip-py-backend-production.up.railway.app/" :   "http://54.161.100.146:5000" ;
 
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://clip-backend-production.up.railway.app/api';
 
 export const USERS_API = `${API_BASE_URL}/users`;
 export const CLIPS_API = `${API_BASE_URL}/clips`;
