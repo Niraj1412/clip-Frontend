@@ -38,7 +38,7 @@ const TranscriptGridPage = () => {
   const { setSelectedClipsData } = useClipsData();
   const [retryCounts, setRetryCounts] = useState({}); // Track retries per video
   const [maxRetries] = useState(3); // Maximum number of retry attempts
-  const API_BASE_URL = 'https://clip-backend-production.up.railway.app/api/v1/youtube';
+ const API_BASE_URL = 'http://localhost:4001/api/v1';
 
   useEffect(() => {
     const initializeFirstVideo = async () => {
@@ -72,134 +72,224 @@ const TranscriptGridPage = () => {
     initializeFirstVideo();
   }, [videoIds]); // Only depend on videoIds to prevent unnecessary re-runs
 
-  const fetchVideoDetails = async (videoId) => {
+const fetchVideoDetails = async (videoId) => {
+  const token = localStorage.getItem('token');
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  
+  try {
+    // First try YouTube-specific endpoint
+    let response;
     try {
-      const response = await axios.post(`${API_BASE_URL}/details/${videoId}`);
-      if (response.data.status) {
-        const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-        setVideoDetails(prev => ({
-          ...prev,
-          [videoId]: {
-            ...response.data.data,
-            thumbnail: thumbnailUrl
-          }
-        }));
+      response = await axios.post(`${API_BASE_URL}/youtube/details/${videoId}`, {}, { headers });
+    } catch (youtubeError) {
+      // If YouTube endpoint fails, fall back to generic endpoint
+      if (youtubeError.response?.status === 404) {
+        response = await axios.get(`${API_BASE_URL}/video/${videoId}/details`, { headers });
+      } else {
+        throw youtubeError;
       }
-    } catch (error) {
-      console.error("Error fetching video details:", error);
-      // Set fallback details
-      setVideoDetails(prev => ({
-        ...prev,
-        [videoId]: {
-          title: 'Error loading video',
-          duration: 'PT0M0S',
-          publishedAt: new Date().toISOString(),
-          thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-        }
-      }));
     }
-  };
 
-  // Updated fetchTranscript function
-  const fetchTranscript = async (videoId, attempt = 1) => {
-    if (transcripts[videoId]) return;
+    const details = response.data.data || response.data;
+    const isYouTube = response.config.url.includes('/youtube/');
 
-    setLoading(prev => ({ ...prev, [videoId]: true }));
-    setErrors(prev => ({ ...prev, [videoId]: null }));
+    // Parse duration from ISO format or seconds
+    let durationInSeconds;
+    if (details.duration && typeof details.duration === 'string') {
+      durationInSeconds = parseISODuration(details.duration);
+    } else {
+      durationInSeconds = Number(details.duration) || 0;
+    }
 
+    setVideoDetails(prev => ({
+      ...prev,
+      [videoId]: {
+        title: details.title || (isYouTube ? 'YouTube Video' : 'Uploaded Video'),
+        duration: durationInSeconds,
+        durationISO: details.duration || 'PT0M0S',
+        publishedAt: details.publishedAt || details.createdAt || new Date().toISOString(),
+        thumbnail: isYouTube 
+          ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+          : details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${videoId}.jpg`,
+        isYouTubeVideo: isYouTube,
+        isCustomVideo: !isYouTube,
+        status: details.status || 'processed'
+      }
+    }));
+
+  } catch (error) {
+    console.error("Error fetching video details:", error);
+    // Set fallback details with YouTube thumbnail
+    setVideoDetails(prev => ({
+      ...prev,
+      [videoId]: {
+        title: 'YouTube Video',
+        duration: 0,
+        durationISO: 'PT0M0S',
+        publishedAt: new Date().toISOString(),
+        thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+        isYouTubeVideo: true,
+        isCustomVideo: false,
+        status: 'error'
+      }
+    }));
+  }
+};
+
+const fetchTranscript = async (videoId, attempt = 1) => {
+  if (transcripts[videoId]) return;
+
+  const token = localStorage.getItem('token');
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  setLoading(prev => ({ ...prev, [videoId]: true }));
+  setErrors(prev => ({ ...prev, [videoId]: null }));
+
+  try {
+    console.log(`Fetching transcript for video ${videoId} (attempt ${attempt})...`);
+    
+    // First try YouTube-specific endpoint
+    let response;
+    let isYouTube = false;
     try {
-      console.log(`Fetching transcript for video ${videoId} (attempt ${attempt})...`);
-      const response = await axios.post(`${API_BASE_URL}/video/${videoId}`);
-      console.log('Raw API Response:', response.data);
-
-      if (!response.data?.status) {
-        throw new Error(response.data?.message || "Invalid response format");
+      response = await axios.post(`${API_BASE_URL}/youtube/video/${videoId}`, { headers });
+      isYouTube = true;
+    } catch (youtubeError) {
+      // If YouTube endpoint fails, fall back to generic endpoint
+      if (youtubeError.response?.status === 404) {
+        response = await axios.get(`${API_BASE_URL}/video/${videoId}/transcript`, { headers });
+      } else {
+        throw youtubeError;
       }
+    }
 
-      let transcriptData = [];
-      const responseData = response.data.data || response.data;
+    const transcriptData = response.data.data?.transcript || response.data.transcript || response.data.data || response.data; 
+    
+    if (!transcriptData) {
+      throw new Error('Transcript data not found in response');
+    }
 
-      // Handle different response formats
-      if (Array.isArray(responseData.transcript)) {
-        transcriptData = responseData.transcript;
-      } else if (Array.isArray(responseData)) {
-        transcriptData = responseData;
-      } else if (Array.isArray(responseData.data)) {
-        transcriptData = responseData.data;
-      }
-
-      console.log('Extracted Transcript Data:', transcriptData);
-
-      if (!transcriptData.length) {
-        throw new Error('Transcript is empty or unavailable');
-      }
-
-      // Ensure all segments have required fields
-      const processedTranscript = transcriptData.map(segment => {
-        // Convert from minutes to seconds
-        const startInSeconds = (segment.start || 0) * 60;
-        const durationInSeconds = (segment.duration || 0) * 60;
-        const endInSeconds = startInSeconds + durationInSeconds;
+    // Process transcript data based on source (YouTube or uploaded video)
+    const processedTranscript = (Array.isArray(transcriptData) ? transcriptData : transcriptData.segments || [])
+      .map(segment => {
+        let startTime, endTime;
+        
+        if (isYouTube) {
+        // YouTube transcript format
+        startTime = Number(segment.start || segment.offset || 0);
+        endTime = Number(segment.end || (segment.offset + segment.duration) || startTime + 1);
+          
+          // Ensure end time is after start time
+          if (endTime <= startTime) {
+            endTime = startTime + (segment.duration || 1);
+          }
+        } else {
+          // Uploaded videos might provide milliseconds
+          startTime = Number(segment.start || segment.startTime || 0);
+          endTime = Number(segment.end || segment.endTime || 0);
+          
+          // Convert milliseconds to seconds if needed
+          if (startTime > 1000) startTime = startTime / 1000;
+          if (endTime > 1000) endTime = endTime / 1000;
+          
+          // Ensure valid duration
+          if (endTime <= startTime) {
+            endTime = startTime + (segment.duration ? segment.duration / 1000 : 1);
+          }
+        }
 
         return {
           text: segment.text || '',
-          startTime: startInSeconds,
-          endTime: endInSeconds,
-          duration: durationInSeconds
+          startTime,
+          endTime,
+          duration: Math.max(0, endTime - startTime),
+          speaker: segment.speaker || null,
+          confidence: segment.confidence || null
         };
       });
 
-      console.log('Processed Transcript:', processedTranscript);
-
-      setTranscripts(prev => ({
-        ...prev,
-        [videoId]: processedTranscript
-      }));
-      setRetryCounts(prev => ({ ...prev, [videoId]: 0 }));
-
-    } catch (error) {
-      console.error('Error fetching transcript:', error);
-
-      if (attempt < maxRetries) {
-        setTimeout(() => {
-          fetchTranscript(videoId, attempt + 1);
-          setRetryCounts(prev => ({ ...prev, [videoId]: attempt }));
-        }, 3000 * attempt);
-        return;
-      }
-
-      setErrors(prev => ({
-        ...prev,
-        [videoId]: error.response?.data?.message ||
-          error.message ||
-          "Failed to fetch transcript"
-      }));
-    } finally {
-      setLoading(prev => ({ ...prev, [videoId]: false }));
+    if (processedTranscript.length === 0) {
+      throw new Error('Transcript is empty or unavailable');
     }
-  };
+
+    setTranscripts(prev => ({
+      ...prev,
+      [videoId]: processedTranscript
+    }));
+    setRetryCounts(prev => ({ ...prev, [videoId]: 0 }));
+
+  } catch (error) {
+    console.error('Error fetching transcript:', {
+      error,
+      videoId,
+      attempt,
+      response: error.response?.data
+    });
+
+    if (attempt < maxRetries) {
+      setTimeout(() => {
+        fetchTranscript(videoId, attempt + 1);
+        setRetryCounts(prev => ({ ...prev, [videoId]: attempt }));
+      }, 3000 * attempt);
+      return;
+    }
+
+    setErrors(prev => ({
+      ...prev,
+      [videoId]: error.response?.data?.message || 
+                error.message || 
+                "Failed to fetch transcript. Please check if captions are available for this video."
+    }));
+  } finally {
+    setLoading(prev => ({ ...prev, [videoId]: false }));
+  }
+};
+
 
   // Updated formatTimeRange function
-  const formatTime = (seconds) => {
-    if (typeof seconds !== 'number') return '0:00';
-    const minutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    const ms = Math.floor((seconds % 1) * 1000);
-    return ms > 0 ?
-      `${minutes}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}` :
-      `${minutes}:${secs.toString().padStart(2, '0')}`;
+const formatTime = (seconds) => {
+  if (typeof seconds !== 'number' || isNaN(seconds)) return '0:00';
+  
+  // Handle negative values
+  const isNegative = seconds < 0;
+  const absSeconds = Math.abs(seconds);
+  
+  const minutes = Math.floor(absSeconds / 60);
+  const secs = Math.floor(absSeconds % 60);
+  const millis = Math.floor((absSeconds % 1) * 1000);
+  
+  // Format as M:SS or MM:SS
+  const timeStr = `${minutes}:${secs.toString().padStart(2, '0')}`;
+  
+  return `${isNegative ? '-' : ''}${timeStr}`;
+};
+
+
+  const parseISODuration = (duration) => {
+    if (!duration) return 0;
+    if (typeof duration === 'number') return duration;
+    
+    const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    const hours = parseInt(match[1] || '0');
+    const minutes = parseInt(match[2] || '0');
+    const seconds = parseInt(match[3] || '0');
+    
+    return (hours * 3600) + (minutes * 60) + seconds;
   };
 
-  const formatDuration = (duration) => {
-    if (!duration) return '';
-    const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-    const hours = (match[1] || '').replace('H', '');
-    const minutes = (match[2] || '').replace('M', '');
-    const seconds = (match[3] || '').replace('S', '');
-
-    if (hours) return `${hours}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')}`;
-    return `${minutes || '0'}:${seconds.padStart(2, '0')}`;
-  };
+// In your frontend code
+const formatDuration = (duration) => {
+  if (typeof duration === 'string' && duration.startsWith('PT')) {
+    // Handle ISO 8601 format if needed
+    return formatTime(parseISODuration(duration));
+  }
+  
+  // Ensure duration is a number
+  const durationNum = Number(duration);
+  if (isNaN(durationNum)) return '0:00';
+  
+  return formatTime(durationNum);
+};
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -240,19 +330,15 @@ const TranscriptGridPage = () => {
     !searchTerm
   );
 
-  const formatTimeRange = (start, end) => {
-    // Ensure we have numbers (in seconds)
-    const startSec = typeof start === 'number' ? start : 0;
-    const endSec = typeof end === 'number' ? end : startSec + 1;
-
-    const format = (seconds) => {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
-
-    return `${format(startSec)} - ${format(endSec)}`;
-  };
+const formatTimeRange = (start, end) => {
+  const startSec = typeof start === 'number' ? start : 0;
+  const endSec = typeof end === 'number' ? end : startSec + 1;
+  
+  // Ensure valid times
+  if (isNaN(startSec) || isNaN(endSec)) return '0:00 - 0:00';
+  
+  return `${formatTime(startSec)} - ${formatTime(endSec)}`;
+};
 
   // Function to generate section heading based on time
   const generateSectionHeading = (timeInSeconds) => {
@@ -286,6 +372,8 @@ const TranscriptGridPage = () => {
       return newSelection;
     });
   };
+
+  
 
   return (
     <div className="h-screen bg-[#121212] text-white flex flex-col">
