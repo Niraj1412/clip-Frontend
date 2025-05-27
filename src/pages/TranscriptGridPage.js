@@ -38,7 +38,7 @@ const TranscriptGridPage = () => {
   const { setSelectedClipsData } = useClipsData();
   const [retryCounts, setRetryCounts] = useState({}); // Track retries per video
   const [maxRetries] = useState(3); // Maximum number of retry attempts
- const API_BASE_URL = 'http://localhost:4001/api/v1';
+ const API_BASE_URL = 'https://clip-backend-production.up.railway.app/api/v1';
 
   useEffect(() => {
     const initializeFirstVideo = async () => {
@@ -176,8 +176,9 @@ const fetchTranscript = async (videoId, attempt = 1) => {
         
         if (isYouTube) {
         // YouTube transcript format
-        startTime = Number(segment.start || segment.offset || 0);
-        endTime = Number(segment.end || (segment.offset + segment.duration) || startTime + 1);
+          // YouTube typically provides start/end in seconds
+          startTime = Number(segment.start || segment.startTime || 0);
+          endTime = Number(segment.end || segment.endTime || 0);
           
           // Ensure end time is after start time
           if (endTime <= startTime) {
