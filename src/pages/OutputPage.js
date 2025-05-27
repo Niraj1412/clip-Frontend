@@ -39,9 +39,6 @@ const OutputPage = () => {
   const [savedToDatabase, setSavedToDatabase] = useState(false);
   const navigate = useNavigate();
 
-
-
-  
   // Simulated loading progress
   useEffect(() => {
     let interval;
@@ -82,68 +79,101 @@ const OutputPage = () => {
         endTime: clip.endTime
       }));
 
-      // Make request to backend for merging
-      const videoId = selectedClipsData[0].videoId;
+      // Debugging logs
+      console.log('Sending merge request with clips:', clipsToMerge);
 
-      const response = await axios.post(`https://clip-py-backend-production.up.railway.app/merge-clips`, { clips: clipsToMerge });
+      const token = localStorage.getItem('token');
+      const headers = token ? { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      } : {};
 
-
-      if (response.data && response.data.success && response.data.s3Url) {
-        // Set the video URL to the S3 URL returned from the backend
-        setVideoUrl(response.data.s3Url);
-        setLoadingProgress(98);
+      // Try the first method (Python backend)
+      let response;
+      try {
+        response = await axios.post(`https://clip-py-backend-production.up.railway.app/merge-clips`, { 
+          clips: clipsToMerge 
+        });
         
-        try {
-          // Prepare data for database
-          const { clipsInfo, fileNames3, s3Url } = response.data;
-          
-          // Get user data using the ProfilePage logic
-          let userId = "guest";
-          let userEmail = "guest@clipsmart.ai";
-          let userName = "Guest User";
+        if (!response.data?.success || !response.data?.s3Url) {
+          throw new Error('Python backend response invalid, trying fallback');
+        }
+      } catch (pythonError) {
+        console.log('Python backend failed, trying Node backend:', pythonError);
+        // Fall back to Node backend if Python backend fails
+        response = await axios.post(`${API_URL}/api/merge/videoMerge`, {
+          clips: clipsToMerge
+        }, { headers });
+      }
 
-          const userDataFromStorage = JSON.parse(localStorage.getItem('user') || '{}');
-          
-          if (userDataFromStorage && userDataFromStorage.id) {
-            userId = userDataFromStorage.id;
-            userEmail = userDataFromStorage.email || userEmail; // Use stored email if available
-            userName = userDataFromStorage.name || userName;   // Use stored name if available
-          } else {
-            // Fallback to authService if localStorage is empty or missing id
-            const authUser = authService.getCurrentUser(); 
-            if (authUser) {
-               userId = authUser.id || userId;
-               userEmail = authUser.email || userEmail;
-               userName = authUser.name || userName;
+      console.log('Merge response:', response.data);
+
+      // Handle both possible response structures:
+      // 1. Direct response from videoMerge endpoint
+      // 2. Nested response through router
+      const videoUrl = response.data?.videoUrl || 
+                      response.data?.data?.videoUrl || 
+                      response.data?.s3Url || 
+                      response.data?.data?.s3Url;
+
+      if (!videoUrl) {
+        console.error('No video URL found in response. Full response:', response);
+        throw new Error(
+          response.data?.message || 
+          response.data?.data?.message || 
+          'Video was processed but no URL was returned. Please check console for details.'
+        );
+      }
+
+      setVideoUrl(videoUrl);
+      setLoadingProgress(98);
+
+      // Database save logic (only for authenticated users)
+      try {
+        const userDataFromStorage = JSON.parse(localStorage.getItem('user') || '{}');
+        const authUser = authService.getCurrentUser();
+        
+        if ((userDataFromStorage && userDataFromStorage.id) || (authUser && authUser.id)) {
+          const userId = userDataFromStorage.id || authUser?.id;
+          const userEmail = userDataFromStorage.email || authUser?.email || "guest@clipsmart.ai";
+          const userName = userDataFromStorage.name || authUser?.name || "Guest User";
+
+          const dbResponse = await axios.post(`${API_URL}/api/v1/youtube/addFinalVideo`, {
+            clipsInfo: clipsToMerge,
+            fileNames3: videoUrl.split('/').pop(), // Extract filename from URL
+            s3Url: videoUrl,
+            userId,
+            userEmail,
+            userName
+          }, { headers });
+
+          if (dbResponse.data?.success) {
+            setSavedToDatabase(true);
+            // Update URL if database returned a different one
+            if (dbResponse.data.data?.s3Url) {
+              setVideoUrl(dbResponse.data.data.s3Url);
             }
           }
-          
-          // Send to the database endpoint
-          const dbResponse = await axios.post(`${API_URL}/api/v1/youtube/addFinalVideo`, {
-            clipsInfo: clipsToMerge, // Use the original clips data
-            fileNames3: fileNames3,
-            s3Url: s3Url,
-            userId: userId,       // Send the determined userId
-            userEmail: userEmail,   // Send the determined userEmail
-            userName: userName      // Send the determined userName
-          });
-          
-          if (dbResponse.data && dbResponse.data.success) {
-            setSavedToDatabase(true);
-            console.log('Video saved to database:', dbResponse.data);
-          }
-        } catch (dbError) {
-          console.error('Error saving to database:', dbError);
-        } finally {
-          setLoadingProgress(100);
-          setLoading(false);
         }
-      } else {
-        throw new Error('Invalid response from server');
+      } catch (dbError) {
+        console.error('Database save error (non-critical):', dbError);
+        // Don't fail the operation if database save fails
+      } finally {
+        setLoadingProgress(100);
+        setLoading(false);
       }
     } catch (err) {
-      console.error('Error merging clips:', err);
-      setError(err.response?.data?.message || 'Failed to merge clips. Please try again.');
+      console.error('Merge error details:', {
+        error: err,
+        response: err.response
+      });
+      
+      setError(
+        err.response?.data?.message || 
+        err.response?.data?.data?.message || 
+        err.message || 
+        'Failed to merge clips. Please check console for details.'
+      );
       setLoading(false);
     }
   };

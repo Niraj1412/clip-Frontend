@@ -52,6 +52,7 @@ const ClipsPreviewerDemo = () => {
 
   const initialSelectionRef = useRef(false);
 
+
   // Add new state for advanced loading animation
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingStage, setLoadingStage] = useState(0);
@@ -148,11 +149,15 @@ const ClipsPreviewerDemo = () => {
           console.log('Received script data:', data.data.script);
 
           try {
-            const cleanScript = data.data.script
-              .replace(/\((\d+\.?\d*)\)\.toFixed\(2\)/g, '$1')
-              .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\)\.toFixed\(2\)/g, (match) => {
-                return eval(match.replace('.toFixed(2)', '')).toFixed(2);
-              });
+      // Enhanced cleaning and sanitization
+      const cleanScript = data.data.script
+        .replace(/```json/g, '')
+        .replace(/```/g, '')
+        .replace(/\((\d+\.?\d*)\)\.toFixed\(2\)/g, '$1')
+        .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\)\.toFixed\(2\)/g, (match) => {
+          return eval(match.replace('.toFixed(2)', '')).toFixed(2);
+        })
+        .trim();
 
             const clipsArray = JSON.parse(cleanScript);
             console.log('Parsed clips array:', clipsArray);
@@ -176,7 +181,7 @@ const ClipsPreviewerDemo = () => {
                 startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
                 endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
                 transcriptText: (clip.transcriptText || '').replace(/&amp;#39;/g, "'"),
-                thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`,
+                 thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg` ,
                 createdAt: new Date().toISOString()
               };
             });
@@ -934,4 +939,4 @@ const ClipsPreviewerDemo = () => {
   );
 };
 
-export default ClipsPreviewerDemo; 
+export default ClipsPreviewerDemo;
