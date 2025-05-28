@@ -72,6 +72,16 @@ const TranscriptGridPage = () => {
     initializeFirstVideo();
   }, [videoIds]); // Only depend on videoIds to prevent unnecessary re-runs
 
+  const checkImageExists = async (url) => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
+
 const fetchVideoDetails = async (videoId) => {
   const token = localStorage.getItem('token');
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
