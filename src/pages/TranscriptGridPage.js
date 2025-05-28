@@ -77,21 +77,63 @@ const fetchVideoDetails = async (videoId) => {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   
   try {
-    // First try YouTube-specific endpoint
-    let response;
-    try {
-      response = await axios.post(`${API_BASE_URL}/youtube/details/${videoId}`, {}, { headers });
-    } catch (youtubeError) {
-      // If YouTube endpoint fails, fall back to generic endpoint
-      if (youtubeError.response?.status === 404) {
-        response = await axios.get(`${API_BASE_URL}/video/${videoId}/details`, { headers });
-      } else {
-        throw youtubeError;
+    // First check if we have a valid MongoDB ID format
+    const isMongoId = /^[a-f0-9]{24}$/.test(videoId);
+    let details = {};
+    let isYouTube = false;
+
+    if (isMongoId) {
+      // Try to get video details from our database first
+      try {
+        const response = await axios.get(`${API_BASE_URL}/video/${videoId}/details`, { headers });
+        details = response.data.data || response.data;
+        
+        // If we have a YouTube ID associated, fetch those details too
+        if (details.youtubeId) {
+          try {
+            const youtubeResponse = await axios.get(
+              `${API_BASE_URL}/youtube/video/${videoId}`,
+              { headers }
+            );
+            const youtubeData = youtubeResponse.data.data || {};
+            details = { ...details, ...youtubeData };
+            isYouTube = true;
+          } catch (youtubeError) {
+            console.log("YouTube details not available, using basic video info");
+          }
+        }
+      } catch (dbError) {
+        // If database lookup fails, try YouTube as fallback
+        if (dbError.response?.status === 404) {
+          try {
+            const youtubeResponse = await axios.post(
+              `${API_BASE_URL}/youtube/details/${videoId}`, 
+              {}, 
+              { headers }
+            );
+            details = youtubeResponse.data.data || youtubeResponse.data;
+            isYouTube = true;
+          } catch (youtubeError) {
+            throw new Error('Neither video nor YouTube details found');
+          }
+        } else {
+          throw dbError;
+        }
+      }
+    } else {
+      // If not MongoDB ID, assume it's a YouTube ID
+      try {
+        const response = await axios.post(
+          `${API_BASE_URL}/youtube/details/${videoId}`, 
+          {}, 
+          { headers }
+        );
+        details = response.data.data || response.data;
+        isYouTube = true;
+      } catch (youtubeError) {
+        throw new Error('YouTube details not found');
       }
     }
-
-    const details = response.data.data || response.data;
-    const isYouTube = response.config.url.includes('/youtube/');
 
     // Parse duration from ISO format or seconds
     let durationInSeconds;
@@ -101,36 +143,59 @@ const fetchVideoDetails = async (videoId) => {
       durationInSeconds = Number(details.duration) || 0;
     }
 
+    // Determine thumbnail URL
+    let thumbnailUrl;
+    if (isYouTube) {
+      thumbnailUrl = `https://img.youtube.com/vi/${details.youtubeId || videoId}/maxresdefault.jpg`;
+      // Fallback to hqdefault if maxres doesn't exist
+      if (!await checkImageExists(thumbnailUrl)) {
+        thumbnailUrl = `https://img.youtube.com/vi/${details.youtubeId || videoId}/hqdefault.jpg`;
+      }
+    } else {
+      thumbnailUrl = details.thumbnailUrl || 
+                    `${API_BASE_URL}/thumbnails/${videoId}` ||
+                    `${API_BASE_URL}/default-thumbnail.jpg`;
+    }
+
+    // Set the video details
     setVideoDetails(prev => ({
       ...prev,
       [videoId]: {
         title: details.title || (isYouTube ? 'YouTube Video' : 'Uploaded Video'),
+        description: details.description || '',
         duration: durationInSeconds,
         durationISO: details.duration || 'PT0M0S',
         publishedAt: details.publishedAt || details.createdAt || new Date().toISOString(),
-        thumbnail: isYouTube 
-          ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-          : details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${videoId}.jpg`,
+        thumbnail: thumbnailUrl,
         isYouTubeVideo: isYouTube,
         isCustomVideo: !isYouTube,
-        status: details.status || 'processed'
+        status: details.status || 'processed',
+        videoUrl: details.videoUrl || null
       }
     }));
 
   } catch (error) {
     console.error("Error fetching video details:", error);
-    // Set fallback details with YouTube thumbnail
+    
+    // Set fallback details with appropriate thumbnail
+    const fallbackThumbnail = /^[a-f0-9]{24}$/.test(videoId)
+      ? `${API_BASE_URL}/thumbnails/${videoId}`
+      : `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    
     setVideoDetails(prev => ({
       ...prev,
       [videoId]: {
-        title: 'YouTube Video',
+        title: 'Video Details Unavailable',
+        description: '',
         duration: 0,
         durationISO: 'PT0M0S',
         publishedAt: new Date().toISOString(),
-        thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-        isYouTubeVideo: true,
-        isCustomVideo: false,
-        status: 'error'
+        thumbnail: fallbackThumbnail,
+        isYouTubeVideo: false,
+        isCustomVideo: true,
+        status: 'error',
+        videoUrl: null,
+        error: error.message
       }
     }));
   }
