@@ -198,51 +198,15 @@ const handleGenerate = async () => {
     let videoId;
 
     if (selectedFile) {
-      // Handle file upload
+      // Handle file upload - this will trigger backend processing automatically
       videoId = await uploadFile(selectedFile);
-
-      // Try processing the uploaded file with auth header
-      try {
-        const response = await axios.post(
-          `${API_URL}/api/v1/process/${videoId}`,
-          null,
-          {
-            timeout: 300000,
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-          }
-        );
-
-        if (response.status === 401) {
-          // Attempt token refresh
-          const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
-            refreshToken: localStorage.getItem('refreshToken')
-          });
-          localStorage.setItem('token', refreshResponse.data.token);
-          // Retry with new token
-          return handleGenerate();
-        }
-
-        if (response.data?.status) {
-          await processSuccessResponse(videoId);
-          return;
-        }
-        throw new Error(response.data?.message || 'Failed to process video');
-      } catch (error) {
-        console.error('File processing error:', error);
-
-        if (error.response?.status === 401) {
-          // Handle unauthorized error specifically
-          setUrlError('Session expired. Please log in again.');
-          navigate('/login');
-          return;
-        }
-
-        throw new Error('Failed to process uploaded file');
-      }
+      
+      // Poll for processing completion instead of calling process endpoint
+      await pollForProcessingCompletion(videoId);
+      await processSuccessResponse(videoId);
+      return;
     } else {
-      // Handle YouTube URL
+      // Handle YouTube URL (keep existing YouTube flow)
       videoId = extractVideoId(youtubeUrl);
       if (!videoId) {
         throw new Error('Could not extract video ID from URL');
@@ -280,7 +244,6 @@ const handleGenerate = async () => {
         console.warn('Primary endpoint failed, trying fallback:', primaryError);
 
         if (primaryError.response?.status === 401) {
-          // Handle unauthorized error specifically
           setUrlError('Session expired. Please log in again.');
           navigate('/login');
           return;
@@ -355,6 +318,45 @@ const handleGenerate = async () => {
     setIsLoading(false);
     setUploadProgress(0);
   }
+};
+
+// Add this helper function outside handleGenerate
+const pollForProcessingCompletion = async (videoId) => {
+  const maxAttempts = 10; // 10 attempts
+  const delay = 3000; // 3 seconds between attempts
+  
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const response = await axios.get(`${API_URL}/api/v1/video/${videoId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        timeout: 5000
+      });
+      
+      if (response.data?.status === 'completed') {
+        return; // Processing complete
+      }
+      
+      if (response.data?.status === 'failed') {
+        throw new Error(response.data.error || 'Video processing failed');
+      }
+      
+      // Still processing - wait and try again
+      await new Promise(resolve => setTimeout(resolve, delay));
+    } catch (error) {
+      if (attempt === maxAttempts - 1) {
+        // Last attempt failed
+        throw new Error(error.response?.data?.error || 
+                      error.message || 
+                      'Processing timed out');
+      }
+      // Log only if not the last attempt
+      console.log(`Attempt ${attempt + 1}:`, error.message);
+    }
+  }
+  
+  throw new Error('Processing timed out');
 };
 
 
