@@ -163,7 +163,7 @@ const fetchVideoDetails = async (videoId) => {
       }
     } else {
       thumbnailUrl = details.thumbnailUrl || 
-                    `${API_BASE_URL}/thumbnails/${videoId}` ||
+                    `${API_BASE_URL}/thumbnails/${videoId}.jpg` ||
                     `${API_BASE_URL}/default-thumbnail.jpg`;
     }
 
