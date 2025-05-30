@@ -260,8 +260,11 @@ const handleGenerate = async () => {
   } catch (error) {
     // Special case for YouTube fallback success
     if (error.message.includes('YouTube Transcript')) {
-      await processSuccessResponse(videoId, true);
-      return;
+      const videoId = selectedFile ? null : extractVideoId(youtubeUrl);
+      if (videoId) {
+        await processSuccessResponse(videoId, true);
+        return;
+      }
     }
 
     const userMessage = getErrorMessage(error);
