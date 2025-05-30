@@ -104,16 +104,7 @@ const InputComponent = () => {
     if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split(/[?&]/)[0];
     return null;
   };
-
-  // Process successful response
-  const processSuccessResponse = async (videoId) => {
-    clearVideoIds();
-    await new Promise(resolve => setTimeout(resolve, 100));
-    addVideoIds([videoId]);
-    setShowSuccessMessage(true);
-    setTimeout(() => navigate('/transcripts'), 1500);
-  };
-
+  
   // Handle processing errors
   const handleProcessingError = (error) => {
     let errorMessage = 'Service unavailable. Please try again later.';
@@ -181,40 +172,57 @@ const uploadFile = async (file) => {
 };
 
 // Enhanced processing function with better error handling
+// Updated processSuccessResponse with better state handling
+const processSuccessResponse = async (videoId, isFallback = false) => {
+  clearVideoIds();
+  await new Promise(resolve => setTimeout(resolve, 100));
+  addVideoIds([videoId]);
+  
+  setShowSuccessMessage(true);
+  if (isFallback) {
+    setUrlError(''); // Clear any previous errors
+  }
+  
+  setTimeout(() => navigate('/transcripts'), 1500);
+};
+
+// Enhanced handleGenerate with better state management
 const handleGenerate = async () => {
   if (isLoading) return;
 
   setIsLoading(true);
   setUrlError('');
   setShowSuccessMessage(false);
+  setRetryCount(0); // Reset on new attempt
 
   try {
-    // Validate input
     if (!selectedFile && !validateYouTubeUrl(youtubeUrl)) {
-      throw new Error('Please upload a video file or enter a valid YouTube URL');
+      throw new Error('Please upload a video or enter a valid YouTube URL');
     }
 
-    let videoId = selectedFile ? await uploadFile(selectedFile) : extractVideoId(youtubeUrl);
+    const videoId = selectedFile ? await uploadFile(selectedFile) : extractVideoId(youtubeUrl);
     if (!videoId) throw new Error('Could not extract video ID');
 
-    // For YouTube URLs - try direct transcript first
+    // For YouTube URLs only
     if (!selectedFile) {
       try {
         const transcript = await getYouTubeTranscript(videoId);
         if (transcript) {
-          await processSuccessResponse(videoId);
-          return; // Exit on success
+          await processSuccessResponse(videoId, true);
+          return;
         }
-      } catch (youtubeError) {
-        console.warn('Direct transcript failed:', youtubeError);
+      } catch (error) {
+        console.log('Direct transcript attempt:', error.message);
       }
     }
 
-    // Main processing (for files or fallback)
+    // Main processing endpoint
+    const processingUrl = selectedFile 
+      ? `${API_URL}/api/v1/process/${videoId}`
+      : `${YOUTUBE_API}/video/${videoId}`;
+
     const response = await axios.post(
-      selectedFile 
-        ? `${API_URL}/api/v1/process/${videoId}`
-        : `${YOUTUBE_API}/video/${videoId}`,
+      processingUrl,
       { prompt },
       {
         timeout: selectedFile ? 300000 : 15000,
@@ -238,20 +246,17 @@ const handleGenerate = async () => {
     throw new Error(response.data?.error || 'Processing failed');
 
   } catch (error) {
-    // Special case: If we have YouTube success but backend failed
-    if (error.message.includes('YouTube Transcript (English)')) {
-      await processSuccessResponse(videoId);
+    // Special case for YouTube fallback success
+    if (error.message.includes('YouTube Transcript')) {
+      await processSuccessResponse(videoId, true);
       return;
     }
 
-    // Normal error handling
-    const userMessage = error.response?.data?.message || 
-                       error.message || 
-                       'Processing failed. Please try again.';
+    const userMessage = getErrorMessage(error);
     setUrlError(userMessage);
 
-    if (retryCount < maxRetries && shouldRetry(error)) {
-      const delay = 3000 * (retryCount + 1);
+    if (shouldRetry(error) && retryCount < maxRetries) {
+      const delay = getRetryDelay(retryCount);
       setTimeout(() => {
         setRetryCount(prev => prev + 1);
         handleGenerate();
@@ -263,18 +268,19 @@ const handleGenerate = async () => {
   }
 };
 
-// Helper function to get YouTube transcript
-const getYouTubeTranscript = async (videoId) => {
-  try {
-    const response = await axios.get(
-      `${API_URL}/api/youtube/transcript/${videoId}`,
-      { timeout: 8000 }
-    );
-    return response.data?.transcript;
-  } catch (error) {
-    console.warn('YouTube transcript API failed:', error);
-    throw new Error('YouTube Transcript (English)'); // Special error code
+// New helper function for error messages
+const getErrorMessage = (error) => {
+  const defaultMessage = 'Processing failed. Please try again.';
+  
+  if (error.response) {
+    return error.response.data?.message || defaultMessage;
   }
+  
+  if (error.code === 'ECONNABORTED') {
+    return 'Request timed out. Please try again.';
+  }
+  
+  return error.message || defaultMessage;
 };
 
 const handleTokenRefresh = async () => {
