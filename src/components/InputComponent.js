@@ -285,35 +285,7 @@ const handleGenerate = async () => {
           return;
         }
 
-        // Try fallback endpoint
-        try {
-          const fallbackResponse = await axios.post(
-            `${PYTHON_API}/transcript/${videoId}`,
-            null,
-            {
-              timeout: 10000,
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              }
-            }
-          );
 
-          if (fallbackResponse.data?.success) {
-            await processSuccessResponse(videoId);
-            return;
-          }
-          throw new Error(fallbackResponse.data?.error || 'Failed to process video');
-        } catch (fallbackError) {
-          console.error('Fallback endpoint failed:', fallbackError);
-
-          if (fallbackError.response?.status === 401) {
-            setUrlError('Session expired. Please log in again.');
-            navigate('/login');
-            return;
-          }
-
-          throw new Error('All processing endpoints failed');
-        }
       }
     }
   } catch (error) {
