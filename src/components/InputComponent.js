@@ -187,6 +187,7 @@ const handleGenerate = async () => {
   setIsLoading(true);
   setUrlError('');
   setShowSuccessMessage(false);
+  setRetryCount(0); // Reset retry count on new attempt
 
   try {
     // Validate input
@@ -200,25 +201,21 @@ const handleGenerate = async () => {
       // Handle file upload
       videoId = await uploadFile(selectedFile);
 
-      // Process the uploaded file with retry logic
       try {
         const response = await axios.post(
           `${API_URL}/api/v1/process/${videoId}`,
-          null,
+          { prompt }, // Include prompt in the request
           {
-            timeout: 300000, // 5 minute timeout for processing
+            timeout: 300000,
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'application/json'
             }
           }
         );
 
         if (response.status === 401) {
-          // Handle token refresh
-          const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
-            refreshToken: localStorage.getItem('refreshToken')
-          });
-          localStorage.setItem('token', refreshResponse.data.token);
+          await handleTokenRefresh();
           return handleGenerate();
         }
 
@@ -229,19 +226,7 @@ const handleGenerate = async () => {
         throw new Error(response.data?.error || 'Failed to process video');
       } catch (error) {
         console.error('File processing error:', error);
-
-        if (error.response?.status === 401) {
-          setUrlError('Session expired. Please log in again.');
-          navigate('/login');
-          return;
-        }
-
-        // Enhanced error handling for 404
-        if (error.response?.status === 404) {
-          throw new Error('Video processing service unavailable. Please try again later.');
-        }
-
-        throw new Error('Failed to process uploaded file');
+        throw handleBackendError(error);
       }
     } else {
       // Handle YouTube URL
@@ -250,24 +235,33 @@ const handleGenerate = async () => {
         throw new Error('Could not extract video ID from URL');
       }
 
-      // Try primary endpoint
+      // First try direct YouTube transcript
+      try {
+        const transcript = await getYouTubeTranscript(videoId);
+        if (transcript) {
+          await processSuccessResponse(videoId);
+          return;
+        }
+      } catch (youtubeError) {
+        console.warn('Direct YouTube transcript failed:', youtubeError);
+      }
+
+      // Fallback to backend processing
       try {
         const response = await axios.post(
-          `${YOUTUBE_API}/video/${videoId}`,
-          null,
+          `${YOUTUBE_API}/process`,
+          { videoId, prompt },
           {
-            timeout: 10000,
+            timeout: 15000,
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'application/json'
             }
           }
         );
 
         if (response.status === 401) {
-          const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
-            refreshToken: localStorage.getItem('refreshToken')
-          });
-          localStorage.setItem('token', refreshResponse.data.token);
+          await handleTokenRefresh();
           return handleGenerate();
         }
 
@@ -276,70 +270,86 @@ const handleGenerate = async () => {
           return;
         }
         throw new Error(response.data?.error || 'Failed to process video');
-      } catch (primaryError) {
-        console.warn('Primary endpoint failed, trying fallback:', primaryError);
-
-        if (primaryError.response?.status === 401) {
-          setUrlError('Session expired. Please log in again.');
-          navigate('/login');
-          return;
-        }
-
-        // Try fallback endpoint
-        try {
-          const fallbackResponse = await axios.post(
-            `${PYTHON_API}/transcript/${videoId}`,
-            null,
-            {
-              timeout: 10000,
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              }
-            }
-          );
-
-          if (fallbackResponse.data?.success) {
-            await processSuccessResponse(videoId);
-            return;
-          }
-          throw new Error(fallbackResponse.data?.error || 'Failed to process video');
-        } catch (fallbackError) {
-          console.error('Fallback endpoint failed:', fallbackError);
-
-          if (fallbackError.response?.status === 401) {
-            setUrlError('Session expired. Please log in again.');
-            navigate('/login');
-            return;
-          }
-
-          throw new Error('All processing endpoints failed');
-        }
+      } catch (backendError) {
+        console.error('Backend processing failed:', backendError);
+        throw handleBackendError(backendError);
       }
     }
   } catch (error) {
     handleProcessingError(error);
 
-    // Enhanced retry logic
-    if (retryCount < maxRetries) {
-      const isNetworkError = error.code === 'ECONNABORTED' || !error.response;
-      const isServerError = error.response?.status >= 500;
-      const isTemporaryError = error.response?.status === 404 || error.response?.status === 429;
-
-      if (isNetworkError || isServerError || isTemporaryError) {
-        const delay = 3000 * (retryCount + 1);
-        console.log(`Retrying in ${delay/1000} seconds... (Attempt ${retryCount + 1})`);
-        
-        setTimeout(() => {
-          setRetryCount(prev => prev + 1);
-          handleGenerate();
-        }, delay);
-        return;
-      }
+    // Smart retry logic
+    if (shouldRetry(error) && retryCount < maxRetries) {
+      const delay = getRetryDelay(retryCount);
+      console.log(`Retrying in ${delay/1000} seconds... (Attempt ${retryCount + 1})`);
+      
+      setTimeout(() => {
+        setRetryCount(prev => prev + 1);
+        handleGenerate();
+      }, delay);
+      return;
     }
   } finally {
     setIsLoading(false);
     setUploadProgress(0);
   }
+};
+
+// Helper functions
+const getYouTubeTranscript = async (videoId) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/api/youtube/transcript/${videoId}`,
+      { timeout: 8000 }
+    );
+    return response.data?.transcript || null;
+  } catch (error) {
+    console.error('YouTube transcript error:', error);
+    return null;
+  }
+};
+
+const handleTokenRefresh = async () => {
+  try {
+    const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
+      refreshToken: localStorage.getItem('refreshToken')
+    });
+    localStorage.setItem('token', refreshResponse.data.token);
+  } catch (refreshError) {
+    console.error('Token refresh failed:', refreshError);
+    setUrlError('Session expired. Please log in again.');
+    navigate('/login');
+    throw new Error('Authentication failed');
+  }
+};
+
+const handleBackendError = (error) => {
+  if (error.response?.status === 401) {
+    return new Error('Session expired. Please log in again.');
+  }
+  if (error.response?.status === 404) {
+    return new Error('Service unavailable. Please try again later.');
+  }
+  if (error.code === 'ECONNABORTED') {
+    return new Error('Request timed out. Please try again.');
+  }
+  return new Error(error.message || 'Failed to process request');
+};
+
+const shouldRetry = (error) => {
+  const retryableCodes = ['ECONNABORTED', 'ECONNRESET', 'ETIMEDOUT'];
+  const retryableStatuses = [408, 429, 500, 502, 503, 504];
+  
+  return retryableCodes.includes(error.code) || 
+         retryableStatuses.includes(error.response?.status);
+};
+
+const getRetryDelay = (attempt) => {
+  // Exponential backoff with jitter
+  const baseDelay = 3000;
+  const maxDelay = 30000;
+  const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
+  return delay + Math.random() * 1000;
 };
 
 
