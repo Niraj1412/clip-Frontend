@@ -36,6 +36,18 @@ const InputComponent = () => {
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 2;
   
+    const getYouTubeTranscript = async (videoId) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/api/youtube/transcript/${videoId}`,
+      { timeout: 8000 }
+    );
+    return response.data?.transcript;
+  } catch (error) {
+    console.warn('YouTube transcript API failed:', error);
+    throw new Error('YouTube Transcript (English)'); // Special error code
+  }
+};
 
   // Validate YouTube URL format
    // Validate YouTube URL format
@@ -104,7 +116,7 @@ const InputComponent = () => {
     if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split(/[?&]/)[0];
     return null;
   };
-  
+
   // Handle processing errors
   const handleProcessingError = (error) => {
     let errorMessage = 'Service unavailable. Please try again later.';
