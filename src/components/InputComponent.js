@@ -39,7 +39,7 @@ const InputComponent = () => {
     const getYouTubeTranscript = async (videoId) => {
   try {
     const response = await axios.post(
-      `${API_URL}/api/youtube/transcript/${videoId}`,
+      `${YOUTUBE_API}/transcript/${videoId}`,
       { timeout: 8000 }
     );
     return response.data?.transcript;
@@ -205,7 +205,7 @@ const handleGenerate = async () => {
   setIsLoading(true);
   setUrlError('');
   setShowSuccessMessage(false);
-  setRetryCount(0); // Reset on new attempt
+  setRetryCount(0);
 
   try {
     if (!selectedFile && !validateYouTubeUrl(youtubeUrl)) {
@@ -231,11 +231,11 @@ const handleGenerate = async () => {
     // Main processing endpoint
     const processingUrl = selectedFile 
       ? `${API_URL}/api/v1/process/${videoId}`
-      : `${YOUTUBE_API}/video/${videoId}`;
+      : `${YOUTUBE_API}/process`;  // Changed this
 
     const response = await axios.post(
       processingUrl,
-      { prompt },
+      { prompt, videoId },  // Added videoId to payload
       {
         timeout: selectedFile ? 300000 : 15000,
         headers: {
