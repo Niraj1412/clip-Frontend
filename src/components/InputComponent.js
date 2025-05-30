@@ -197,7 +197,7 @@ const handleGenerate = async () => {
     let videoId;
 
     if (selectedFile) {
-      // Handle file upload
+      // Handle file upload (unchanged from your original code)
       videoId = await uploadFile(selectedFile);
 
       // Process the uploaded file with retry logic
@@ -236,7 +236,6 @@ const handleGenerate = async () => {
           return;
         }
 
-        // Enhanced error handling for 404
         if (error.response?.status === 404) {
           throw new Error('Video processing service unavailable. Please try again later.');
         }
@@ -244,19 +243,18 @@ const handleGenerate = async () => {
         throw new Error('Failed to process uploaded file');
       }
     } else {
-      // Handle YouTube URL
+      // Handle YouTube URL - Updated section
       videoId = extractVideoId(youtubeUrl);
       if (!videoId) {
         throw new Error('Could not extract video ID from URL');
       }
 
-      // Try primary endpoint
       try {
         const response = await axios.post(
           `${YOUTUBE_API}/video/${videoId}`,
           null,
           {
-            timeout: 10000,
+            timeout: 15000, // 15 second timeout
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -264,6 +262,7 @@ const handleGenerate = async () => {
         );
 
         if (response.status === 401) {
+          // Handle token refresh
           const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
             refreshToken: localStorage.getItem('refreshToken')
           });
@@ -271,21 +270,34 @@ const handleGenerate = async () => {
           return handleGenerate();
         }
 
-        if (response.data?.success) {
+        if (response.data?.status === false) {
+          throw new Error(response.data.message || 'Failed to process video');
+        }
+
+        if (response.data?.status === true) {
           await processSuccessResponse(videoId);
           return;
         }
-        throw new Error(response.data?.error || 'Failed to process video');
-      } catch (primaryError) {
-        console.warn('Primary endpoint failed, trying fallback:', primaryError);
 
-        if (primaryError.response?.status === 401) {
+        throw new Error('Unexpected response format');
+      } catch (error) {
+        console.error('YouTube processing error:', error);
+
+        // Handle specific error cases
+        if (error.response?.status === 404) {
+          throw new Error('This video doesn\'t have captions available. Please try a different video with subtitles.');
+        }
+
+        if (error.response?.status === 401) {
           setUrlError('Session expired. Please log in again.');
           navigate('/login');
           return;
         }
 
-
+        // No fallback to Python API here since it's now handled by the backend
+        throw new Error(error.response?.data?.message || 
+                      error.message || 
+                      'Failed to process YouTube video');
       }
     }
   } catch (error) {
