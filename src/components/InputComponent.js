@@ -38,7 +38,7 @@ const InputComponent = () => {
   
     const getYouTubeTranscript = async (videoId) => {
   try {
-    const response = await axios.get(
+    const response = await axios.post(
       `${API_URL}/api/youtube/transcript/${videoId}`,
       { timeout: 8000 }
     );
