@@ -187,7 +187,6 @@ const handleGenerate = async () => {
   setIsLoading(true);
   setUrlError('');
   setShowSuccessMessage(false);
-  setRetryCount(0); // Reset retry count on new attempt
 
   try {
     // Validate input
@@ -195,99 +194,68 @@ const handleGenerate = async () => {
       throw new Error('Please upload a video file or enter a valid YouTube URL');
     }
 
-    let videoId;
+    let videoId = selectedFile ? await uploadFile(selectedFile) : extractVideoId(youtubeUrl);
+    if (!videoId) throw new Error('Could not extract video ID');
 
-    if (selectedFile) {
-      // Handle file upload
-      videoId = await uploadFile(selectedFile);
-
-      try {
-        const response = await axios.post(
-          `${API_URL}/api/v1/process/${videoId}`,
-          { prompt }, // Include prompt in the request
-          {
-            timeout: 300000,
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        if (response.status === 401) {
-          await handleTokenRefresh();
-          return handleGenerate();
-        }
-
-        if (response.data?.success) {
-          await processSuccessResponse(videoId);
-          return;
-        }
-        throw new Error(response.data?.error || 'Failed to process video');
-      } catch (error) {
-        console.error('File processing error:', error);
-        throw handleBackendError(error);
-      }
-    } else {
-      // Handle YouTube URL
-      videoId = extractVideoId(youtubeUrl);
-      if (!videoId) {
-        throw new Error('Could not extract video ID from URL');
-      }
-
-      // First try direct YouTube transcript
+    // For YouTube URLs - try direct transcript first
+    if (!selectedFile) {
       try {
         const transcript = await getYouTubeTranscript(videoId);
         if (transcript) {
           await processSuccessResponse(videoId);
-          return;
+          return; // Exit on success
         }
       } catch (youtubeError) {
-        console.warn('Direct YouTube transcript failed:', youtubeError);
-      }
-
-      // Fallback to backend processing
-      try {
-        const response = await axios.post(
-          `${YOUTUBE_API}/process`,
-          { videoId, prompt },
-          {
-            timeout: 15000,
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        if (response.status === 401) {
-          await handleTokenRefresh();
-          return handleGenerate();
-        }
-
-        if (response.data?.success) {
-          await processSuccessResponse(videoId);
-          return;
-        }
-        throw new Error(response.data?.error || 'Failed to process video');
-      } catch (backendError) {
-        console.error('Backend processing failed:', backendError);
-        throw handleBackendError(backendError);
+        console.warn('Direct transcript failed:', youtubeError);
       }
     }
-  } catch (error) {
-    handleProcessingError(error);
 
-    // Smart retry logic
-    if (shouldRetry(error) && retryCount < maxRetries) {
-      const delay = getRetryDelay(retryCount);
-      console.log(`Retrying in ${delay/1000} seconds... (Attempt ${retryCount + 1})`);
-      
+    // Main processing (for files or fallback)
+    const response = await axios.post(
+      selectedFile 
+        ? `${API_URL}/api/v1/process/${videoId}`
+        : `${YOUTUBE_API}/video/${videoId}`,
+      { prompt },
+      {
+        timeout: selectedFile ? 300000 : 15000,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (response.status === 401) {
+      await handleTokenRefresh();
+      return handleGenerate();
+    }
+
+    if (response.data?.success) {
+      await processSuccessResponse(videoId);
+      return;
+    }
+
+    throw new Error(response.data?.error || 'Processing failed');
+
+  } catch (error) {
+    // Special case: If we have YouTube success but backend failed
+    if (error.message.includes('YouTube Transcript (English)')) {
+      await processSuccessResponse(videoId);
+      return;
+    }
+
+    // Normal error handling
+    const userMessage = error.response?.data?.message || 
+                       error.message || 
+                       'Processing failed. Please try again.';
+    setUrlError(userMessage);
+
+    if (retryCount < maxRetries && shouldRetry(error)) {
+      const delay = 3000 * (retryCount + 1);
       setTimeout(() => {
         setRetryCount(prev => prev + 1);
         handleGenerate();
       }, delay);
-      return;
     }
   } finally {
     setIsLoading(false);
@@ -295,17 +263,17 @@ const handleGenerate = async () => {
   }
 };
 
-// Helper functions
+// Helper function to get YouTube transcript
 const getYouTubeTranscript = async (videoId) => {
   try {
     const response = await axios.get(
       `${API_URL}/api/youtube/transcript/${videoId}`,
       { timeout: 8000 }
     );
-    return response.data?.transcript || null;
+    return response.data?.transcript;
   } catch (error) {
-    console.error('YouTube transcript error:', error);
-    return null;
+    console.warn('YouTube transcript API failed:', error);
+    throw new Error('YouTube Transcript (English)'); // Special error code
   }
 };
 
