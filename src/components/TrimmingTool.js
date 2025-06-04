@@ -22,6 +22,7 @@ import {
   faLock,
   faLockOpen,
 } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 // Update color scheme and typography
 const primaryColor = '#6366f1'; // Indigo
@@ -41,13 +42,16 @@ const TrimmingTool = ({
   initialEndTime = 60,
   transcriptText = '',
   onTimingChange = () => {},
-  onSaveTrim = () => {}
+  onSaveTrim = () => {},
+  apiEndpoint = 'https://clip-backend-production.up.railway.app/api/process-video' // Backend API endpoint
 }) => {
   // Core video state
   const [isPlaying, setIsPlaying] = useState(false);
   const [ready, setReady] = useState(false);
   const [duration, setDuration] = useState(initialDuration);
   const [error, setError] = useState('');
+  const [processing, setProcessing] = useState(false);
+  const [processedUrl, setProcessedUrl] = useState(null);
   
   // Parse start and end times properly
   const parsedStartTime = typeof initialStartTime === 'string' ? parseFloat(initialStartTime) : initialStartTime;
@@ -265,6 +269,44 @@ const TrimmingTool = ({
     setError(errorMessages[event.data] || "An error occurred loading the video");
   };
 
+  // Process video clip - new function to handle backend processing
+  const processVideoClip = async () => {
+    if (!videoId) {
+      setError("No video selected");
+      return;
+    }
+
+    setProcessing(true);
+    setError('');
+
+    try {
+      const response = await axios.post(apiEndpoint, {
+        videoId,
+        startTime,
+        endTime,
+        // Add any additional processing options here
+      });
+
+      if (response.data.success && response.data.url) {
+        setProcessedUrl(response.data.url);
+        // Call the onSaveTrim callback with the processed URL
+        onSaveTrim({ 
+          startTime, 
+          endTime, 
+          duration: trimDuration,
+          processedUrl: response.data.url 
+        });
+      } else {
+        setError(response.data.message || "Failed to process video");
+      }
+    } catch (err) {
+      console.error("Error processing video:", err);
+      setError(err.response?.data?.message || "Failed to process video");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   // Update player when playback state changes
   useEffect(() => {
     if (!player || !youtubeReady) return;
@@ -406,7 +448,6 @@ const TrimmingTool = ({
       }
     }
   };
-
 
   const handleSeek = (e) => {
     if (!ready || !player || !youtubeReady) return;
@@ -594,7 +635,8 @@ const TrimmingTool = ({
   };
 
   const saveTrim = () => {
-    onSaveTrim({ startTime, endTime, duration: trimDuration });
+    // Now calls the processVideoClip function which will handle the backend processing
+    processVideoClip();
   };
 
   // Add effect to handle YouTube player when it becomes visible
@@ -678,6 +720,19 @@ const TrimmingTool = ({
                 </div>
               </div>
             )}
+
+            {/* Processing Overlay */}
+            {processing && (
+              <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-30">
+                <div className="flex flex-col items-center">
+                  <FontAwesomeIcon 
+                    icon={faCircleNotch} 
+                    className="text-[#6366f1] text-4xl animate-spin mb-2" 
+                  />
+                  <p className="text-white text-sm">Processing video clip...</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Compact Controls Row */}
@@ -740,10 +795,19 @@ const TrimmingTool = ({
               <button
                 onClick={saveTrim}
                 className="bg-gradient-to-r from-[#6366f1] to-[#4f46e5] hover:from-[#4f46e5] hover:to-[#4338ca] text-white px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 shadow-md text-xs font-medium"
-                disabled={!ready}
+                disabled={!ready || processing}
               >
-                <FontAwesomeIcon icon={faCheck} className="text-xs" />
-                <span>Save</span>
+                {processing ? (
+                  <>
+                    <FontAwesomeIcon icon={faCircleNotch} className="animate-spin text-xs" />
+                    <span>Processing</span>
+                  </>
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                    <span>Save</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -943,6 +1007,28 @@ const TrimmingTool = ({
           </div>
         </div>
       </div>
+
+      {/* Processed Video Preview */}
+      {processedUrl && (
+        <div className="w-full mt-6 bg-gradient-to-br from-[#111827] to-[#1e293b] rounded-xl shadow-lg overflow-hidden p-4">
+          <h3 className="text-white text-lg font-medium mb-3">Processed Clip Preview</h3>
+          <video 
+            src={processedUrl} 
+            controls 
+            className="w-full aspect-video bg-black rounded-lg"
+          />
+          <div className="mt-3 flex justify-end">
+            <a 
+              href={processedUrl} 
+              download={`clip-${videoId}-${startTime}-${endTime}.mp4`}
+              className="bg-gradient-to-r from-[#6366f1] to-[#4f46e5] hover:from-[#4f46e5] hover:to-[#4338ca] text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 shadow-md"
+            >
+              <FontAwesomeIcon icon={faScissors} />
+              Download Clip
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
