@@ -34,6 +34,7 @@ const InputComponent = () => {
   const [urlError, setUrlError] = useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const retryDelays = [3000, 5000, 8000]; 
   const maxRetries = 2;
   
 
