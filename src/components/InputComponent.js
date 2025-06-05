@@ -298,7 +298,7 @@ const uploadFile = async (file) => {
       setIsLoading(false);
       setUploadProgress(0);
     }
-  };
+  }; 
 
 
 
