@@ -254,7 +254,7 @@ const handleGenerate = async () => {
           `${YOUTUBE_API}/video/${videoId}`,
           null,
           {
-            timeout: 15000, // 15 second timeout
+            timeout: 30000, // 15 second timeout
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
