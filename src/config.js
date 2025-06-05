@@ -10,10 +10,10 @@ export const MERGE_API = `${API_URL}/api/merge`;
 export const AUTH_API = `${API_URL}/api/v1/auth`;
 export const PROJECTS_API = `${API_URL}/api/projects`;
 
-export const PYTHON_API =  USE_EC2_SERVER ?  "https://clip-py-backend-production.up.railway.app" :   "http://54.161.100.146:5000" ;
+export const PYTHON_API =  USE_EC2_SERVER ?  "https://clip-py-backend-1.onrender.com" :   "http://54.161.100.146:5000" ;
 
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://clip-backend-production.up.railway.app/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://clip-py-backend-1.onrender.com/api';
 
 export const USERS_API = `${API_BASE_URL}/users`;
 export const CLIPS_API = `${API_BASE_URL}/clips`;
