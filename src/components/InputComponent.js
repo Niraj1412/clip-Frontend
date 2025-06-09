@@ -148,7 +148,7 @@ const uploadFile = async (file) => {
       'Content-Type': 'multipart/form-data',
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     },
-    timeout: 30000
+    timeout: 300000
   };
 
   try {
