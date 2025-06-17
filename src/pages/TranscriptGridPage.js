@@ -146,12 +146,7 @@ const fetchVideoDetails = async (videoId) => {
     }
 
     // Parse duration from ISO format or seconds
-    let durationInSeconds;
-    if (details.duration && typeof details.duration === 'string') {
-      durationInSeconds = parseISODuration(details.duration);
-    } else {
-      durationInSeconds = Number(details.duration) || 0;
-    }
+   let durationInSeconds = Number(details.duration) || 0;
 
     // Determine thumbnail URL
     let thumbnailUrl;
