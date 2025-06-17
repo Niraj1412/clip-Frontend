@@ -91,7 +91,7 @@ const OutputPage = () => {
       // Try the first method (Python backend)
       let response;
       try {
-        response = await axios.post(`https://clip-py-backend-1.onrender.com/merge-clips`, { 
+        response = await axios.post(`https://ai-py-backend.onrender.com/merge-clips`, { 
           clips: clipsToMerge 
         });
         
