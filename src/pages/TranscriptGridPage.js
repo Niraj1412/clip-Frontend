@@ -155,17 +155,14 @@ const fetchVideoDetails = async (videoId) => {
 
     // Determine thumbnail URL
     let thumbnailUrl;
-    if (isYouTube) {
-      thumbnailUrl = `https://img.youtube.com/vi/${details.youtubeId || videoId}/maxresdefault.jpg`;
-      // Fallback to hqdefault if maxres doesn't exist
-      if (!await checkImageExists(thumbnailUrl)) {
-        thumbnailUrl = `https://img.youtube.com/vi/${details.youtubeId || videoId}/hqdefault.jpg`;
-      }
-    } else {
-      thumbnailUrl = details.thumbnailUrl || 
-                    `${API_BASE_URL}/thumbnails/${videoId}.jpg` ||
-                    `${API_BASE_URL}/default-thumbnail.jpg`;
+  if (isYouTube) {
+    thumbnailUrl = `https://img.youtube.com/vi/${details.youtubeId || videoId}/maxresdefault.jpg`;
+    if (!await checkImageExists(thumbnailUrl)) {
+      thumbnailUrl = `https://img.youtube.com/vi/${details.youtubeId || videoId}/hqdefault.jpg`;
     }
+  } else {
+    thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${videoId}.jpg`;
+  }
 
     // Set the video details
     setVideoDetails(prev => ({
