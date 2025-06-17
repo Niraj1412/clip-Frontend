@@ -245,44 +245,15 @@ const fetchTranscript = async (videoId, attempt = 1) => {
     }
 
     // Process transcript data based on source (YouTube or uploaded video)
-    const processedTranscript = (Array.isArray(transcriptData) ? transcriptData : transcriptData.segments || [])
-      .map(segment => {
-        let startTime, endTime;
-        
-        if (isYouTube) {
-        // YouTube transcript format
-          // YouTube typically provides start/end in seconds
-          startTime = Number(segment.start || segment.startTime || 0);
-          endTime = Number(segment.end || segment.endTime || 0);
-          
-          // Ensure end time is after start time
-          if (endTime <= startTime) {
-            endTime = startTime + (segment.duration || 1);
-          }
-        } else {
-          // Uploaded videos might provide milliseconds
-          startTime = Number(segment.start || segment.startTime || 0);
-          endTime = Number(segment.end || segment.endTime || 0);
-          
-          // Convert milliseconds to seconds if needed
-          if (startTime > 1000) startTime = startTime / 1000;
-          if (endTime > 1000) endTime = endTime / 1000;
-          
-          // Ensure valid duration
-          if (endTime <= startTime) {
-            endTime = startTime + (segment.duration ? segment.duration / 1000 : 1);
-          }
-        }
-
-        return {
-          text: segment.text || '',
-          startTime,
-          endTime,
-          duration: Math.max(0, endTime - startTime),
-          speaker: segment.speaker || null,
-          confidence: segment.confidence || null
-        };
-      });
+      const processedTranscript = (Array.isArray(transcriptData) ? transcriptData : transcriptData.segments || [])
+    .map(segment => ({
+      text: segment.text || '',
+      startTime: Number(segment.start || 0), // Already in seconds from backend
+      endTime: Number(segment.end || 0),     // Already in seconds from backend
+      duration: Math.max(0, Number(segment.end || 0) - Number(segment.start || 0)),
+      speaker: segment.speaker || null,
+      confidence: segment.confidence || null
+    }));
 
     if (processedTranscript.length === 0) {
       throw new Error('Transcript is empty or unavailable');
