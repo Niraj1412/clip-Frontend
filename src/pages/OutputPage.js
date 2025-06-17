@@ -17,7 +17,9 @@ import {
   faClock,
   faCalendar,
   faList,
-  faWandMagicSparkles
+  faWandMagicSparkles,
+  faPlay,
+  faRefresh
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faTwitter,
@@ -37,6 +39,8 @@ const OutputPage = () => {
   const [copied, setCopied] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [savedToDatabase, setSavedToDatabase] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const navigate = useNavigate();
 
   // Simulated loading progress
@@ -64,12 +68,39 @@ const OutputPage = () => {
     mergeClips();
   }, []);
 
+  // Function to validate and clean video URL
+  const validateVideoUrl = (url) => {
+    if (!url) return null;
+    
+    // Handle different URL formats
+    let cleanUrl = url.trim();
+    
+    // If it's an S3 URL, ensure it's properly formatted
+    if (cleanUrl.includes('s3.amazonaws.com') || cleanUrl.includes('amazonaws.com')) {
+      // Ensure HTTPS
+      if (cleanUrl.startsWith('http://')) {
+        cleanUrl = cleanUrl.replace('http://', 'https://');
+      }
+      // Add CORS headers for S3 if needed
+      return cleanUrl;
+    }
+    
+    // If it's a relative path, make it absolute
+    if (cleanUrl.startsWith('/')) {
+      cleanUrl = `${window.location.origin}${cleanUrl}`;
+    }
+    
+    return cleanUrl;
+  };
+
   // Function to send clips data to backend for merging
   const mergeClips = async () => {
     setLoading(true);
     setError(null);
     setLoadingProgress(0);
     setSavedToDatabase(false);
+    setVideoLoaded(false);
+    setVideoError(false);
 
     try {
       const clipsToMerge = selectedClipsData.map(clip => ({
@@ -86,38 +117,51 @@ const OutputPage = () => {
       const headers = token ? { 
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
-      } : {};
+      } : { 'Content-Type': 'application/json' };
 
       // Try the first method (Python backend)
       let response;
       try {
+        console.log('Trying Python backend...');
         response = await axios.post(`https://ai-py-backend.onrender.com/merge-clips`, { 
           clips: clipsToMerge 
+        }, { 
+          headers,
+          timeout: 300000 // 5 minutes timeout
         });
+        
+        console.log('Python backend response:', response.data);
         
         if (!response.data?.success || !response.data?.s3Url) {
           throw new Error('Python backend response invalid, trying fallback');
         }
       } catch (pythonError) {
-        console.log('Python backend failed, trying Node backend:', pythonError);
+        console.log('Python backend failed, trying Node backend:', pythonError.message);
         // Fall back to Node backend if Python backend fails
-        response = await axios.post(`${API_URL}/api/merge/videoMerge`, {
-          clips: clipsToMerge
-        }, { headers });
+        try {
+          response = await axios.post(`${API_URL}/api/merge/videoMerge`, {
+            clips: clipsToMerge
+          }, { 
+            headers,
+            timeout: 300000 // 5 minutes timeout
+          });
+          console.log('Node backend response:', response.data);
+        } catch (nodeError) {
+          console.error('Both backends failed:', { pythonError, nodeError });
+          throw new Error(`All backends failed. Python: ${pythonError.message}, Node: ${nodeError.message}`);
+        }
       }
 
-      console.log('Merge response:', response.data);
-
       // Handle both possible response structures:
-      // 1. Direct response from videoMerge endpoint
-      // 2. Nested response through router
-      const videoUrl = response.data?.videoUrl || 
-                      response.data?.data?.videoUrl || 
-                      response.data?.s3Url || 
-                      response.data?.data?.s3Url;
+      const rawVideoUrl = response.data?.videoUrl || 
+                          response.data?.data?.videoUrl || 
+                          response.data?.s3Url || 
+                          response.data?.data?.s3Url;
 
-      if (!videoUrl) {
-        console.error('No video URL found in response. Full response:', response);
+      console.log('Raw video URL received:', rawVideoUrl);
+
+      if (!rawVideoUrl) {
+        console.error('No video URL found in response. Full response:', response.data);
         throw new Error(
           response.data?.message || 
           response.data?.data?.message || 
@@ -125,8 +169,31 @@ const OutputPage = () => {
         );
       }
 
-      setVideoUrl(videoUrl);
+      // Validate and clean the video URL
+      const cleanVideoUrl = validateVideoUrl(rawVideoUrl);
+      if (!cleanVideoUrl) {
+        throw new Error('Invalid video URL format received from server');
+      }
+
+      console.log('Clean video URL:', cleanVideoUrl);
+      setVideoUrl(cleanVideoUrl);
       setLoadingProgress(98);
+
+      // Test video accessibility
+      try {
+        const testResponse = await fetch(cleanVideoUrl, { 
+          method: 'HEAD',
+          mode: 'cors'
+        });
+        console.log('Video accessibility test:', testResponse.status, testResponse.statusText);
+        
+        if (!testResponse.ok) {
+          console.warn('Video URL might not be accessible:', testResponse.status);
+        }
+      } catch (testError) {
+        console.warn('Could not test video accessibility:', testError.message);
+        // Don't fail the whole process for this
+      }
 
       // Database save logic (only for authenticated users)
       try {
@@ -140,8 +207,8 @@ const OutputPage = () => {
 
           const dbResponse = await axios.post(`${API_URL}/api/v1/youtube/addFinalVideo`, {
             clipsInfo: clipsToMerge,
-            fileNames3: videoUrl.split('/').pop(), // Extract filename from URL
-            s3Url: videoUrl,
+            fileNames3: cleanVideoUrl.split('/').pop(), // Extract filename from URL
+            s3Url: cleanVideoUrl,
             userId,
             userEmail,
             userName
@@ -151,7 +218,10 @@ const OutputPage = () => {
             setSavedToDatabase(true);
             // Update URL if database returned a different one
             if (dbResponse.data.data?.s3Url) {
-              setVideoUrl(dbResponse.data.data.s3Url);
+              const dbVideoUrl = validateVideoUrl(dbResponse.data.data.s3Url);
+              if (dbVideoUrl) {
+                setVideoUrl(dbVideoUrl);
+              }
             }
           }
         }
@@ -165,7 +235,8 @@ const OutputPage = () => {
     } catch (err) {
       console.error('Merge error details:', {
         error: err,
-        response: err.response
+        response: err.response,
+        message: err.message
       });
       
       setError(
@@ -186,15 +257,35 @@ const OutputPage = () => {
     navigate('/explore');
   };
 
-  const downloadVideo = () => {
+  const downloadVideo = async () => {
     if (!videoUrl) return;
     
-    const link = document.createElement('a');
-    link.href = videoUrl;
-    link.download = 'merged-video.mp4';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      // For S3 URLs, we might need to handle CORS
+      const response = await fetch(videoUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `merged-video-${Date.now()}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download error:', error);
+      // Fallback to direct link
+      const link = document.createElement('a');
+      link.href = videoUrl;
+      link.download = `merged-video-${Date.now()}.mp4`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const copyToClipboard = () => {
@@ -226,6 +317,28 @@ const OutputPage = () => {
 
     window.open(shareUrl, '_blank');
     setShowShareMenu(false);
+  };
+
+  // Video event handlers
+  const handleVideoLoad = () => {
+    console.log('Video loaded successfully');
+    setVideoLoaded(true);
+    setVideoError(false);
+  };
+
+  const handleVideoError = (e) => {
+    console.error('Video failed to load:', e);
+    setVideoError(true);
+    setVideoLoaded(false);
+  };
+
+  const retryVideoLoad = () => {
+    setVideoError(false);
+    setVideoLoaded(false);
+    // Force video reload by adding timestamp
+    const url = new URL(videoUrl);
+    url.searchParams.set('t', Date.now().toString());
+    setVideoUrl(url.toString());
   };
 
   // Database save notification component
