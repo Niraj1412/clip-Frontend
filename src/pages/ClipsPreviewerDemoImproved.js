@@ -38,6 +38,7 @@ import { useClipsData } from '../context/clipsData';
 import { usePrompt } from '../context/promptContext';
 import { useVideoIds } from '../context/videoIds';
 import { YOUTUBE_API } from '../config';
+import axios from 'axios';
 
 const ClipsPreviewerDemo = () => {
   const { selectedClipsData, setSelectedClipsData, transcriptData } = useClipsData();
@@ -168,7 +169,9 @@ const ClipsPreviewerDemo = () => {
 
             // Process each clip with exact timestamp precision
             const processed = await Promise.all(clipsArray.map(async (clip, index) => {
-              // For uploaded videos (non-YouTube), fetch details to get thumbnailUrl
+              const token = localStorage.getItem('token');
+              const headers = token ? { Authorization: `Bearer ${token}` } : {};
+              
               let thumbnailUrl = clip.thumbnailUrl;
 
               if (!clip.isYouTube && clip.videoId) {
