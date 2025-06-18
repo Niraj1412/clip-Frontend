@@ -181,7 +181,7 @@ const ClipsPreviewerDemo = () => {
                 transcriptText: (clip.transcriptText || '').replace(/&#39;/g, "'"),
                 thumbnail: clip.isYouTube
                   ? `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`
-                  : `https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`,
+                  : `https://ai-clip-backend1-1.onrender.com/thumbnails/${clip.videoId}.jpg`,
               };
             });
 
