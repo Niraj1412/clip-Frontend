@@ -181,7 +181,9 @@ const ClipsPreviewerDemo = () => {
                 startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
                 endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
                 transcriptText: (clip.transcriptText || '').replace(/&amp;#39;/g, "'"),
-                 thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg` ,
+                thumbnail: isYouTube 
+                ? `https://img.youtube.com/vi/${clip.youtubeId || clip.videoId}/maxresdefault.jpg`
+                : clip.thumbnailUrl || `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`,
                 createdAt: new Date().toISOString()
               };
             });
