@@ -259,8 +259,9 @@ const ClipsPreviewerDemo = () => {
   };
 
   const handlePlayClip = (clip) => {
-    setCurrentClip(clip);
-  };
+  console.log('Clip selected:', clip);
+  setCurrentClip(clip);
+};
 
   const handleDeleteClip = (clipToDelete) => {
     setProcessedClips(clips => clips.filter(clip => clip.id !== clipToDelete.id));

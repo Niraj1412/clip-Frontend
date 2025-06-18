@@ -35,13 +35,13 @@ const shadowColor = 'rgba(0, 0, 0, 0.5)';
 const TrimmingTool = ({
   videoId = '',
   videoUrl = '',
-  isYouTube = false, // Explicitly rely on this prop
+  isYouTube = false,
   initialDuration = 600,
   initialStartTime = 0,
   initialEndTime = 60,
   transcriptText = '',
   onTimingChange = () => {},
-  onSaveTrim = () => {}
+  onSaveTrim = () => {},
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [ready, setReady] = useState(false);
@@ -56,7 +56,7 @@ const TrimmingTool = ({
   const [endTime, setEndTime] = useState(Math.min(parsedEndTime, initialDuration));
   const [playbackRate, setPlaybackRate] = useState(1);
 
-  const [player, setPlayer] = useState(null); // For YouTube player
+  const [player, setPlayer] = useState(null);
   const [youtubeReady, setYoutubeReady] = useState(false);
 
   const [isHovering, setIsHovering] = useState(false);
@@ -75,13 +75,13 @@ const TrimmingTool = ({
 
   const [userInteracted, setUserInteracted] = useState(false);
 
-  const videoRef = useRef(null); // For HTML5 video or YouTube player container
+  const videoRef = useRef(null);
   const containerRef = useRef(null);
   const timelineRef = useRef(null);
 
-  // Initialize player based on video type
+  // **YouTube Player Initialization**
   useEffect(() => {
-    if (!isYouTube) return; // Only run for YouTube videos
+    if (!isYouTube) return;
 
     if (!videoId) {
       setError('No video ID provided for YouTube video');
@@ -149,7 +149,7 @@ const TrimmingTool = ({
             showinfo: 0,
             fs: 0,
             playsinline: 1,
-            origin: 'https://clip-frontend-three.vercel.app', // Hardcode this
+            origin: 'https://clip-frontend-three.vercel.app',
           },
           events: {
             onReady: onPlayerReady,
@@ -228,7 +228,7 @@ const TrimmingTool = ({
     setError(errorMessages[event.data] || 'An error occurred loading the video');
   };
 
-  // HTML5 video controls
+  // **HTML5 Video Controls**
   useEffect(() => {
     if (isYouTube || !videoRef.current || !ready) return;
 
@@ -256,6 +256,7 @@ const TrimmingTool = ({
     videoRef.current.muted = isMuted;
   }, [volume, isMuted, isYouTube]);
 
+  // **YouTube Current Time Updates**
   useEffect(() => {
     if (!isYouTube || !player || !ready || !youtubeReady) return;
 
@@ -264,21 +265,21 @@ const TrimmingTool = ({
         const playerTime = player.getCurrentTime();
         setCurrentTime(playerTime);
 
-        if (playerTime >= endTime && isPlaying) {
-          player.seekTo(startTime);
+        if (playerTime >= endTime - 0.05 && isPlaying) { // 50ms buffer
           player.pauseVideo();
+          player.seekTo(startTime);
           setIsPlaying(false);
+          console.log('YouTube playback paused and reset to startTime:', startTime);
         }
       }
-    }, 100);
+    }, 50); // Reduced to 50ms for better precision
 
     return () => clearInterval(interval);
   }, [isYouTube, player, ready, youtubeReady, startTime, endTime, isPlaying]);
 
-
-  // Uploaded Video Initialization
+  // **HTML5 Video Initialization**
   useEffect(() => {
-    if (isYouTube) return; // Only run for uploaded videos
+    if (isYouTube) return;
 
     if (videoRef.current && videoUrl) {
       videoRef.current.src = videoUrl;
@@ -294,12 +295,14 @@ const TrimmingTool = ({
         setStartTime(validStartTime);
         setEndTime(validEndTime);
         setCurrentTime(validStartTime);
+        console.log('HTML5 video loaded. Duration:', videoDuration);
       };
 
       videoRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
       videoRef.current.addEventListener('error', () => {
         setError('Failed to load uploaded video');
         setReady(false);
+        console.error('HTML5 video load error');
       });
 
       return () => {
@@ -312,13 +315,32 @@ const TrimmingTool = ({
     }
   }, [isYouTube, videoUrl, parsedStartTime, parsedEndTime]);
 
-  // Update trim duration
+  // **HTML5 Time Updates**
+  useEffect(() => {
+    if (!isYouTube && videoRef.current) {
+      const handleTimeUpdate = () => {
+        const current = videoRef.current.currentTime;
+        setCurrentTime(current);
+        if (current >= endTime && isPlaying) {
+          videoRef.current.pause();
+          videoRef.current.currentTime = startTime;
+          setIsPlaying(false);
+          console.log('HTML5 playback paused and reset to startTime:', startTime);
+        }
+      };
+      videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
+      return () => videoRef.current.removeEventListener('timeupdate', handleTimeUpdate);
+    }
+  }, [isYouTube, endTime, isPlaying]);
+
+  // **Trim Duration Updates**
   useEffect(() => {
     const newDuration = endTime - startTime;
     setTrimDuration(newDuration);
 
     if (userInteracted) {
       onTimingChange({ startTime, endTime, duration: newDuration });
+      console.log('Timing changed:', { startTime, endTime, duration: newDuration });
     }
   }, [startTime, endTime, onTimingChange, userInteracted]);
 
@@ -335,6 +357,7 @@ const TrimmingTool = ({
         setHistory((prev) => [...prev.slice(0, historyIndex + 1), newHistoryEntry]);
         setHistoryIndex((prev) => prev + 1);
       }
+      console.log('Updated startTime:', validStartTime);
     }
   };
 
@@ -350,6 +373,7 @@ const TrimmingTool = ({
         setHistory((prev) => [...prev.slice(0, historyIndex + 1), newHistoryEntry]);
         setHistoryIndex((prev) => prev + 1);
       }
+      console.log('Updated endTime:', validEndTime);
     }
   };
 
@@ -365,9 +389,11 @@ const TrimmingTool = ({
     if (isYouTube && player && typeof player.seekTo === 'function') {
       player.seekTo(boundedTime);
       setCurrentTime(boundedTime);
+      console.log('YouTube seek to:', boundedTime);
     } else if (!isYouTube && videoRef.current) {
       videoRef.current.currentTime = boundedTime;
       setCurrentTime(boundedTime);
+      console.log('HTML5 seek to:', boundedTime);
     }
   };
 
@@ -400,9 +426,11 @@ const TrimmingTool = ({
       if (isYouTube && player && typeof player.seekTo === 'function') {
         player.seekTo(startTime);
         setCurrentTime(startTime);
+        console.log('YouTube seek to startTime:', startTime);
       } else if (!isYouTube && videoRef.current) {
         videoRef.current.currentTime = startTime;
         setCurrentTime(startTime);
+        console.log('HTML5 seek to startTime:', startTime);
       }
     }
 
@@ -417,12 +445,16 @@ const TrimmingTool = ({
         if (Math.abs(currentTime - startTime) > 0.5) {
           player.seekTo(startTime);
           setCurrentTime(startTime);
+          console.log('YouTube seek to startTime before play:', startTime);
         }
-        player.playVideo();
+        setTimeout(() => {
+          player.playVideo();
+        }, 100); // 100ms delay for YouTube
       } else if (!isYouTube && videoRef.current) {
         if (Math.abs(currentTime - startTime) > 0.5) {
           videoRef.current.currentTime = startTime;
           setCurrentTime(startTime);
+          console.log('HTML5 seek to startTime before play:', startTime);
         }
         videoRef.current.play().catch((err) => {
           console.error('Error playing HTML5 video:', err);
@@ -446,9 +478,11 @@ const TrimmingTool = ({
     if (isYouTube && player && typeof player.seekTo === 'function') {
       player.seekTo(startTime);
       setCurrentTime(startTime);
+      console.log('Skip to startTime:', startTime);
     } else if (!isYouTube && videoRef.current) {
       videoRef.current.currentTime = startTime;
       setCurrentTime(startTime);
+      console.log('Skip to startTime:', startTime);
     }
   };
 
@@ -458,9 +492,11 @@ const TrimmingTool = ({
     if (isYouTube && player && typeof player.seekTo === 'function') {
       player.seekTo(endTime);
       setCurrentTime(endTime);
+      console.log('Skip to endTime:', endTime);
     } else if (!isYouTube && videoRef.current) {
       videoRef.current.currentTime = endTime;
       setCurrentTime(endTime);
+      console.log('Skip to endTime:', endTime);
     }
   };
 
@@ -505,6 +541,7 @@ const TrimmingTool = ({
     const newHistoryEntry = { startTime, endTime };
     setHistory((prev) => [...prev.slice(0, historyIndex + 1), newHistoryEntry]);
     setHistoryIndex((prev) => prev + 1);
+    console.log('Drag complete, updated history');
   };
 
   const adjustZoom = (increase) => {
@@ -525,6 +562,7 @@ const TrimmingTool = ({
 
   const saveTrim = () => {
     onSaveTrim({ startTime, endTime, duration: trimDuration });
+    console.log('Saving trim:', { startTime, endTime, duration: trimDuration });
   };
 
   useEffect(() => {
@@ -575,7 +613,6 @@ const TrimmingTool = ({
                       setError('');
                       setReady(false);
                       setYoutubeReady(false);
-                      // Trigger re-initialization by resetting videoId
                       setPlayer(null);
                     }}
                   >
@@ -602,7 +639,6 @@ const TrimmingTool = ({
               </div>
             )}
           </div>
-          {/* Rest of the JSX remains unchanged */}
           <div className="grid grid-cols-3 gap-2 bg-[#1e293b] p-2 rounded-lg shadow-inner items-center">
             <div className="flex gap-2 items-center">
               <div className="text-[#f9fafb] text-sm bg-[#0f172a] px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-[#6366f1]/20 shadow-inner whitespace-nowrap">
@@ -763,6 +799,10 @@ const TrimmingTool = ({
                             e.stopPropagation();
                             setIsDragging(true);
                             const timeline = timelineRef.current;
+                            if (!timeline) {
+                              console.error('Timeline reference not found');
+                              return;
+                            }
                             const initialX = e.clientX;
                             const initialTime = pointer.time;
                             const timelineBounds = timeline.getBoundingClientRect();
@@ -798,7 +838,7 @@ const TrimmingTool = ({
                       className="absolute -top-[0.25em] left-1/2 -translate-x-1/2 w-[0.625em] h-[0.625em] rounded-full"
                       style={{
                         background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
-                        boxShadow: '0 0 0.2em rgba(255, 255, 255, 0.5)'
+                        boxShadow: '0 0 0.2em rgba(255, 255, 255, 0.5)',
                       }}
                     />
                   </div>
