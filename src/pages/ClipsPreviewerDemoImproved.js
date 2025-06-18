@@ -171,7 +171,7 @@ const ClipsPreviewerDemo = () => {
             const processed = await Promise.all(clipsArray.map(async (clip, index) => {
               const token = localStorage.getItem('token');
               const headers = token ? { Authorization: `Bearer ${token}` } : {};
-              
+
               let thumbnailUrl = clip.thumbnailUrl;
 
               if (!clip.isYouTube && clip.videoId) {
@@ -189,7 +189,7 @@ const ClipsPreviewerDemo = () => {
                 id: `clip_${index + 1}`,
                 videoId: clip.videoId,
                 isYouTube: clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11),
-                videoUrl: clip.videoUrl || '',
+                videoUrl: clip.videoUrl || details.videoUrl,
                 title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
                 originalVideoDuration: clip.originalVideoDuration || 60,
                 duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
