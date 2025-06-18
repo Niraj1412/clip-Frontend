@@ -168,25 +168,24 @@ const ClipsPreviewerDemo = () => {
 
             // Process each clip with exact timestamp precision
             const processed = clipsArray.map((clip, index) => {
-              if (!clip.videoId || clip.startTime === undefined || clip.endTime === undefined) {
-                console.warn(`Clip ${index} has missing required fields:`, clip);
-              }
-
-              return {
-                id: `clip_${index + 1}`,
-                videoId: clip.videoId,
-                title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
-                originalVideoDuration: clip.originalVideoDuration || 60, 
-                duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
-                startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
-                endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
-                transcriptText: (clip.transcriptText || '').replace(/&amp;#39;/g, "'"),
-                thumbnail: isYouTube 
+            const isYouTube = !!clip.youtubeId || (clip.videoId && clip.videoId.match(/^[a-zA-Z0-9_-]{11}$/));
+            return {
+              id: `clip_${index + 1}`,
+              videoId: isYouTube ? (clip.youtubeId || clip.videoId) : null,
+              title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
+              originalVideoDuration: clip.originalVideoDuration || 60,
+              duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
+              startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
+              endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
+              transcriptText: (clip.transcriptText || '').replace(/&#39;/g, "'"),
+              thumbnail: isYouTube 
                 ? `https://img.youtube.com/vi/${clip.youtubeId || clip.videoId}/maxresdefault.jpg`
-                : clip.thumbnailUrl || `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`,
-                createdAt: new Date().toISOString()
-              };
-            });
+                : clip.thumbnailUrl || `https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`,
+              videoUrl: isYouTube ? null : clip.videoUrl,
+              isYouTube: isYouTube,
+              createdAt: new Date().toISOString()
+            };
+          });
 
             setProcessedClips(processed);
             showFeedback('Clips generated successfully!', 'success');
