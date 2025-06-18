@@ -97,7 +97,7 @@ const ClipsPreviewerDemo = () => {
                 startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
                 endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
                 transcriptText: (clip.transcriptText || '').replace(/&amp;#39;/g, "'"),
-                thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`,
+                thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg` || `https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`,
                 createdAt: new Date().toISOString()
               };
             });
