@@ -168,21 +168,20 @@ const ClipsPreviewerDemo = () => {
 
             // Process each clip with exact timestamp precision
             const processed = clipsArray.map((clip, index) => {
-              if (!clip.videoId || clip.startTime === undefined || clip.endTime === undefined) {
-                console.warn(`Clip ${index} has missing required fields:`, clip);
-              }
-
               return {
                 id: `clip_${index + 1}`,
-                videoId: clip.videoId,
+                videoId: clip.videoId, // Could be YouTube ID or internal ID
+                isYouTube: clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11), // Adjust based on your data
+                videoUrl: clip.videoUrl || '', // URL to actual video file for uploaded videos
                 title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
                 originalVideoDuration: clip.originalVideoDuration || 60,
                 duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
                 startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
                 endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
-                transcriptText: (clip.transcriptText || '').replace(/&amp;#39;/g, "'"),
-                thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg` || `https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`,
-                createdAt: new Date().toISOString()
+                transcriptText: (clip.transcriptText || '').replace(/&#39;/g, "'"),
+                thumbnail: clip.isYouTube
+                  ? `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`
+                  : `https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`,
               };
             });
 
@@ -504,9 +503,9 @@ const ClipsPreviewerDemo = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className={`fixed top-12 right-4 z-50 px-4 py-2 rounded-lg shadow-lg ${feedback.type === 'success' ? 'bg-green-500' :
-                feedback.type === 'error' ? 'bg-red-500' :
-                  feedback.type === 'warning' ? 'bg-amber-500' :
-                    'bg-blue-500'
+              feedback.type === 'error' ? 'bg-red-500' :
+                feedback.type === 'warning' ? 'bg-amber-500' :
+                  'bg-blue-500'
               } text-white text-sm flex items-center gap-2`}
           >
             <FontAwesomeIcon
@@ -819,8 +818,9 @@ const ClipsPreviewerDemo = () => {
                   >
                     <div className="w-full h-full flex items-center justify-center p-6">
                       <TrimmingTool
-                        videoId={currentClip.videoId}
-                        videoUrl={currentClip.thumbnail}
+                        videoId={currentClip.isYouTube ? currentClip.videoId : ''} // Only set for YouTube
+                        videoUrl={currentClip.isYouTube ? currentClip.thumbnail : currentClip.videoUrl} // Thumbnail for YouTube, video file for uploaded
+                        isYouTube={currentClip.isYouTube || false} // Explicitly set based on clip type
                         initialDuration={currentClip.originalVideoDuration}
                         initialStartTime={currentClip.startTime}
                         initialEndTime={currentClip.endTime}

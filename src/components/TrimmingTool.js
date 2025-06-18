@@ -35,7 +35,7 @@ const shadowColor = 'rgba(0, 0, 0, 0.5)';
 const TrimmingTool = ({
   videoId = '',
   videoUrl = '',
-  isYouTube = false,
+  isYouTube = false, // Explicitly rely on this prop
   initialDuration = 600,
   initialStartTime = 0,
   initialEndTime = 60,
@@ -43,7 +43,6 @@ const TrimmingTool = ({
   onTimingChange = () => {},
   onSaveTrim = () => {}
 }) => {
-  const isYouTubeVideo = isYouTube || !!videoId;
   const [isPlaying, setIsPlaying] = useState(false);
   const [ready, setReady] = useState(false);
   const [duration, setDuration] = useState(initialDuration);
@@ -82,8 +81,10 @@ const TrimmingTool = ({
 
   // Initialize player based on video type
   useEffect(() => {
-    if (!videoId || !isYouTube) {
-      setError('Invalid video ID or configuration');
+    if (!isYouTube) return; // Only run for YouTube videos
+
+    if (!videoId) {
+      setError('No video ID provided for YouTube video');
       setReady(false);
       return;
     }
@@ -274,21 +275,10 @@ const TrimmingTool = ({
     return () => clearInterval(interval);
   }, [isYouTube, player, ready, youtubeReady, startTime, endTime, isPlaying]);
 
-  // Validate initial times
-useEffect(() => {
-    if (!isYouTubeVideo) return;
-
-    if (!videoId) {
-      setError('Invalid video ID for YouTube video');
-      setReady(false);
-      return;
-    }
-    // Existing YouTube initialization logic...
-  }, [videoId, isYouTubeVideo, parsedStartTime]);
 
   // Uploaded Video Initialization
   useEffect(() => {
-    if (isYouTubeVideo) return;
+    if (isYouTube) return; // Only run for uploaded videos
 
     if (videoRef.current && videoUrl) {
       videoRef.current.src = videoUrl;
@@ -320,7 +310,7 @@ useEffect(() => {
       setError('No video URL provided for uploaded video');
       setReady(false);
     }
-  }, [isYouTubeVideo, videoUrl, parsedStartTime, parsedEndTime]);
+  }, [isYouTube, videoUrl, parsedStartTime, parsedEndTime]);
 
   // Update trim duration
   useEffect(() => {
