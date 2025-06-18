@@ -754,7 +754,7 @@ const ClipsPreviewerDemo = () => {
                     onClick={() => {
                       setError(null);
                       setLoading(true);
-                      fetchClips();
+                      fetchClips(); // Now defined and accessible
                     }}
                   >
                     Retry
