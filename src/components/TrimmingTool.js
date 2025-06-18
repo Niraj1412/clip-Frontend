@@ -135,7 +135,7 @@ const TrimmingTool = ({
         playerContainer.appendChild(playerElement);
 
         const newPlayer = new window.YT.Player(playerElement, {
-          videoId,
+          videoId: videoId,
           playerVars: {
             autoplay: 0,
             controls: 0,
@@ -147,7 +147,7 @@ const TrimmingTool = ({
             showinfo: 0,
             fs: 0,
             playsinline: 1,
-            start: Math.floor(parsedStartTime),
+            origin: 'https://clip-frontend-three.vercel.app', // Hardcode this
           },
           events: {
             onReady: onPlayerReady,
@@ -254,24 +254,24 @@ const TrimmingTool = ({
     videoRef.current.muted = isMuted;
   }, [volume, isMuted, isYouTube]);
 
-useEffect(() => {
-  if (!isYouTube || !player || !ready || !youtubeReady) return;
+  useEffect(() => {
+    if (!isYouTube || !player || !ready || !youtubeReady) return;
 
-  const interval = setInterval(() => {
-    if (player && typeof player.getCurrentTime === 'function') {
-      const playerTime = player.getCurrentTime();
-      setCurrentTime(playerTime);
+    const interval = setInterval(() => {
+      if (player && typeof player.getCurrentTime === 'function') {
+        const playerTime = player.getCurrentTime();
+        setCurrentTime(playerTime);
 
-      if (playerTime >= endTime && isPlaying) {
-        player.seekTo(startTime);
-        player.pauseVideo();
-        setIsPlaying(false);
+        if (playerTime >= endTime && isPlaying) {
+          player.seekTo(startTime);
+          player.pauseVideo();
+          setIsPlaying(false);
+        }
       }
-    }
-  }, 100);
+    }, 100);
 
-  return () => clearInterval(interval);
-}, [isYouTube, player, ready, youtubeReady, startTime, endTime, isPlaying]);
+    return () => clearInterval(interval);
+  }, [isYouTube, player, ready, youtubeReady, startTime, endTime, isPlaying]);
 
   // Validate initial times
   useEffect(() => {
