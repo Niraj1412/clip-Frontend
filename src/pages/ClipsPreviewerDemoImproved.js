@@ -115,101 +115,75 @@ const ClipsPreviewerDemo = () => {
   }, [loading, processedClips.length]);
 
   useEffect(() => {
-    const fetchClips = async () => {
-      try {
-        if (!selectedClipsData || selectedClipsData.length === 0) {
-          throw new Error('No transcript data available');
-        }
-
-        setLoading(true);
-        setError(null);
-        showFeedback('Generating clips...', 'info');
-
-        console.log('Sending transcript data to API:', selectedClipsData);
-
-        const response = await fetch(`${YOUTUBE_API}/generateClips`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            transcripts: selectedClipsData,
-            customPrompt: prompt || "Generate 3 clips from the transcript with highly accurate and precise transcription and EXACT timestamps. The timestamps must precisely match the actual video timing with frame-level accuracy. Maintain exact wording from the source material. Prioritize both content accuracy and timestamp precision for perfect synchronization with the video."
-          })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          console.error('API error response:', data);
-          throw new Error(data.message || data.error || `Failed to generate clips (Status: ${response.status})`);
-        }
-
-        if (data.success && data.data.script) {
-          console.log('Received script data:', data.data.script);
-
-          try {
-      // Enhanced cleaning and sanitization
-      const cleanScript = data.data.script
-        .replace(/```json/g, '')
-        .replace(/```/g, '')
-        .replace(/\((\d+\.?\d*)\)\.toFixed\(2\)/g, '$1')
-        .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\)\.toFixed\(2\)/g, (match) => {
-          return eval(match.replace('.toFixed(2)', '')).toFixed(2);
-        })
-        .trim();
-
-            const clipsArray = JSON.parse(cleanScript);
-            console.log('Parsed clips array:', clipsArray);
-
-            if (!Array.isArray(clipsArray) || clipsArray.length === 0) {
-              throw new Error('No valid clips were generated');
-            }
-
-            // Process each clip with exact timestamp precision
-            const processed = clipsArray.map((clip, index) => {
-            const isYouTube = !!clip.youtubeId || (clip.videoId && clip.videoId.match(/^[a-zA-Z0-9_-]{11}$/));
-            return {
-              id: `clip_${index + 1}`,
-              videoId: isYouTube ? (clip.youtubeId || clip.videoId) : null,
-              title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
-              originalVideoDuration: clip.originalVideoDuration || 60,
-              duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
-              startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
-              endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
-              transcriptText: (clip.transcriptText || '').replace(/&#39;/g, "'"),
-              thumbnail: isYouTube 
-                ? `https://img.youtube.com/vi/${clip.youtubeId || clip.videoId}/maxresdefault.jpg`
-                : clip.thumbnailUrl || `https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`,
-              videoUrl: isYouTube ? null : clip.videoUrl,
-              isYouTube: isYouTube,
-              createdAt: new Date().toISOString()
-            };
-          });
-
-            setProcessedClips(processed);
-            showFeedback('Clips generated successfully!', 'success');
-          } catch (parseError) {
-            console.error('Error parsing script:', parseError, data.data.script);
-            throw new Error(`Failed to parse generated clips: ${parseError.message}`);
-          }
-        } else {
-          console.error('Invalid API response format:', data);
-          throw new Error(data.message || 'Invalid response format');
-        }
-      } catch (err) {
-        console.error('Error details:', err);
-        setError(err.message);
-        showFeedback(`Error: ${err.message}`, 'error');
-      } finally {
-        setLoading(false);
+  const fetchClips = async () => {
+    try {
+      if (!selectedClipsData || selectedClipsData.length === 0) {
+        throw new Error('No transcript data available');
       }
-    };
 
-    if (selectedClipsData) {
-      fetchClips();
+      setLoading(true);
+      setError(null);
+      showFeedback('Generating clips...', 'info');
+
+      const response = await fetch(`${YOUTUBE_API}/generateClips`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcripts: selectedClipsData,
+          customPrompt: prompt || "Generate 3 clips from the transcript..."
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to generate clips');
+
+      if (data.success && data.data.script) {
+        const cleanScript = data.data.script
+          .replace(/```json/g, '')
+          .replace(/```/g, '')
+          .replace(/\((\d+\.?\d*)\)\.toFixed\(2\)/g, '$1')
+          .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\)\.toFixed\(2\)/g, match => eval(match.replace('.toFixed(2)', '')).toFixed(2))
+          .trim();
+
+        const clipsArray = JSON.parse(cleanScript);
+        if (!Array.isArray(clipsArray) || clipsArray.length === 0) throw new Error('No valid clips were generated');
+
+        // Use video details from selectedClipsData[0]
+        const videoDetails = selectedClipsData[0];
+        const isYouTube = videoDetails.isYouTube || false;
+        const commonThumbnail = isYouTube 
+          ? `https://img.youtube.com/vi/${videoDetails.videoId}/maxresdefault.jpg`
+          : videoDetails.thumbnailUrl || 'https://via.placeholder.com/128x72?text=No+Preview';
+
+        const processed = clipsArray.map((clip, index) => ({
+          id: `clip_${index + 1}`,
+          videoId: videoDetails.videoId,
+          title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
+          originalVideoDuration: clip.originalVideoDuration || 60,
+          duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
+          startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
+          endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
+          transcriptText: (clip.transcriptText || '').replace(/'/g, "'"),
+          thumbnail: commonThumbnail,
+          videoUrl: isYouTube ? null : videoDetails.videoUrl,
+          isYouTube: isYouTube,
+          createdAt: new Date().toISOString()
+        }));
+
+        setProcessedClips(processed);
+        showFeedback('Clips generated successfully!', 'success');
+      } else {
+        throw new Error(data.message || 'Invalid response format');
+      }
+    } catch (err) {
+      setError(err.message);
+      showFeedback(`Error: ${err.message}`, 'error');
+    } finally {
+      setLoading(false);
     }
-  }, [selectedClipsData]);
+  };
+  if (selectedClipsData) fetchClips();
+}, [selectedClipsData]);
 
   const [selectedClips, setSelectedClips] = useState([]);
   const [currentClip, setCurrentClip] = useState(null);
