@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faMinus, 
-  faPlus, 
-  faBackwardStep, 
+import {
+  faMinus,
+  faPlus,
+  faBackwardStep,
   faForwardStep,
   faPlay,
   faPause,
@@ -32,7 +32,7 @@ const textColor = '#f9fafb';
 const mutedTextColor = '#9ca3af';
 const shadowColor = 'rgba(0, 0, 0, 0.5)';
 
-const TrimmingTool = ({ 
+const TrimmingTool = ({
   videoId = '',
   videoUrl = '',
   isYouTube = false, // New prop to distinguish video type
@@ -40,25 +40,25 @@ const TrimmingTool = ({
   initialStartTime = 0,
   initialEndTime = 60,
   transcriptText = '',
-  onTimingChange = () => {},
-  onSaveTrim = () => {}
+  onTimingChange = () => { },
+  onSaveTrim = () => { }
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [ready, setReady] = useState(false);
   const [duration, setDuration] = useState(initialDuration);
   const [error, setError] = useState('');
-  
+
   const parsedStartTime = typeof initialStartTime === 'string' ? parseFloat(initialStartTime) : initialStartTime;
   const parsedEndTime = typeof initialEndTime === 'string' ? parseFloat(initialEndTime) : initialEndTime;
-  
+
   const [currentTime, setCurrentTime] = useState(Math.min(parsedStartTime, initialDuration));
   const [startTime, setStartTime] = useState(Math.min(parsedStartTime, initialDuration));
   const [endTime, setEndTime] = useState(Math.min(parsedEndTime, initialDuration));
   const [playbackRate, setPlaybackRate] = useState(1);
-  
+
   const [player, setPlayer] = useState(null); // For YouTube player
   const [youtubeReady, setYoutubeReady] = useState(false);
-  
+
   const [isHovering, setIsHovering] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -72,181 +72,129 @@ const TrimmingTool = ({
   const [zoomLevel, setZoomLevel] = useState(1);
   const [history, setHistory] = useState([{ startTime: initialStartTime, endTime: initialEndTime }]);
   const [historyIndex, setHistoryIndex] = useState(0);
-  
+
   const [userInteracted, setUserInteracted] = useState(false);
-  
+
   const videoRef = useRef(null); // For HTML5 video or YouTube player container
   const containerRef = useRef(null);
   const timelineRef = useRef(null);
 
   // Initialize player based on video type
   useEffect(() => {
-    if (isYouTube) {
-      console.log(`Initializing YouTube player for videoId: ${videoId}`);
-      let isLoading = false;
-      
-      const initYouTubeAPI = () => {
-        if (isLoading) return;
-        isLoading = true;
-        
-        if (!window.YT) {
-          const tag = document.createElement('script');
-          tag.src = 'https://www.youtube.com/iframe_api';
-          tag.onload = () => {
-            const checkYT = setInterval(() => {
-              if (window.YT && window.YT.Player) {
-                clearInterval(checkYT);
-                initializeYouTubePlayer();
-              }
-            }, 100);
-          };
-          tag.onerror = () => {
-            console.error("Failed to load YouTube API");
-            setReady(false);
-            setError("Failed to load YouTube API");
-            isLoading = false;
-          };
-          
-          const firstScriptTag = document.getElementsByTagName('script')[0];
-          firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
-          
-          window.onYouTubeIframeAPIReady = () => {
-            clearTimeout(apiTimeout);
-            initializeYouTubePlayer();
-          };
-          
-          const apiTimeout = setTimeout(() => {
-            if (!window.YT) {
-              console.error("YouTube API failed to load");
-              setReady(false);
-              setError("YouTube API failed to load");
-              isLoading = false;
-            }
-          }, 5000);
-        } else if (window.YT.Player) {
-          initializeYouTubePlayer();
-        }
+    if (!videoId || !isYouTube) {
+      setError('Invalid video ID or configuration');
+      setReady(false);
+      return;
+    }
+
+    console.log(`Initializing YouTube player for videoId: ${videoId}`);
+    let isLoading = false;
+
+    const initYouTubeAPI = () => {
+      if (isLoading || window.YT?.Player) {
+        initializeYouTubePlayer();
+        return;
+      }
+      isLoading = true;
+
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      tag.async = true;
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+
+      window.onYouTubeIframeAPIReady = () => {
+        initializeYouTubePlayer();
       };
-      
-      const initializeYouTubePlayer = () => {
-        if (!videoRef.current || !videoId) {
-          setError('Invalid YouTube configuration');
-          setReady(false);
-          return;
-        }
-        
-        try {
-          try {
-            if (player) {
-              player.destroy();
-            }
-          } catch (err) {
-            console.warn('Error destroying previous player:', err);
-          }
-          
-          const playerContainer = videoRef.current;
-          while (playerContainer.firstChild) {
-            playerContainer.removeChild(playerContainer.firstChild);
-          }
-          
-          const playerElement = document.createElement('div');
-          playerElement.id = 'youtube-player-element';
-          playerElement.style.width = '100%';
-          playerElement.style.height = '100%';
-          playerContainer.appendChild(playerElement);
-          
-          const newPlayer = new window.YT.Player(playerElement, {
-            videoId: videoId,
-            playerVars: {
-              autoplay: 0,
-              controls: 0,
-              disablekb: 1,
-              enablejsapi: 1,
-              iv_load_policy: 3,
-              modestbranding: 1,
-              rel: 0,
-              showinfo: 0,
-              fs: 0,
-              playsinline: 1,
-              origin: window.location.origin,
-            },
-            events: {
-              onReady: onPlayerReady,
-              onStateChange: onPlayerStateChange,
-              onError: onPlayerError,
-            },
-          });
-          
-          setPlayer(newPlayer);
-        } catch (error) {
-          console.error('YouTube player initialization failed:', error);
-          setReady(false);
-          setError('Failed to initialize YouTube player');
-        }
+
+      tag.onerror = () => {
+        setError('Failed to load YouTube API');
+        setReady(false);
+        isLoading = false;
       };
-      
-      initYouTubeAPI();
-      
-      return () => {
-        if (player) {
-          try {
-            player.destroy();
-          } catch (err) {
-            console.warn('Error destroying YouTube player:', err);
-          }
-        }
-      };
-    } else {
-      // Non-YouTube video (HTML5 video)
-      console.log(`Initializing HTML5 video for URL: ${videoUrl}`);
-      if (!videoRef.current || !videoUrl) {
-        setError('Invalid video URL');
+    };
+
+    const initializeYouTubePlayer = () => {
+      if (!videoRef.current) {
+        setError('Player container not found');
         setReady(false);
         return;
       }
-      
-      videoRef.current.src = videoUrl;
-      videoRef.current.onloadedmetadata = () => {
-        setDuration(videoRef.current.duration || initialDuration);
-        setStartTime(parsedStartTime);
-        setEndTime(parsedEndTime);
-        setCurrentTime(parsedStartTime);
-        setReady(true);
-        setUserInteracted(false);
-        console.log(`HTML5 video ready. Duration: ${videoRef.current.duration}`);
-      };
-      
-      videoRef.current.onerror = () => {
-        setError('Failed to load video');
-        setReady(false);
-        console.error('HTML5 video failed to load:', videoUrl);
-      };
-      
-      return () => {
-        if (videoRef.current) {
-          videoRef.current.onloadedmetadata = null;
-          videoRef.current.onerror = null;
-          videoRef.current.src = '';
+
+      try {
+        if (player) {
+          player.destroy();
         }
-      };
-    }
-  }, [videoId, videoUrl, isYouTube]);
+        const playerContainer = videoRef.current;
+        while (playerContainer.firstChild) {
+          playerContainer.removeChild(playerContainer.firstChild);
+        }
+
+        const playerElement = document.createElement('div');
+        playerElement.id = 'youtube-player-element';
+        playerContainer.appendChild(playerElement);
+
+        const newPlayer = new window.YT.Player(playerElement, {
+          videoId,
+          playerVars: {
+            autoplay: 0,
+            controls: 0,
+            disablekb: 1,
+            enablejsapi: 1,
+            iv_load_policy: 3,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+            fs: 0,
+            playsinline: 1,
+            start: Math.floor(parsedStartTime),
+          },
+          events: {
+            onReady: onPlayerReady,
+            onStateChange: onPlayerStateChange,
+            onError: onPlayerError,
+          },
+        });
+
+        setPlayer(newPlayer);
+      } catch (error) {
+        console.error('YouTube player initialization failed:', error);
+        setError('Failed to initialize YouTube player');
+        setReady(false);
+      }
+    };
+
+    initYouTubeAPI();
+
+    return () => {
+      if (player) {
+        try {
+          player.destroy();
+        } catch (err) {
+          console.warn('Error destroying YouTube player:', err);
+        }
+      }
+      setPlayer(null);
+      setYoutubeReady(false);
+      setReady(false);
+    };
+  }, [videoId, isYouTube, parsedStartTime]);
 
   const onPlayerReady = (event) => {
     setYoutubeReady(true);
     const videoDuration = event.target.getDuration();
     setDuration(videoDuration);
-    
+
     setStartTime(parsedStartTime);
     setEndTime(parsedEndTime);
     setCurrentTime(parsedStartTime);
-    
+
     setUserInteracted(false);
-    
+
     event.target.seekTo(parsedStartTime);
-    
+
     setReady(true);
-    
+
     console.log(`YouTube video ready. Starting playback from ${parsedStartTime.toFixed(2)} seconds`);
   };
 
@@ -266,7 +214,7 @@ const TrimmingTool = ({
   const onPlayerError = (event) => {
     console.error('YouTube Player Error:', event.data);
     setReady(false);
-    
+
     const errorMessages = {
       2: 'The video ID is invalid',
       5: 'The requested content cannot be played in an HTML5 player',
@@ -274,14 +222,14 @@ const TrimmingTool = ({
       101: 'The video owner does not allow it to be played in embedded players',
       150: 'The video owner does not allow it to be played in embedded players',
     };
-    
+
     setError(errorMessages[event.data] || 'An error occurred loading the video');
   };
 
   // HTML5 video controls
   useEffect(() => {
     if (isYouTube || !videoRef.current || !ready) return;
-    
+
     if (isPlaying) {
       videoRef.current.play().catch((err) => {
         console.error('Error playing HTML5 video:', err);
@@ -295,47 +243,53 @@ const TrimmingTool = ({
 
   useEffect(() => {
     if (isYouTube || !videoRef.current) return;
-    
+
     videoRef.current.playbackRate = playbackRate;
   }, [playbackRate, isYouTube]);
 
   useEffect(() => {
     if (isYouTube || !videoRef.current) return;
-    
+
     videoRef.current.volume = volume;
     videoRef.current.muted = isMuted;
   }, [volume, isMuted, isYouTube]);
 
-  useEffect(() => {
-    if (isYouTube || !videoRef.current || !ready) return;
-    
-    const interval = setInterval(() => {
-      const currentPlayerTime = videoRef.current.currentTime;
-      setCurrentTime(currentPlayerTime);
-      
-      if (currentPlayerTime >= endTime && !videoRef.current.paused) {
-        videoRef.current.pause();
-        videoRef.current.currentTime = startTime;
+useEffect(() => {
+  if (!isYouTube || !player || !ready || !youtubeReady) return;
+
+  const interval = setInterval(() => {
+    if (player && typeof player.getCurrentTime === 'function') {
+      const playerTime = player.getCurrentTime();
+      setCurrentTime(playerTime);
+
+      if (playerTime >= endTime && isPlaying) {
+        player.seekTo(startTime);
+        player.pauseVideo();
         setIsPlaying(false);
       }
-    }, 100);
-    
-    return () => clearInterval(interval);
-  }, [startTime, endTime, ready, isYouTube]);
+    }
+  }, 100);
+
+  return () => clearInterval(interval);
+}, [isYouTube, player, ready, youtubeReady, startTime, endTime, isPlaying]);
 
   // Validate initial times
   useEffect(() => {
-    setStartTime(parsedStartTime);
-    setEndTime(parsedEndTime);
-    setCurrentTime(parsedStartTime);
+    // Validate initial times
+    const validStartTime = Math.max(0, Math.min(parsedStartTime, duration - 0.1));
+    const validEndTime = Math.max(validStartTime + 0.1, Math.min(parsedEndTime, duration));
+    setStartTime(validStartTime);
+    setEndTime(validEndTime);
+    setCurrentTime(validStartTime);
+    setTrimDuration(validEndTime - validStartTime);
     setUserInteracted(false);
-  }, [parsedStartTime, parsedEndTime]);
+  }, [parsedStartTime, parsedEndTime, duration]);
 
   // Update trim duration
   useEffect(() => {
     const newDuration = endTime - startTime;
     setTrimDuration(newDuration);
-    
+
     if (userInteracted) {
       onTimingChange({ startTime, endTime, duration: newDuration });
     }
@@ -343,12 +297,12 @@ const TrimmingTool = ({
 
   const updateStartTime = (newStartTime) => {
     const validStartTime = Math.max(0, Math.min(newStartTime, endTime - 0.1));
-    
+
     if (validStartTime !== startTime) {
       setStartTime(validStartTime);
       setCurrentTime(validStartTime);
       setUserInteracted(true);
-      
+
       if (!isDragging) {
         const newHistoryEntry = { startTime: validStartTime, endTime };
         setHistory((prev) => [...prev.slice(0, historyIndex + 1), newHistoryEntry]);
@@ -359,11 +313,11 @@ const TrimmingTool = ({
 
   const updateEndTime = (newEndTime) => {
     const validEndTime = Math.max(startTime + 0.1, Math.min(newEndTime, duration));
-    
+
     if (validEndTime !== endTime) {
       setEndTime(validEndTime);
       setUserInteracted(true);
-      
+
       if (!isDragging) {
         const newHistoryEntry = { startTime, endTime: validEndTime };
         setHistory((prev) => [...prev.slice(0, historyIndex + 1), newHistoryEntry]);
@@ -374,13 +328,13 @@ const TrimmingTool = ({
 
   const handleSeek = (e) => {
     if (!ready) return;
-    
+
     const bounds = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - bounds.left;
     const percentage = x / bounds.width;
     const newTime = percentage * duration;
     const boundedTime = Math.max(startTime, Math.min(newTime, endTime));
-    
+
     if (isYouTube && player && typeof player.seekTo === 'function') {
       player.seekTo(boundedTime);
       setCurrentTime(boundedTime);
@@ -414,7 +368,7 @@ const TrimmingTool = ({
 
   const handlePlayPause = () => {
     if (!ready) return;
-    
+
     if (currentTime <= startTime || currentTime >= endTime) {
       if (isYouTube && player && typeof player.seekTo === 'function') {
         player.seekTo(startTime);
@@ -424,7 +378,7 @@ const TrimmingTool = ({
         setCurrentTime(startTime);
       }
     }
-    
+
     if (isPlaying) {
       if (isYouTube && player && typeof player.pauseVideo === 'function') {
         player.pauseVideo();
@@ -449,7 +403,7 @@ const TrimmingTool = ({
         });
       }
     }
-    
+
     setIsPlaying(!isPlaying);
   };
 
@@ -461,7 +415,7 @@ const TrimmingTool = ({
 
   const skipToStart = () => {
     if (!ready) return;
-    
+
     if (isYouTube && player && typeof player.seekTo === 'function') {
       player.seekTo(startTime);
       setCurrentTime(startTime);
@@ -473,7 +427,7 @@ const TrimmingTool = ({
 
   const skipToEnd = () => {
     if (!ready) return;
-    
+
     if (isYouTube && player && typeof player.seekTo === 'function') {
       player.seekTo(endTime);
       setCurrentTime(endTime);
@@ -495,7 +449,7 @@ const TrimmingTool = ({
 
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
-    
+
     if (!document.fullscreenElement) {
       if (containerRef.current.requestFullscreen) {
         containerRef.current.requestFullscreen();
@@ -520,7 +474,7 @@ const TrimmingTool = ({
   const handleStartEndDragComplete = () => {
     setIsDragging(false);
     setUserInteracted(true);
-    
+
     const newHistoryEntry = { startTime, endTime };
     setHistory((prev) => [...prev.slice(0, historyIndex + 1), newHistoryEntry]);
     setHistoryIndex((prev) => prev + 1);
@@ -587,7 +541,19 @@ const TrimmingTool = ({
                 <div className="bg-red-900/60 backdrop-blur-lg p-4 rounded-xl max-w-lg text-center border border-red-500/30 shadow-xl">
                   <FontAwesomeIcon icon={faCircleNotch} className="text-red-400 text-2xl mb-2" />
                   <h3 className="text-white text-lg font-medium mb-1">Video Error</h3>
-                  <p className="text-white/80 text-sm">{error}</p>
+                  <p className="text-white/80 text-sm mb-4">{error}</p>
+                  <button
+                    className="bg-[#6366f1] hover:bg-[#4f46e5] text-white px-4 py-2 rounded-lg text-sm"
+                    onClick={() => {
+                      setError('');
+                      setReady(false);
+                      setYoutubeReady(false);
+                      // Trigger re-initialization by resetting videoId
+                      setPlayer(null);
+                    }}
+                  >
+                    Retry
+                  </button>
                 </div>
               </div>
             )}

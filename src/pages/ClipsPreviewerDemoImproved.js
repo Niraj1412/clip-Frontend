@@ -117,89 +117,102 @@ const ClipsPreviewerDemo = () => {
   useEffect(() => {
     const fetchClips = async () => {
       try {
-        if (!selectedClipsData || selectedClipsData.length === 0) {
-          throw new Error('No transcript data available');
+        if (!selectedClipsData || !Array.isArray(selectedClipsData) || selectedClipsData.length === 0) {
+          throw new Error('No valid transcript data available');
+        }
+
+        // Validate that all clips have a videoId
+        const hasInvalidClips = selectedClipsData.some(
+          (clip) => !clip.videoId && !clip.url
+        );
+        if (hasInvalidClips) {
+          throw new Error('Some clips are missing video IDs or URLs');
         }
 
         setLoading(true);
         setError(null);
         showFeedback('Generating clips...', 'info');
 
-        console.log('Sending transcript data to API:', selectedClipsData);
-
         const response = await fetch(`${YOUTUBE_API}/generateClips`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             transcripts: selectedClipsData,
-            customPrompt: prompt || "Generate 3 clips from the transcript with highly accurate and precise transcription and EXACT timestamps. The timestamps must precisely match the actual video timing with frame-level accuracy. Maintain exact wording from the source material. Prioritize both content accuracy and timestamp precision for perfect synchronization with the video."
-          })
+            customPrompt: prompt || "Generate 3 clips from the transcript with highly accurate and precise transcription and EXACT timestamps..."
+          }),
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-          console.error('API error response:', data);
-          throw new Error(data.message || data.error || `Failed to generate clips (Status: ${response.status})`);
+          throw new Error(data.message || `Failed to generate clips (Status: ${response.status})`);
         }
 
-        if (data.success && data.data.script) {
-          console.log('Received script data:', data.data.script);
+        if (!data.success || !data.data?.script) {
+          throw new Error('No clips generated in the response');
+        }
 
-          try {
-            // Enhanced cleaning and sanitization
-            const cleanScript = data.data.script
-              .replace(/```json/g, '')
-              .replace(/```/g, '')
-              .replace(/\((\d+\.?\d*)\)\.toFixed\(2\)/g, '$1')
-              .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\)\.toFixed\(2\)/g, (match) => {
-                return eval(match.replace('.toFixed(2)', '')).toFixed(2);
-              })
-              .trim();
+        // Parse and clean the script
+        let clipsArray;
+        try {
+          const cleanScript = data.data.script
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .replace(/\((\d+\.?\d*)\)\.toFixed\(2\)/g, '$1')
+            .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\)\.toFixed\(2\)/g, (match) =>
+              eval(match.replace('.toFixed(2)', '')).toFixed(2)
+            )
+            .trim();
 
-            const clipsArray = JSON.parse(cleanScript);
-            console.log('Parsed clips array:', clipsArray);
+          clipsArray = JSON.parse(cleanScript);
+        } catch (parseError) {
+          throw new Error(`Failed to parse generated clips: ${parseError.message}`);
+        }
 
-            if (!Array.isArray(clipsArray) || clipsArray.length === 0) {
-              throw new Error('No valid clips were generated');
+        if (!Array.isArray(clipsArray) || clipsArray.length === 0) {
+          throw new Error('No valid clips were generated');
+        }
+
+        // Process clips with validation
+        const processed = clipsArray
+          .map((clip, index) => {
+            if (!clip.videoId || clip.startTime === undefined || clip.endTime === undefined) {
+              console.warn(`Clip ${index} has missing required fields:`, clip);
+              return null;
             }
 
-            // Process each clip with exact timestamp precision
-            const processed = clipsArray.map((clip, index) => {
-              if (!clip.videoId || clip.startTime === undefined || clip.endTime === undefined) {
-                console.warn(`Clip ${index} has missing required fields:`, clip);
-              }
+            const startTime = parseFloat(clip.startTime) || 0;
+            const endTime = parseFloat(clip.endTime) || 0;
+            if (startTime >= endTime || startTime < 0 || endTime > clip.originalVideoDuration) {
+              console.warn(`Clip ${index} has invalid timestamps:`, clip);
+              return null;
+            }
 
-              return {
-                id: `clip_${index + 1}`,
-                videoId: clip.videoId,
-                title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
-                originalVideoDuration: clip.originalVideoDuration || 60,
-                duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
-                startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
-                endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
-                transcriptText: (clip.transcriptText || '').replace(/&amp;#39;/g, "'"),
-                thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg` || `https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`,
-                createdAt: new Date().toISOString()
-              };
-            });
+            return {
+              id: `clip_${index + 1}`,
+              videoId: clip.videoId,
+              title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
+              originalVideoDuration: clip.originalVideoDuration || 60,
+              duration: parseFloat((endTime - startTime).toFixed(2)),
+              startTime: parseFloat(startTime.toFixed(2)),
+              endTime: parseFloat(endTime.toFixed(2)),
+              transcriptText: (clip.transcriptText || '').replace(/&#39;/g, "'"),
+              thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`,
+              createdAt: new Date().toISOString(),
+            };
+          })
+          .filter((clip) => clip !== null);
 
-            setProcessedClips(processed);
-            showFeedback('Clips generated successfully!', 'success');
-          } catch (parseError) {
-            console.error('Error parsing script:', parseError, data.data.script);
-            throw new Error(`Failed to parse generated clips: ${parseError.message}`);
-          }
-        } else {
-          console.error('Invalid API response format:', data);
-          throw new Error(data.message || 'Invalid response format');
+        if (processed.length === 0) {
+          throw new Error('No valid clips after processing');
         }
+
+        setProcessedClips(processed);
+        showFeedback('Clips generated successfully!', 'success');
       } catch (err) {
-        console.error('Error details:', err);
-        setError(err.message);
-        showFeedback(`Error: ${err.message}`, 'error');
+        console.error('Error fetching clips:', err);
+        setError(err.message || 'Failed to load clips');
+        showFeedback(`Error: ${err.message || 'Failed to load clips'}`, 'error');
       } finally {
         setLoading(false);
       }
@@ -208,7 +221,7 @@ const ClipsPreviewerDemo = () => {
     if (selectedClipsData) {
       fetchClips();
     }
-  }, [selectedClipsData]);
+  }, [selectedClipsData, prompt]);
 
   const [selectedClips, setSelectedClips] = useState([]);
   const [currentClip, setCurrentClip] = useState(null);
@@ -504,9 +517,9 @@ const ClipsPreviewerDemo = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className={`fixed top-12 right-4 z-50 px-4 py-2 rounded-lg shadow-lg ${feedback.type === 'success' ? 'bg-green-500' :
-                feedback.type === 'error' ? 'bg-red-500' :
-                  feedback.type === 'warning' ? 'bg-amber-500' :
-                    'bg-blue-500'
+              feedback.type === 'error' ? 'bg-red-500' :
+                feedback.type === 'warning' ? 'bg-amber-500' :
+                  'bg-blue-500'
               } text-white text-sm flex items-center gap-2`}
           >
             <FontAwesomeIcon
@@ -733,13 +746,24 @@ const ClipsPreviewerDemo = () => {
             {/* Clips List */}
             <div className="flex-1 overflow-y-auto custom-purple-scrollbar bg-gray-900">
               {error ? (
-                <div className="flex items-center justify-center h-full text-red-400 text-sm">
-                  <FontAwesomeIcon icon={faExclamationCircle} className="mr-2" />
-                  {error}
+                <div className="flex flex-col items-center justify-center h-full text-red-400 text-sm p-4">
+                  <FontAwesomeIcon icon={faExclamationCircle} className="mr-2 text-2xl" />
+                  <p className="mt-2">{error}</p>
+                  <button
+                    className="mt-4 bg-[#6c5ce7] hover:bg-[#5849e0] text-white px-4 py-2 rounded-lg text-sm"
+                    onClick={() => {
+                      setError(null);
+                      setLoading(true);
+                      fetchClips();
+                    }}
+                  >
+                    Retry
+                  </button>
                 </div>
               ) : sortedClips.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-                  <p>No clips found</p>
+                <div className="flex flex-col items-center justify-center h-full text-gray-500 text-sm p-4">
+                  <FontAwesomeIcon icon={faFilm} className="text-2xl mb-2" />
+                  <p>No clips found. Try generating new clips or uploading a different video.</p>
                 </div>
               ) : (
                 <div className="divide-y divide-[#2d2d2d]">
@@ -820,7 +844,7 @@ const ClipsPreviewerDemo = () => {
                     <div className="w-full h-full flex items-center justify-center p-6">
                       <TrimmingTool
                         videoId={currentClip.videoId}
-                        videoUrl={currentClip.thumbnail}
+                        isYouTube={true} // Explicitly set to true for YouTube videos
                         initialDuration={currentClip.originalVideoDuration}
                         initialStartTime={currentClip.startTime}
                         initialEndTime={currentClip.endTime}
