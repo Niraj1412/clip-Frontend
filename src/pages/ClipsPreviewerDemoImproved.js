@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faInfo, 
-  faBackwardStep, 
-  faForwardStep, 
+import {
+  faInfo,
+  faBackwardStep,
+  faForwardStep,
   faCheck,
   faFilm,
   faSave,
@@ -64,16 +64,16 @@ const ClipsPreviewerDemo = () => {
     { title: "Finalizing clips", subtitle: "Perfecting timestamps and transitions" },
     { title: "Almost ready", subtitle: "Your clips are being prepared for editing" }
   ];
-  
+
   // Simulate loading progress for better UX
   useEffect(() => {
     if (loading && processedClips.length === 0) {
       // Clear any existing interval
       if (loadingInterval.current) clearInterval(loadingInterval.current);
-      
+
       setLoadingProgress(0);
       setLoadingStage(0);
-      
+
       // Create smooth progress simulation
       loadingInterval.current = setInterval(() => {
         setLoadingProgress(prev => {
@@ -84,19 +84,19 @@ const ClipsPreviewerDemo = () => {
           else if (prev < 70) increment = 0.3; // Slow more
           else if (prev < 85) increment = 0.2; // Very slow
           else increment = 0.1; // Extremely slow at the end
-          
+
           const newProgress = prev + increment;
-          
+
           // Update stage based on progress
           if (newProgress >= 20 && prev < 20) setLoadingStage(1);
           else if (newProgress >= 40 && prev < 40) setLoadingStage(2);
           else if (newProgress >= 65 && prev < 65) setLoadingStage(3);
           else if (newProgress >= 85 && prev < 85) setLoadingStage(4);
-          
+
           return newProgress > 95 ? 95 : newProgress; // Cap at 95%
         });
       }, 150);
-      
+
       return () => {
         if (loadingInterval.current) {
           clearInterval(loadingInterval.current);
@@ -106,7 +106,7 @@ const ClipsPreviewerDemo = () => {
       // Complete the progress to 100% when loading is done
       clearInterval(loadingInterval.current);
       setLoadingProgress(100);
-      
+
       // Add small delay before showing content
       setTimeout(() => {
         setLoadingProgress(0);
@@ -149,15 +149,15 @@ const ClipsPreviewerDemo = () => {
           console.log('Received script data:', data.data.script);
 
           try {
-      // Enhanced cleaning and sanitization
-      const cleanScript = data.data.script
-        .replace(/```json/g, '')
-        .replace(/```/g, '')
-        .replace(/\((\d+\.?\d*)\)\.toFixed\(2\)/g, '$1')
-        .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\)\.toFixed\(2\)/g, (match) => {
-          return eval(match.replace('.toFixed(2)', '')).toFixed(2);
-        })
-        .trim();
+            // Enhanced cleaning and sanitization
+            const cleanScript = data.data.script
+              .replace(/```json/g, '')
+              .replace(/```/g, '')
+              .replace(/\((\d+\.?\d*)\)\.toFixed\(2\)/g, '$1')
+              .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\)\.toFixed\(2\)/g, (match) => {
+                return eval(match.replace('.toFixed(2)', '')).toFixed(2);
+              })
+              .trim();
 
             const clipsArray = JSON.parse(cleanScript);
             console.log('Parsed clips array:', clipsArray);
@@ -176,12 +176,12 @@ const ClipsPreviewerDemo = () => {
                 id: `clip_${index + 1}`,
                 videoId: clip.videoId,
                 title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
-                originalVideoDuration: clip.originalVideoDuration || 60, 
+                originalVideoDuration: clip.originalVideoDuration || 60,
                 duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
                 startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
                 endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
                 transcriptText: (clip.transcriptText || '').replace(/&amp;#39;/g, "'"),
-                 thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg` || 'https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg',
+                thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg` || `https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`,
                 createdAt: new Date().toISOString()
               };
             });
@@ -220,7 +220,7 @@ const ClipsPreviewerDemo = () => {
       console.log('Initializing all clips as selected in ClipsPreviewerDemo');
       setSelectedClips([...processedClips]);
       initialSelectionRef.current = true;
-      
+
       // Automatically select the first clip to display in the trimming tool
       if (processedClips[0] && !currentClip) {
         console.log('Automatically selecting first clip for display:', processedClips[0].id);
@@ -232,7 +232,7 @@ const ClipsPreviewerDemo = () => {
   const showFeedback = (message, type = 'success') => {
     // Valid types: 'success', 'error', 'info', 'warning'
     setFeedback({ message, type });
-    
+
     // Keep warnings visible a bit longer
     const timeout = type === 'warning' || type === 'error' ? 5000 : 3000;
     setTimeout(() => setFeedback(null), timeout);
@@ -263,8 +263,8 @@ const ClipsPreviewerDemo = () => {
 
   const handleTimingChange = ({ startTime, endTime, duration }) => {
     if (currentClip) {
-      setProcessedClips(clips => clips.map(clip => 
-        clip.id === currentClip.id 
+      setProcessedClips(clips => clips.map(clip =>
+        clip.id === currentClip.id
           ? { ...clip, startTime, endTime, duration }
           : clip
       ));
@@ -273,8 +273,8 @@ const ClipsPreviewerDemo = () => {
 
   const handleSaveTrim = ({ startTime, endTime, duration }) => {
     if (currentClip) {
-      setProcessedClips(clips => clips.map(clip => 
-        clip.id === currentClip.id 
+      setProcessedClips(clips => clips.map(clip =>
+        clip.id === currentClip.id
           ? { ...clip, startTime, endTime, duration }
           : clip
       ));
@@ -315,7 +315,7 @@ const ClipsPreviewerDemo = () => {
     if (processedClips && processedClips.length > 0) {
       // Try to extract the videoId from the selectedClipsData or transcriptData first
       let commonVideoId = '';
-      
+
       // Check if we have a common videoId in the original selectedClipsData
       if (selectedClipsData && selectedClipsData.length > 0) {
         if (selectedClipsData[0].videoId) {
@@ -325,12 +325,12 @@ const ClipsPreviewerDemo = () => {
           if (urlMatch) commonVideoId = urlMatch[1];
         }
       }
-      
+
       // Make sure each clip has the videoId 
       const clipsWithVideoId = processedClips.map(clip => {
         // If the clip already has a videoId, use it
         if (clip.videoId) return clip;
-        
+
         // Try to extract from videoUrl if available
         if (clip.videoUrl) {
           const videoIdMatch = clip.videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
@@ -341,7 +341,7 @@ const ClipsPreviewerDemo = () => {
             };
           }
         }
-        
+
         // Fall back to the common videoId if we found one
         if (commonVideoId) {
           return {
@@ -349,25 +349,25 @@ const ClipsPreviewerDemo = () => {
             videoId: commonVideoId
           };
         }
-        
+
         // If we still don't have a videoId, return the clip as is
         return clip;
       });
-      
+
       // Check if all clips have a videoId
       const missingVideoId = clipsWithVideoId.some(clip => !clip.videoId);
       if (missingVideoId) {
         showFeedback('Warning: Some clips may not have a video ID. Merging might not work correctly.', 'warning');
       }
-      
+
       console.log('Clips prepared for merging:', clipsWithVideoId);
-      
+
       // Save the processed clips to the context
       setSelectedClipsData(clipsWithVideoId);
-      
+
       // Navigate to the MergeClipsPage
       showFeedback('Clips saved successfully! Redirecting to merge page...', 'success');
-      
+
       // Small delay for the feedback to be visible before navigating
       setTimeout(() => {
         navigate('/merge');
@@ -384,11 +384,11 @@ const ClipsPreviewerDemo = () => {
       const secs = Math.floor(seconds % 60);
       return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
-    
+
     return `${formatTime(startTime)} - ${formatTime(endTime)}`;
   };
 
-  const filteredClips = processedClips.filter(clip => 
+  const filteredClips = processedClips.filter(clip =>
     clip.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -408,9 +408,9 @@ const ClipsPreviewerDemo = () => {
   const renderClipItem = (clip) => {
     const isSelected = isClipSelected(clip);
     const isActive = currentClip && currentClip.id === clip.id;
-    
+
     return (
-      <div 
+      <div
         key={clip.id}
         className={`p-3 border-b border-[#2d2d2d] cursor-pointer transition-colors hover:bg-[#2d2d2d]/70 relative
                   ${isActive ? 'bg-[#2d2d2d]' : isSelected ? 'bg-[#2d2d2d]/30' : 'bg-transparent'}`}
@@ -426,15 +426,25 @@ const ClipsPreviewerDemo = () => {
           >
             <FontAwesomeIcon icon={isSelected ? faCheckSquare : faSquare} className={`text-sm ${isSelected ? 'scale-110' : ''}`} />
           </button>
-          
+
           <div className={`relative flex-shrink-0 w-32 h-20 bg-black/50 rounded-md overflow-hidden ${isActive ? 'ring-2 ring-[#6c5ce7]' : isSelected ? 'ring-1 ring-[#6c5ce7]/50' : ''}`}>
-            <img 
-              src={clip.thumbnail} 
-              alt={clip.title} 
+            <img
+              src={clip.thumbnail}
+              alt={clip.title}
               className="w-full h-full object-cover"
               onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = 'https://via.placeholder.com/128x72?text=No+Preview';
+                e.target.onerror = null; // prevent infinite loop
+                // Try different YouTube thumbnail qualities
+                if (e.target.src.includes('maxresdefault.jpg')) {
+                  e.target.src = `https://img.youtube.com/vi/${clip.videoId}/hqdefault.jpg`;
+                }
+                else if (e.target.src.includes('hqdefault.jpg')) {
+                  e.target.src = `https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`;
+                }
+                else {
+                  // Final fallback - use a data URL or empty image
+                  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjgiIGhlaWdodD0iNzIiIHZpZXdCb3g9IjAgMCAxMjggNzIiPjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iNzIiIGZpbGw9IiMyMjIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNTU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5ObyBQcmV2aWV3PC90ZXh0Pjwvc3ZnPg==';
+                }
               }}
             />
             <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1 py-0.5 rounded">
@@ -448,7 +458,7 @@ const ClipsPreviewerDemo = () => {
               </div>
             )}
           </div>
-          
+
           <div className="flex-1 min-w-0">
             <h3 className={`text-sm font-medium ${isActive ? 'text-white' : isSelected ? 'text-gray-200' : 'text-gray-300'} truncate`}>
               {clip.title}
@@ -478,7 +488,7 @@ const ClipsPreviewerDemo = () => {
             </span>
           </h1>
         </div>
-        
+
         {/* Help text */}
         <div className="text-gray-400 text-sm flex items-center">
           <FontAwesomeIcon icon={faInfoCircle} className="mr-2 text-[#6c5ce7]" />
@@ -493,30 +503,29 @@ const ClipsPreviewerDemo = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className={`fixed top-12 right-4 z-50 px-4 py-2 rounded-lg shadow-lg ${
-              feedback.type === 'success' ? 'bg-green-500' : 
-              feedback.type === 'error' ? 'bg-red-500' : 
-              feedback.type === 'warning' ? 'bg-amber-500' : 
-              'bg-blue-500'
-            } text-white text-sm flex items-center gap-2`}
+            className={`fixed top-12 right-4 z-50 px-4 py-2 rounded-lg shadow-lg ${feedback.type === 'success' ? 'bg-green-500' :
+                feedback.type === 'error' ? 'bg-red-500' :
+                  feedback.type === 'warning' ? 'bg-amber-500' :
+                    'bg-blue-500'
+              } text-white text-sm flex items-center gap-2`}
           >
-            <FontAwesomeIcon 
+            <FontAwesomeIcon
               icon={
-                feedback.type === 'success' ? faCheck : 
-                feedback.type === 'warning' ? faExclamationTriangle : 
-                faInfo
-              } 
+                feedback.type === 'success' ? faCheck :
+                  feedback.type === 'warning' ? faExclamationTriangle :
+                    faInfo
+              }
               className="text-base"
             />
             {feedback.message}
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {/* Enhanced Loading State */}
       {loading && processedClips.length === 0 ? (
         <div className="flex-1 flex items-center justify-center bg-[#121212] p-6 overflow-hidden">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="relative max-w-3xl w-full"
@@ -527,26 +536,26 @@ const ClipsPreviewerDemo = () => {
               <div className="mb-8 relative">
                 <div className="absolute -top-20 -left-20 w-40 h-40 bg-[#6c5ce7]/30 rounded-full filter blur-3xl animate-pulse-slow"></div>
                 <div className="absolute -top-16 -right-16 w-32 h-32 bg-[#a281ff]/20 rounded-full filter blur-3xl animate-pulse-slower"></div>
-                
+
                 <div className="relative flex justify-center">
                   <div className="relative w-24 h-24 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-5">
                     <div className="absolute inset-0 rounded-full border-4 border-[#6c5ce7]/30 border-t-[#6c5ce7] animate-spin"></div>
                     <div className="w-16 h-16 bg-[#232323] rounded-full flex items-center justify-center">
-                      <FontAwesomeIcon 
+                      <FontAwesomeIcon
                         icon={
                           loadingStage === 0 ? faBrain :
-                          loadingStage === 1 ? faFileAlt :
-                          loadingStage === 2 ? faVideo :
-                          loadingStage === 3 ? faScissors :
-                          faMagic
-                        } 
+                            loadingStage === 1 ? faFileAlt :
+                              loadingStage === 2 ? faVideo :
+                                loadingStage === 3 ? faScissors :
+                                  faMagic
+                        }
                         className="text-[#6c5ce7] text-xl"
                       />
                     </div>
                   </div>
                 </div>
-                
-                <motion.h2 
+
+                <motion.h2
                   key={`loading-title-${loadingStage}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -556,8 +565,8 @@ const ClipsPreviewerDemo = () => {
                 >
                   {stageMessages[loadingStage].title}
                 </motion.h2>
-                
-                <motion.p 
+
+                <motion.p
                   key={`loading-subtitle-${loadingStage}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -568,17 +577,17 @@ const ClipsPreviewerDemo = () => {
                   {stageMessages[loadingStage].subtitle}
                 </motion.p>
               </div>
-              
+
               {/* Progress bar */}
               <div className="h-2 bg-[#2d2d2d] rounded-full overflow-hidden mb-8">
-                <motion.div 
+                <motion.div
                   className="h-full bg-gradient-to-r from-[#6c5ce7] to-[#a281ff]"
                   initial={{ width: '0%' }}
                   animate={{ width: `${loadingProgress}%` }}
                   transition={{ duration: 0.4 }}
                 />
               </div>
-              
+
               {/* Steps */}
               <div className="grid grid-cols-5 gap-2 mb-8">
                 {stageMessages.map((stage, index) => (
@@ -601,7 +610,7 @@ const ClipsPreviewerDemo = () => {
                   </div>
                 ))}
               </div>
-              
+
               {/* Rotating insights */}
               <div className="bg-[#232323] rounded-xl p-4 mb-6">
                 <div className="flex items-start space-x-3">
@@ -611,7 +620,7 @@ const ClipsPreviewerDemo = () => {
                   <div>
                     <h4 className="text-sm font-medium text-white mb-1">ClipSmart AI Insight</h4>
                     <AnimatePresence mode="wait">
-                      <motion.p 
+                      <motion.p
                         key={`tip-${loadingStage}`}
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -628,10 +637,10 @@ const ClipsPreviewerDemo = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Random interesting facts/encouragement - changes every few seconds */}
               <AnimatePresence mode="wait">
-                <motion.div 
+                <motion.div
                   key={`fact-${Math.floor(loadingProgress / 20)}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -654,7 +663,7 @@ const ClipsPreviewerDemo = () => {
       ) : (
         <div className="flex-1 flex h-[calc(100vh-49px)] overflow-hidden">
           {/* Left Panel - Clip Selection */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
@@ -672,7 +681,7 @@ const ClipsPreviewerDemo = () => {
                 </span>
               </div>
             </div> */}
-            
+
             {/* Search Bar */}
             <div className="px-4 py-2 border-b border-[#2d2d2d] bg-gray-900">
               <div className="relative">
@@ -684,38 +693,36 @@ const ClipsPreviewerDemo = () => {
                   className="w-full bg-[#252525] text-sm px-10 py-2 rounded text-gray-300 
                              placeholder-gray-500 outline-none focus:ring-1 focus:ring-[#6c5ce7]"
                 />
-                <FontAwesomeIcon 
-                  icon={faSearch} 
+                <FontAwesomeIcon
+                  icon={faSearch}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                 />
               </div>
             </div>
-            
+
             {/* Sort and Filter Controls */}
             <div className="flex justify-between items-center px-4 py-2 border-b border-[#2d2d2d] bg-gray-900">
               <div className="flex items-center space-x-3">
-                <button 
-                  className={`flex items-center text-xs px-3 py-1 rounded-full ${
-                    sortOrder === 'time' ? 'bg-[#6c5ce7]/20 text-[#6c5ce7]' : 'bg-[#252525] text-gray-400'
-                  }`}
+                <button
+                  className={`flex items-center text-xs px-3 py-1 rounded-full ${sortOrder === 'time' ? 'bg-[#6c5ce7]/20 text-[#6c5ce7]' : 'bg-[#252525] text-gray-400'
+                    }`}
                   onClick={toggleSort}
                 >
                   <FontAwesomeIcon icon={faClock} className="mr-1.5" />
                   <span>Time</span>
                 </button>
-                
-                <button 
-                  className={`flex items-center text-xs px-3 py-1 rounded-full ${
-                    sortOrder === 'length' ? 'bg-[#6c5ce7]/20 text-[#6c5ce7]' : 'bg-[#252525] text-gray-400'
-                  }`}
+
+                <button
+                  className={`flex items-center text-xs px-3 py-1 rounded-full ${sortOrder === 'length' ? 'bg-[#6c5ce7]/20 text-[#6c5ce7]' : 'bg-[#252525] text-gray-400'
+                    }`}
                   onClick={toggleSort}
                 >
                   <FontAwesomeIcon icon={faRuler} className="mr-1.5" />
                   <span>Length</span>
                 </button>
               </div>
-              
-              <button 
+
+              <button
                 className="text-xs text-gray-400 hover:text-white transition-colors"
                 onClick={handleUnselectAll}
               >
@@ -740,15 +747,15 @@ const ClipsPreviewerDemo = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Selection Counter and Clear Button */}
             <div className="p-3 border-t border-[#2d2d2d] bg-gray-900 flex justify-between items-center">
               <div className="text-sm text-gray-400">
                 {selectedClips.length} selected
               </div>
-              
+
               {selectedClips.length > 0 && (
-                <button 
+                <button
                   className="flex items-center text-xs px-3 py-1.5 rounded-md bg-[#252525] text-gray-300 hover:bg-[#303030] transition-colors"
                   onClick={handleClearSelection}
                 >
@@ -760,7 +767,7 @@ const ClipsPreviewerDemo = () => {
           </motion.div>
 
           {/* Middle Panel - Trimming Tool */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.2 }}
@@ -776,18 +783,18 @@ const ClipsPreviewerDemo = () => {
                   Edit Clip {currentClip ? currentClip.id.replace('clip_', '#') : ''}
                 </h2>
               </div>
-              
+
               {/* Navigation Buttons */}
               {currentClip && processedClips.length > 1 && (
                 <div className="flex gap-3">
-                  <button 
+                  <button
                     className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-xs font-medium transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:pointer-events-none"
                     onClick={handlePreviousClip}
                   >
                     <FontAwesomeIcon icon={faBackwardStep} className="text-xs" />
                     <span>Previous</span>
                   </button>
-                  <button 
+                  <button
                     className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-xs font-medium transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:pointer-events-none"
                     onClick={handleNextClip}
                   >
@@ -797,12 +804,12 @@ const ClipsPreviewerDemo = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Trimming Tool Content */}
             <div className="flex-1 overflow-hidden">
               <AnimatePresence mode="wait">
                 {currentClip ? (
-                  <motion.div 
+                  <motion.div
                     key="trimming-tool"
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -824,7 +831,7 @@ const ClipsPreviewerDemo = () => {
                     </div>
                   </motion.div>
                 ) : (
-                  <motion.div 
+                  <motion.div
                     key="empty-state"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -873,17 +880,17 @@ const ClipsPreviewerDemo = () => {
                   <h2 className="text-sm font-medium text-white">Video Details</h2>
                 </div>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto custom-purple-scrollbar p-4">
-                <VideoDetails 
+                <VideoDetails
                   currentClip={currentClip}
                   showTranscript={true}
                 />
               </div>
-              
+
               {/* Save & Continue Button in Right Panel */}
               <div className="p-4 border-t border-[#2d2d2d] bg-[#1f1f1f]">
-                <button 
+                <button
                   className="w-full py-3 bg-[#6c5ce7] hover:bg-[#5849e0] text-white rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
                   onClick={handleFinishAndSave}
                   disabled={processedClips.length === 0 || selectedClips.length === 0}
@@ -897,7 +904,7 @@ const ClipsPreviewerDemo = () => {
           )}
         </div>
       )}
-      
+
       {/* Custom scrollbar styles */}
       <style>
         {`
