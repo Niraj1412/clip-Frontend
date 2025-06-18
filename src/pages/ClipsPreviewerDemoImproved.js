@@ -49,7 +49,7 @@ const ClipsPreviewerDemo = () => {
   const [processedClips, setProcessedClips] = useState([]);
   const [sortOrder, setSortOrder] = useState('time'); // 'time' or 'length'
   const [searchQuery, setSearchQuery] = useState('');
-
+  const API_BASE_URL = 'https://ai-clip-backend1-1.onrender.com/api/v1';
   const initialSelectionRef = useRef(false);
 
 
@@ -167,12 +167,26 @@ const ClipsPreviewerDemo = () => {
             }
 
             // Process each clip with exact timestamp precision
-            const processed = clipsArray.map((clip, index) => {
+            const processed = await Promise.all(clipsArray.map(async (clip, index) => {
+              // For uploaded videos (non-YouTube), fetch details to get thumbnailUrl
+              let thumbnailUrl = clip.thumbnailUrl;
+
+              if (!clip.isYouTube && clip.videoId) {
+                try {
+                  const response = await axios.get(`${API_BASE_URL}/video/${clip.videoId}/details`, { headers });
+                  const details = response.data.data || response.data;
+                  thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
+                } catch (error) {
+                  console.error('Error fetching video details:', error);
+                  thumbnailUrl = `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`; // Fallback
+                }
+              }
+
               return {
                 id: `clip_${index + 1}`,
-                videoId: clip.videoId, // Could be YouTube ID or internal ID
-                isYouTube: clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11), // Adjust based on your data
-                videoUrl: clip.videoUrl || '', // URL to actual video file for uploaded videos
+                videoId: clip.videoId,
+                isYouTube: clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11),
+                videoUrl: clip.videoUrl || '',
                 title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
                 originalVideoDuration: clip.originalVideoDuration || 60,
                 duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
@@ -181,9 +195,9 @@ const ClipsPreviewerDemo = () => {
                 transcriptText: (clip.transcriptText || '').replace(/&#39;/g, "'"),
                 thumbnail: clip.isYouTube
                   ? `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`
-                  : `https://ai-clip-backend1-1.onrender.com/thumbnails/${clip.videoId}.jpg`,
+                  : thumbnailUrl,
               };
-            });
+            }));
 
             setProcessedClips(processed);
             showFeedback('Clips generated successfully!', 'success');
