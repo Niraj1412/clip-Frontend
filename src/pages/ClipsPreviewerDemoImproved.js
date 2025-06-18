@@ -171,7 +171,7 @@ const ClipsPreviewerDemo = () => {
             const processed = await Promise.all(clipsArray.map(async (clip, index) => {
               const token = localStorage.getItem('token');
               const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
+              
               let thumbnailUrl = clip.thumbnailUrl;
 
               if (!clip.isYouTube && clip.videoId) {
@@ -179,9 +179,11 @@ const ClipsPreviewerDemo = () => {
                   const response = await axios.get(`${API_BASE_URL}/video/${clip.videoId}/details`, { headers });
                   const details = response.data.data || response.data;
                   thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
+                  uploadedvideoUrl = details.videoUrl;
                 } catch (error) {
                   console.error('Error fetching video details:', error);
                   thumbnailUrl = `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`; // Fallback
+                  
                 }
               }
 
@@ -189,7 +191,7 @@ const ClipsPreviewerDemo = () => {
                 id: `clip_${index + 1}`,
                 videoId: clip.videoId,
                 isYouTube: clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11),
-                videoUrl: clip.videoUrl || details.videoUrl,
+                videoUrl: clip.videoUrl || uploadedvideoUrl,
                 title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
                 originalVideoDuration: clip.originalVideoDuration || 60,
                 duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
