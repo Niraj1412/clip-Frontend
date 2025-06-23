@@ -26,6 +26,8 @@ import VideoPreviewPage from './pages/VideoPreviewPage';
 import ProfilePage from './pages/ProfilePage';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
 import OutputPage from './pages/OutputPage';
+import GitHubCallback from './components/GitHubCallback';
+import TwitterCallback from './components/TwitterCallback';
 
 // Import new pages
 import MyProjectsPage from './pages/MyProjectsPage';
@@ -55,10 +57,12 @@ function App() {
                       <Route path="/" element={<LandingPage />} />
                       <Route path="/signin" element={<SignInPage />} />
                       <Route path="/signup" element={<SignUpPage />} />
+                      <Route path="/auth/github/callback" element={<GitHubCallback />} />
+                      <Route path="/auth/twitter/callback" element={<TwitterCallback />} />
                       <Route path="/about" element={<AboutPage />} />
                       <Route path="/contact" element={<ContactPage />} />
                       <Route path="/privacy" element={<PrivacyPage />} />
-                      
+
                       {/* Protected routes */}
                       <Route path="/dashboard" element={
                         <ProtectedRoute>
@@ -75,7 +79,7 @@ function App() {
                           <ClipsPreviewerDemoImproved />
                         </ProtectedRoute>
                       } />
-              
+
                       <Route path="/input" element={
                         <ProtectedRoute>
                           <InputPage />
@@ -91,19 +95,19 @@ function App() {
                           <MergeClipsPage />
                         </ProtectedRoute>
                       } /> */}
-                      
+
                       <Route path="/merge" element={
                         <ProtectedRoute>
                           <OutputPage />
                         </ProtectedRoute>
                       } />
-                      
+
                       <Route path="/my-projects" element={
                         <ProtectedRoute>
                           <MyProjectsPage />
                         </ProtectedRoute>
                       } />
-                      
+
                       <Route path="/profile" element={
                         <ProtectedRoute>
                           <ProfilePage />
@@ -119,24 +123,24 @@ function App() {
                           <FeedbackPage />
                         </ProtectedRoute>
                       } />
-                      
+
                       {/* Test route for transcript debugging */}
                       <Route path="/test-transcript" element={<TestTranscriptPage />} />
-                      
+
                       {/* Project details route */}
                       <Route path="/project/:id" element={
                         <ProtectedRoute>
                           <ProjectDetailsPage />
                         </ProtectedRoute>
                       } />
-                      
+
                       {/* Video preview route */}
                       <Route path="/video/:videoId" element={
                         <ProtectedRoute>
                           <VideoPreviewPage />
                         </ProtectedRoute>
                       } />
-                      
+
                       {/* Catch-all route for any undefined routes */}
                       <Route path="*" element={<NotFoundPage />} />
                     </Routes>

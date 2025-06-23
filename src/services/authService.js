@@ -324,9 +324,9 @@ const authService = {
   },
 
   // Social media authentication methods
-  loginWithGoogle: async (googleToken) => {
+  loginWithGoogle: async ({ token }) => {
     try {
-      const response = await api.post('/signin/google', { token: googleToken });
+      const response = await api.post('/signin/google', { token });
       
       if (response.data.status && response.data.token) {
         localStorage.setItem('token', response.data.token);
@@ -350,7 +350,7 @@ const authService = {
     }
   },
 
-  loginWithGithub: async (code) => {
+  loginWithGithub: async ({ code }) => {
     try {
       const response = await api.post('/signin/github', { code });
       
@@ -370,11 +370,11 @@ const authService = {
     }
   },
 
-  loginWithTwitter: async (oauthToken, oauthVerifier) => {
+  loginWithTwitter: async ({ oauth_token, oauth_verifier }) => {
     try {
       const response = await api.post('/signin/twitter', { 
-        oauth_token: oauthToken, 
-        oauth_verifier: oauthVerifier 
+        oauth_token, 
+        oauth_verifier 
       });
       
       if (response.data.status && response.data.token) {
@@ -394,4 +394,4 @@ const authService = {
   }
 };
 
-export default authService; 
+export default authService;

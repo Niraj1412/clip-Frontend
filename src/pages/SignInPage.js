@@ -18,7 +18,6 @@ import {
   faCheck
 } from '@fortawesome/free-solid-svg-icons';
 import {
-  faGoogle,
   faGithub,
   faTwitter
 } from '@fortawesome/free-brands-svg-icons';
@@ -51,6 +50,25 @@ const SignInPage = () => {
 
     // Check server status
     checkServerStatus();
+
+    // Initialize GIS
+    if (window.google && window.google.accounts) {
+      window.google.accounts.id.initialize({
+        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse,
+      });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById('google-signin-button'),
+        {
+          theme: 'outline',
+          size: 'large',
+        }
+      );
+    } else {
+      console.error('Google API not loaded');
+      setError('Google API failed to load. Please try again later.');
+    }
   }, [navigate]);
 
   const checkServerStatus = async () => {
@@ -80,7 +98,6 @@ const SignInPage = () => {
     let valid = true;
     const errors = { email: '', password: '' };
     
-    // Validate email
     if (!email) {
       errors.email = 'Email is required';
       valid = false;
@@ -89,7 +106,6 @@ const SignInPage = () => {
       valid = false;
     }
     
-    // Validate password
     if (!password) {
       errors.password = 'Password is required';
       valid = false;
@@ -102,7 +118,6 @@ const SignInPage = () => {
   const handleSignIn = async (e) => {
     e.preventDefault();
     
-    // Validate form first
     if (!validateForm()) {
       return;
     }
@@ -111,26 +126,22 @@ const SignInPage = () => {
     setIsLoading(true);
     
     try {
-      // Call the login method from our auth service
       await authService.login(email, password);
       setIsLoading(false);
       
-      // Check if there's a redirect parameter in the URL
       const params = new URLSearchParams(window.location.search);
       const redirectPath = params.get('redirect') || localStorage.getItem('redirectAfterLogin');
       
       if (redirectPath) {
-        localStorage.removeItem('redirectAfterLogin'); // Clear it after use
+        localStorage.removeItem('redirectAfterLogin');
         navigate(redirectPath);
       } else {
-        // Default redirect to dashboard
         navigate('/dashboard');
       }
     } catch (err) {
       setIsLoading(false);
       setError(err.message || 'Login failed. Please check your credentials.');
       
-      // If it's a network error, show the demo mode modal
       if (err.message.includes('Server not found') || err.message.includes('Network Error')) {
         setShowDemoModal(true);
       }
@@ -143,36 +154,17 @@ const SignInPage = () => {
     navigate('/dashboard');
   };
 
-  const initGoogleAPI = () => {
-    return new Promise((resolve, reject) => {
-      if (window.gapi) {
-        window.gapi.load('auth2', () => {
-          window.gapi.auth2.init({
-            client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-          }).then(resolve).catch(reject);
-        });
-      } else {
-        reject(new Error('Google API not loaded'));
-      }
-    });
+  const handleCredentialResponse = (response) => {
+    const idToken = response.credential;
+    authService.loginWithGoogle({ token: idToken })
+      .then(() => {
+        navigate('/dashboard');
+      })
+      .catch((err) => {
+        console.error('Google login failed:', err);
+        setError('Google login failed. Please try again.');
+      });
   };
-
-  useEffect(() => {
-    // Existing useEffect logic
-    if (authService.isAuthenticated()) {
-      navigate('/dashboard');
-      return;
-    }
-
-    // Check server status
-    checkServerStatus();
-
-    // Initialize Google API
-    initGoogleAPI().catch(error => {
-      console.error('Failed to initialize Google API:', error);
-      setError('Google API failed to initialize. Please try again later.');
-    });
-  }, [navigate]);
 
   const handleSocialLogin = async (provider) => {
     setError('');
@@ -180,46 +172,28 @@ const SignInPage = () => {
 
     try {
       switch (provider) {
-        case 'Google':
-          if (!window.gapi || !window.gapi.auth2) {
-            throw new Error('Google API not loaded. Please try again later.');
-          }
-          const googleAuth = window.gapi.auth2.getAuthInstance();
-          const googleUser = await googleAuth.signIn();
-          const googleToken = googleUser.getAuthResponse().id_token;
-          await authService.loginWithGoogle(googleToken);
-          navigate('/dashboard');
-          break;
-
         case 'GitHub':
-          // Redirect to GitHub OAuth flow
           const githubClientId = process.env.REACT_APP_GITHUB_CLIENT_ID;
           if (!githubClientId) {
             throw new Error('GitHub authentication is not configured.');
           }
-          
           const githubRedirectUri = `${window.location.origin}/auth/github/callback`;
           const githubScope = 'user:email';
           window.location.href = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&redirect_uri=${githubRedirectUri}&scope=${githubScope}`;
-          return; // Don't continue since we're redirecting
+          return;
 
         case 'Twitter':
-          // Redirect to Twitter OAuth flow
           const twitterClientId = process.env.REACT_APP_TWITTER_CLIENT_ID;
           if (!twitterClientId) {
             throw new Error('Twitter authentication is not configured.');
           }
-          
           const twitterRedirectUri = `${window.location.origin}/auth/twitter/callback`;
           window.location.href = `https://api.twitter.com/oauth/authenticate?oauth_token=${twitterClientId}&redirect_uri=${twitterRedirectUri}`;
-          return; // Don't continue since we're redirecting
+          return;
 
         default:
           throw new Error(`Unsupported provider: ${provider}`);
       }
-
-      // If we get here, login was successful
-      navigate('/dashboard');
     } catch (err) {
       console.error(`${provider} login error:`, err);
       setError(err.message || `${provider} login failed. Please try again.`);
@@ -227,10 +201,8 @@ const SignInPage = () => {
     }
   };
 
-  // Navigation handler for forgot password
   const handleForgotPassword = () => navigate('/forgot-password');
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
@@ -253,7 +225,6 @@ const SignInPage = () => {
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-[#0f0f1a] overflow-hidden">
-      {/* Server status indicator */}
       <div className="fixed top-6 right-6 z-50">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -279,11 +250,8 @@ const SignInPage = () => {
         </motion.div>
       </div>
 
-      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#0f0f1a] via-[#1a1a2e] to-[#0f0f1a]" />
-        
-        {/* Animated gradient orbs */}
         {[...Array(3)].map((_, i) => (
           <motion.div
             key={i}
@@ -309,15 +277,12 @@ const SignInPage = () => {
             }}
           />
         ))}
-        
-        {/* Grid background */}
         <div className="absolute inset-0" style={{
           backgroundImage: 'linear-gradient(rgba(108, 92, 231, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(108, 92, 231, 0.05) 1px, transparent 1px)',
           backgroundSize: '50px 50px'
         }} />
       </div>
 
-      {/* Back to home link */}
       <motion.div 
         className="fixed top-6 left-6 z-50"
         initial={{ opacity: 0, x: -20 }}
@@ -333,23 +298,18 @@ const SignInPage = () => {
         </Link>
       </motion.div>
 
-      {/* Main content */}
       <motion.div 
         className="relative w-full max-w-md mx-4 z-10"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        {/* Form card with improved visual design */}
         <motion.div 
           className="bg-[#1a1a2e]/70 backdrop-blur-lg rounded-2xl shadow-xl border border-[#ffffff0f] overflow-hidden"
           variants={itemVariants}
         >
-          {/* Card header */}
           <div className="relative px-8 pt-10 pb-6 text-center">
-            {/* Visual accent */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe]"></div>
-            
             <motion.div
               className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-[#6c5ce7]/10 border border-[#6c5ce7]/20"
               initial={{ scale: 0.8, opacity: 0 }}
@@ -358,14 +318,12 @@ const SignInPage = () => {
             >
               <FontAwesomeIcon icon={faRightToBracket} className="text-[#a29bfe] text-2xl" />
             </motion.div>
-            
             <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
             <p className="text-gray-400 text-sm max-w-xs mx-auto">
               Sign in to your account to continue your video creation journey
             </p>
           </div>
           
-          {/* Success message */}
           <AnimatePresence>
             {success && (
               <motion.div 
@@ -380,7 +338,6 @@ const SignInPage = () => {
             )}
           </AnimatePresence>
           
-          {/* Error message */}
           <AnimatePresence>
             {error && (
               <motion.div 
@@ -395,9 +352,7 @@ const SignInPage = () => {
             )}
           </AnimatePresence>
 
-          {/* Form */}
           <form onSubmit={handleSignIn} className="px-8 pb-8">
-            {/* Email field with better spacing */}
             <div className="mb-5">
               <label 
                 htmlFor="email" 
@@ -426,7 +381,6 @@ const SignInPage = () => {
               )}
             </div>
             
-            {/* Password field with better spacing */}
             <div className="mb-5">
               <label 
                 htmlFor="password" 
@@ -455,7 +409,6 @@ const SignInPage = () => {
               )}
             </div>
             
-            {/* Remember me and forgot password row */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
                 <input
@@ -483,7 +436,6 @@ const SignInPage = () => {
               </div>
             </div>
             
-            {/* Sign in button */}
             <motion.button
               type="submit"
               className="w-full bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed relative overflow-hidden group"
@@ -491,7 +443,6 @@ const SignInPage = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              {/* Shine effect */}
               <motion.div 
                 className="absolute inset-0 bg-white/20"
                 initial={{ x: '-100%' }}
@@ -499,49 +450,45 @@ const SignInPage = () => {
                 transition={{ repeat: Infinity, duration: 2, ease: 'linear', repeatDelay: 1 }}
                 style={{ width: '50%' }}
               />
-              
               {isLoading ? (
                 <>
                   <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />
                   <span>Signing In...</span>
                 </>
               ) : (
-                <>
-                  <span className="relative z-10">Sign In</span>
-                </>
+                <span className="relative z-10">Sign In</span>
               )}
             </motion.button>
             
-            {/* Social logins */}
             <div className="mt-8 text-center">
               <p className="text-gray-400 text-sm mb-4">Or sign in with</p>
               <div className="flex justify-center space-x-4">
-                {['Google', 'GitHub', 'Twitter'].map((provider) => (
-                  <motion.button
-                    key={provider}
-                    type="button"
-                    onClick={() => handleSocialLogin(provider)}
-                    className="bg-[#ffffff0a] hover:bg-[#ffffff15] border border-[#ffffff1a] p-3 rounded-lg text-white transition-colors"
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    disabled={isLoading}
-                  >
-                    <FontAwesomeIcon 
-                      icon={
-                        provider === 'Google' ? faGoogle :
-                        provider === 'GitHub' ? faGithub :
-                        faTwitter
-                      } 
-                      className="text-lg" 
-                    />
-                  </motion.button>
-                ))}
+                <div id="google-signin-button" className="flex items-center justify-center"></div>
+                <motion.button
+                  type="button"
+                  onClick={() => handleSocialLogin('GitHub')}
+                  className="bg-[#ffffff0a] hover:bg-[#ffffff15] border border-[#ffffff1a] p-3 rounded-lg text-white transition-colors"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={isLoading}
+                >
+                  <FontAwesomeIcon icon={faGithub} className="text-lg" />
+                </motion.button>
+                <motion.button
+                  type="button"
+                  onClick={() => handleSocialLogin('Twitter')}
+                  className="bg-[#ffffff0a] hover:bg-[#ffffff15] border border-[#ffffff1a] p-3 rounded-lg text-white transition-colors"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={isLoading}
+                >
+                  <FontAwesomeIcon icon={faTwitter} className="text-lg" />
+                </motion.button>
               </div>
             </div>
           </form>
         </motion.div>
         
-        {/* Sign up link */}
         <motion.div 
           className="mt-6 text-center"
           variants={itemVariants}
@@ -558,7 +505,6 @@ const SignInPage = () => {
         </motion.div>
       </motion.div>
       
-      {/* Demo Mode Modal */}
       <AnimatePresence>
         {showDemoModal && (
           <motion.div
@@ -577,12 +523,10 @@ const SignInPage = () => {
                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-6 rounded-full bg-[#6c5ce7]/20">
                   <FontAwesomeIcon icon={faDatabase} className="text-[#a29bfe] text-2xl" />
                 </div>
-                
                 <h3 className="text-xl font-bold text-white text-center mb-2">Server Connection Issue</h3>
                 <p className="text-gray-300 text-center mb-6">
                   We couldn't connect to our servers. Would you like to use Demo Mode to explore the app without an account?
                 </p>
-                
                 <div className="flex flex-col sm:flex-row gap-3">
                   <motion.button
                     className="flex-1 py-3 px-4 bg-[#ffffff0a] hover:bg-[#ffffff15] rounded-lg text-white border border-[#ffffff1a] transition-colors"
@@ -592,7 +536,6 @@ const SignInPage = () => {
                   >
                     Cancel
                   </motion.button>
-                  
                   <motion.button
                     className="flex-1 py-3 px-4 bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] rounded-lg text-white font-medium transition-all"
                     onClick={handleDemoMode}
@@ -611,4 +554,4 @@ const SignInPage = () => {
   );
 };
 
-export default SignInPage; 
+export default SignInPage;
