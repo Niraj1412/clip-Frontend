@@ -143,6 +143,37 @@ const SignInPage = () => {
     navigate('/dashboard');
   };
 
+  const initGoogleAPI = () => {
+    return new Promise((resolve, reject) => {
+      if (window.gapi) {
+        window.gapi.load('auth2', () => {
+          window.gapi.auth2.init({
+            client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+          }).then(resolve).catch(reject);
+        });
+      } else {
+        reject(new Error('Google API not loaded'));
+      }
+    });
+  };
+
+  useEffect(() => {
+    // Existing useEffect logic
+    if (authService.isAuthenticated()) {
+      navigate('/dashboard');
+      return;
+    }
+
+    // Check server status
+    checkServerStatus();
+
+    // Initialize Google API
+    initGoogleAPI().catch(error => {
+      console.error('Failed to initialize Google API:', error);
+      setError('Google API failed to initialize. Please try again later.');
+    });
+  }, [navigate]);
+
   const handleSocialLogin = async (provider) => {
     setError('');
     setIsLoading(true);
@@ -153,12 +184,11 @@ const SignInPage = () => {
           if (!window.gapi || !window.gapi.auth2) {
             throw new Error('Google API not loaded. Please try again later.');
           }
-          
-          // Initialize Google Sign-In
           const googleAuth = window.gapi.auth2.getAuthInstance();
           const googleUser = await googleAuth.signIn();
           const googleToken = googleUser.getAuthResponse().id_token;
           await authService.loginWithGoogle(googleToken);
+          navigate('/dashboard');
           break;
 
         case 'GitHub':
