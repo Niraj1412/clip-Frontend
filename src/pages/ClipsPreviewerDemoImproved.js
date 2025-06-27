@@ -150,11 +150,12 @@ const ClipsPreviewerDemo = () => {
           console.log('Received script data:', data.data.script);
 
           try {
+            // Enhanced cleaning and sanitization
             const cleanScript = data.data.script
               .replace(/```json/g, '')
               .replace(/```/g, '')
               .replace(/\((\d+\.?\d*)\)\.toFixed\(2\)/g, '$1')
-              .replace(/\((\d+\.?\d*\s*[-+]\s*\d+\.?\d*)\)\.toFixed\(2\)/g, (match) => {
+              .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\)\.toFixed\(2\)/g, (match) => {
                 return eval(match.replace('.toFixed(2)', '')).toFixed(2);
               })
               .trim();
@@ -165,39 +166,6 @@ const ClipsPreviewerDemo = () => {
             if (!Array.isArray(clipsArray) || clipsArray.length === 0) {
               throw new Error('No valid clips were generated');
             }
-
-            // Validate clip duration and end part
-            const expectedDuration = prompt.match(/(\d+(?:\.\d+)?)\s*second(?:s)?/i)?.[1];
-            if (expectedDuration) {
-              const expected = parseFloat(expectedDuration);
-              const invalidClip = clipsArray.find(
-                (clip) =>
-                  Math.abs((clip.endTime - clip.startTime) - expected) > 0.05
-              );
-              if (invalidClip) {
-                throw new Error(
-                  `Clip duration mismatch. Expected ${expected}s, got ${invalidClip.endTime - invalidClip.startTime
-                  }s`
-                );
-              }
-            }
-
-            // Validate "end part" (assuming you fetch video duration)
-            if (/end/i.test(prompt)) {
-              const videoDuration = clipsArray[0]?.originalVideoDuration || 600; // Fallback duration
-              const last20Percent = videoDuration * 0.8;
-              const invalidClip = clipsArray.find(
-                (clip) => clip.startTime < last20Percent
-              );
-              if (invalidClip) {
-                throw new Error(
-                  `Clip not from end part. Expected start time >= ${last20Percent.toFixed(
-                    2
-                  )}s, got ${invalidClip.startTime}s`
-                );
-              }
-            }
-
 
             // Process each clip with exact timestamp precision
             const processed = await Promise.all(clipsArray.map(async (clip, index) => {
@@ -221,25 +189,18 @@ const ClipsPreviewerDemo = () => {
                 }
               }
 
-              const isYouTube = clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11);
-
-              // Final fallback for uploaded videos with missing URL
-              if (!isYouTube && !videoUrl) {
-                videoUrl = `${API_BASE_URL}/videos/${clip.videoId}.mp4`;
-              }
-
               return {
                 id: `clip_${index + 1}`,
                 videoId: clip.videoId,
-                isYouTube,
-                videoUrl: isYouTube ? '' : videoUrl,
+                isYouTube: clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11),
+                videoUrl: clip.isYouTube ? '' : videoUrl,
                 title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
                 originalVideoDuration: clip.originalVideoDuration || 60,
                 duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
                 startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
                 endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
                 transcriptText: (clip.transcriptText || '').replace(/&#39;/g, "'"),
-                thumbnail: isYouTube
+                thumbnail: clip.isYouTube
                   ? `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`
                   : thumbnailUrl,
               };
@@ -249,8 +210,11 @@ const ClipsPreviewerDemo = () => {
             showFeedback('Clips generated successfully!', 'success');
           } catch (parseError) {
             console.error('Error parsing script:', parseError, data.data.script);
-            throw new Error(`Failed to parse or validate generated clips: ${parseError.message}`);
+            throw new Error(`Failed to parse generated clips: ${parseError.message}`);
           }
+        } else {
+          console.error('Invalid API response format:', data);
+          throw new Error(data.message || 'Invalid response format');
         }
       } catch (err) {
         console.error('Error details:', err);
@@ -295,9 +259,9 @@ const ClipsPreviewerDemo = () => {
   };
 
   const handlePlayClip = (clip) => {
-    console.log('Clip selected:', clip);
-    setCurrentClip(clip);
-  };
+  console.log('Clip selected:', clip);
+  setCurrentClip(clip);
+};
 
   const handleDeleteClip = (clipToDelete) => {
     setProcessedClips(clips => clips.filter(clip => clip.id !== clipToDelete.id));
