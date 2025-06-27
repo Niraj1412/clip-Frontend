@@ -128,6 +128,9 @@ const ClipsPreviewerDemo = () => {
 
         console.log('Sending transcript data to API:', selectedClipsData);
 
+        // Extract video duration from selectedClipsData
+        const videoDuration = selectedClipsData[0]?.duration || 600; // Fallback to 600 if not available
+
         const response = await fetch(`${YOUTUBE_API}/generateClips`, {
           method: 'POST',
           headers: {
@@ -135,7 +138,8 @@ const ClipsPreviewerDemo = () => {
           },
           body: JSON.stringify({
             transcripts: selectedClipsData,
-            customPrompt: prompt || "Generate 3 clips from the transcript with highly accurate and precise transcription and EXACT timestamps. The timestamps must precisely match the actual video timing with frame-level accuracy. Maintain exact wording from the source material. Prioritize both content accuracy and timestamp precision for perfect synchronization with the video."
+            customPrompt: prompt || "Generate 3 clips from the transcript with highly accurate and precise transcription and EXACT timestamps. The timestamps must precisely match the actual video timing with frame-level accuracy. Maintain exact wording from the source material. Prioritize both content accuracy and timestamp precision for perfect synchronization with the video.",
+            videoDuration: videoDuration // Include video duration in the request
           })
         });
 
@@ -259,9 +263,9 @@ const ClipsPreviewerDemo = () => {
   };
 
   const handlePlayClip = (clip) => {
-  console.log('Clip selected:', clip);
-  setCurrentClip(clip);
-};
+    console.log('Clip selected:', clip);
+    setCurrentClip(clip);
+  };
 
   const handleDeleteClip = (clipToDelete) => {
     setProcessedClips(clips => clips.filter(clip => clip.id !== clipToDelete.id));
