@@ -189,18 +189,25 @@ const ClipsPreviewerDemo = () => {
                 }
               }
 
+              const isYouTube = clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11);
+
+              // Final fallback for uploaded videos with missing URL
+              if (!isYouTube && !videoUrl) {
+                videoUrl = `${API_BASE_URL}/videos/${clip.videoId}.mp4`;
+              }
+
               return {
                 id: `clip_${index + 1}`,
                 videoId: clip.videoId,
-                isYouTube: clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11),
-                videoUrl: clip.isYouTube ? '' : videoUrl,
+                isYouTube,
+                videoUrl: isYouTube ? '' : videoUrl,
                 title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
                 originalVideoDuration: clip.originalVideoDuration || 60,
                 duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
                 startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
                 endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
                 transcriptText: (clip.transcriptText || '').replace(/&#39;/g, "'"),
-                thumbnail: clip.isYouTube
+                thumbnail: isYouTube
                   ? `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`
                   : thumbnailUrl,
               };

@@ -598,6 +598,8 @@ const TrimmingTool = ({
                 className="w-full h-full object-contain"
                 playsInline
                 preload="metadata"
+                crossOrigin="anonymous"
+                controls
               />
             )}
             <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)' }}></div>
