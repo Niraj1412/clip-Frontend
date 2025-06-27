@@ -37,7 +37,7 @@ import videoPlayer from '../components/videoPlayer';
 import { useClipsData } from '../context/clipsData';
 import { usePrompt } from '../context/promptContext';
 import { useVideoIds } from '../context/videoIds';
-import { YOUTUBE_API, CLIPS_API } from '../config';
+import { YOUTUBE_API } from '../config';
 import axios from 'axios';
 
 const ClipsPreviewerDemo = () => {
@@ -128,13 +128,13 @@ const ClipsPreviewerDemo = () => {
 
         console.log('Sending transcript data to API:', selectedClipsData);
 
-        const response = await fetch(`${CLIPS_API}/generateClip`, {
+        const response = await fetch(`${YOUTUBE_API}/generateClips`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            gotDetails: selectedClipsData,
+            transcripts: selectedClipsData,
             customPrompt: prompt || "Generate 3 clips from the transcript with highly accurate and precise transcription and EXACT timestamps. The timestamps must precisely match the actual video timing with frame-level accuracy. Maintain exact wording from the source material. Prioritize both content accuracy and timestamp precision for perfect synchronization with the video."
           })
         });
@@ -181,16 +181,7 @@ const ClipsPreviewerDemo = () => {
                   const response = await axios.get(`${API_BASE_URL}/video/${clip.videoId}/details`, { headers });
                   const details = response.data.data || response.data;
                   thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
-                  if (details.videoUrl) {
-                    if (/^https?:\/\//i.test(details.videoUrl)) {
-                      videoUrl = details.videoUrl;
-                    } else {
-                      // Prepend API_BASE_URL for relative paths like /uploads/xyz.mp4
-                      videoUrl = `${API_BASE_URL}${details.videoUrl.startsWith('/') ? '' : '/'}${details.videoUrl}`;
-                    }
-                  } else {
-                    videoUrl = `${API_BASE_URL}/uploads/${clip.videoId}.mp4`; // Fallback absolute path
-                  }
+                  videoUrl = details.videoUrl || `${API_BASE_URL}/videos/${clip.videoId}.mp4`; // Fetch video URL
                 } catch (error) {
                   console.error('Error fetching video details:', error);
                   thumbnailUrl = `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`; // Fallback
