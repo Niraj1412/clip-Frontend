@@ -184,18 +184,17 @@ const ClipsPreviewerDemo = () => {
                   const response = await axios.get(`${API_BASE_URL}/video/${clip.videoId}/details`, { headers });
                   const details = response.data.data || response.data;
                   thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
-                  videoUrl = details.videoUrl || `${API_BASE_URL}/videos/${clip.videoId}.mp4`; // Fetch video URL
+                  videoUrl = details.videoUrl || `${API_BASE_URL}/video/${clip.videoId}/stream`; // Use stream endpoint
                 } catch (error) {
                   console.error('Error fetching video details:', error);
                   thumbnailUrl = `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`; // Fallback
-                  videoUrl = `${API_BASE_URL}/videos/${clip.videoId}.mp4`; // Fallback video URL
+                  videoUrl = `${API_BASE_URL}/video/${clip.videoId}/stream`; // Fallback to stream endpoint
                 }
               }
 
               // Ensure final videoUrl is absolute
               if (videoUrl && !videoUrl.startsWith('http')) {
-                const backendHost = API_BASE_URL.replace(/\/api.*$/, '');
-                videoUrl = `${backendHost}/${videoUrl.replace(/^\/*/, '')}`;
+                videoUrl = `${API_BASE_URL}/${videoUrl.replace(/^\/*/, '')}`;
               }
 
               return {
