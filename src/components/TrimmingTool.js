@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -21,6 +22,8 @@ import {
   faRedo,
   faLock,
   faLockOpen,
+  faExclamationTriangle,
+  faRefresh,
 } from '@fortawesome/free-solid-svg-icons';
 
 const primaryColor = '#6366f1';
@@ -47,6 +50,8 @@ const TrimmingTool = ({
   const [ready, setReady] = useState(false);
   const [duration, setDuration] = useState(initialDuration);
   const [error, setError] = useState('');
+  const [videoLoadAttempts, setVideoLoadAttempts] = useState(0);
+  const [videoInfo, setVideoInfo] = useState(null);
 
   const parsedStartTime = typeof initialStartTime === 'string' ? parseFloat(initialStartTime) : initialStartTime;
   const parsedEndTime = typeof initialEndTime === 'string' ? parseFloat(initialEndTime) : initialEndTime;
@@ -78,6 +83,87 @@ const TrimmingTool = ({
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const timelineRef = useRef(null);
+
+  // Enhanced video format checking
+  const checkVideoSupport = () => {
+    if (!videoRef.current) return { mp4: false, webm: false, ogg: false };
+    
+    return {
+      mp4: !!videoRef.current.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"'),
+      webm: !!videoRef.current.canPlayType('video/webm; codecs="vp8, vorbis"'),
+      ogg: !!videoRef.current.canPlayType('video/ogg; codecs="theora, vorbis"'),
+      h264: !!videoRef.current.canPlayType('video/mp4; codecs="avc1.42E01E"'),
+      h265: !!videoRef.current.canPlayType('video/mp4; codecs="hev1.1.6.L93.B0"'),
+    };
+  };
+
+  // Enhanced error handling for video loading
+  const handleVideoError = (errorEvent, customMessage = null) => {
+    const video = errorEvent?.target || videoRef.current;
+    if (!video?.error) {
+      setError(customMessage || 'Unknown video error occurred');
+      return;
+    }
+
+    const errorCode = video.error.code;
+    const errorMessages = {
+      1: 'Video loading was aborted by the user',
+      2: 'A network error occurred while loading the video',
+      3: 'Video decoding failed due to corruption or unsupported format',
+      4: 'Video format is not supported by this browser',
+    };
+
+    let detailedError = errorMessages[errorCode] || 'Unknown video load error';
+    
+    // Add more specific guidance based on error type
+    if (errorCode === 4) {
+      const support = checkVideoSupport();
+      detailedError += '\n\nSupported formats:';
+      if (support.mp4) detailedError += ' MP4';
+      if (support.webm) detailedError += ' WebM';
+      if (support.ogg) detailedError += ' OGG';
+      
+      if (!support.mp4 && !support.webm && !support.ogg) {
+        detailedError += ' None detected. Your browser may not support video playback.';
+      }
+    }
+
+    setError(detailedError);
+    setReady(false);
+    console.error('Video error details:', {
+      code: errorCode,
+      message: video.error.message,
+      support: checkVideoSupport(),
+      videoUrl,
+      attempts: videoLoadAttempts
+    });
+  };
+
+  // Retry mechanism for video loading
+  const retryVideoLoad = () => {
+    if (videoLoadAttempts >= 3) {
+      setError('Failed to load video after multiple attempts. Please check the video file format and try a different video.');
+      return;
+    }
+
+    setVideoLoadAttempts(prev => prev + 1);
+    setError('');
+    setReady(false);
+    
+    if (videoRef.current) {
+      // Force reload
+      const currentSrc = videoRef.current.src;
+      videoRef.current.src = '';
+      videoRef.current.load();
+      
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.src = currentSrc + (currentSrc.includes('?') ? '&' : '?') + 't=' + Date.now();
+          videoRef.current.load();
+        }
+      }, 100);
+    }
+  };
 
   // **YouTube Player Initialization**
   useEffect(() => {
@@ -149,7 +235,7 @@ const TrimmingTool = ({
             showinfo: 0,
             fs: 0,
             playsinline: 1,
-            origin: 'https://clip-frontend-three.vercel.app',
+            origin: window.location.origin,
           },
           events: {
             onReady: onPlayerReady,
@@ -235,7 +321,7 @@ const TrimmingTool = ({
     if (isPlaying) {
       videoRef.current.play().catch((err) => {
         console.error('Error playing HTML5 video:', err);
-        setError('Failed to play video');
+        setError('Failed to play video: ' + err.message);
         setIsPlaying(false);
       });
     } else {
@@ -277,25 +363,60 @@ const TrimmingTool = ({
     return () => clearInterval(interval);
   }, [isYouTube, player, ready, youtubeReady, startTime, endTime, isPlaying]);
 
-  // **HTML5 Video Initialization**
+  // **Enhanced HTML5 Video Initialization**
   useEffect(() => {
     if (isYouTube) return;
 
     if (videoRef.current && videoUrl) {
       console.log('Setting video source:', videoUrl);
-      // Check if the browser supports MP4
-      const canPlay = videoRef.current.canPlayType('video/mp4');
-      console.log('Can play MP4:', canPlay); // "probably", "maybe", or ""
-      if (canPlay === "") {
-        setError('This browser does not support MP4 videos');
+      
+      // Reset attempts when URL changes
+      setVideoLoadAttempts(0);
+      
+      // Enhanced browser support checking
+      const support = checkVideoSupport();
+      console.log('Browser video support:', support);
+      
+      if (!support.mp4 && !support.webm && !support.ogg) {
+        setError('This browser does not support video playback');
         return;
       }
 
-      videoRef.current.src = videoUrl;
-      videoRef.current.load();
+      // Set video attributes for better compatibility
+      const video = videoRef.current;
+      video.crossOrigin = 'anonymous';
+      video.preload = 'metadata';
+      video.playsInline = true;
+      
+      // Try to get video info first
+      const testVideo = document.createElement('video');
+      testVideo.crossOrigin = 'anonymous';
+      testVideo.preload = 'metadata';
+      
+      testVideo.addEventListener('loadedmetadata', () => {
+        setVideoInfo({
+          duration: testVideo.duration,
+          videoWidth: testVideo.videoWidth,
+          videoHeight: testVideo.videoHeight,
+        });
+        console.log('Video metadata loaded:', {
+          duration: testVideo.duration,
+          dimensions: `${testVideo.videoWidth}x${testVideo.videoHeight}`,
+        });
+      });
+
+      video.src = videoUrl;
+      video.load();
 
       const handleLoadedMetadata = () => {
-        const videoDuration = videoRef.current.duration;
+        const videoDuration = video.duration;
+        
+        // Validate duration
+        if (!videoDuration || !isFinite(videoDuration) || videoDuration <= 0) {
+          setError('Invalid video duration. The video file may be corrupted.');
+          return;
+        }
+        
         setDuration(videoDuration);
         setReady(true);
         const validStartTime = Math.max(0, Math.min(parsedStartTime, videoDuration - 0.1));
@@ -303,36 +424,49 @@ const TrimmingTool = ({
         setStartTime(validStartTime);
         setEndTime(validEndTime);
         setCurrentTime(validStartTime);
-        console.log('HTML5 video loaded. Duration:', videoDuration);
+        setError(''); // Clear any previous errors
+        console.log('HTML5 video loaded successfully. Duration:', videoDuration);
+      };
+
+      const handleCanPlay = () => {
+        console.log('Video can start playing');
       };
 
       const handleError = (e) => {
-        const errorCode = e.target.error.code;
-        const errorMessages = {
-          1: 'Video fetching aborted',
-          2: 'Network error occurred',
-          3: 'Video decoding failed',
-          4: 'Video format not supported',
-        };
-        const detailedError = errorMessages[errorCode] || 'Unknown video load error';
-        setError(`Failed to load video: ${detailedError}`);
-        setReady(false);
-        console.error('HTML5 video error:', detailedError, e.target.error);
+        handleVideoError(e);
       };
 
-      videoRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
-      videoRef.current.addEventListener('error', handleError);
+      const handleLoadStart = () => {
+        console.log('Video load started');
+        setError('');
+      };
+
+      const handleProgress = () => {
+        if (video.buffered.length > 0) {
+          const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+          console.log('Video buffered:', bufferedEnd, 'seconds');
+        }
+      };
+
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      video.addEventListener('canplay', handleCanPlay);
+      video.addEventListener('error', handleError);
+      video.addEventListener('loadstart', handleLoadStart);
+      video.addEventListener('progress', handleProgress);
 
       return () => {
-        videoRef.current.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        videoRef.current.removeEventListener('error', handleError);
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        video.removeEventListener('canplay', handleCanPlay);
+        video.removeEventListener('error', handleError);
+        video.removeEventListener('loadstart', handleLoadStart);
+        video.removeEventListener('progress', handleProgress);
       };
     } else {
       setError('No video URL provided for uploaded video');
       setReady(false);
       console.error('Missing videoRef or videoUrl:', { videoRef: !!videoRef.current, videoUrl });
     }
-  }, [isYouTube, videoUrl, parsedStartTime, parsedEndTime]);
+  }, [isYouTube, videoUrl, parsedStartTime, parsedEndTime, videoLoadAttempts]);
 
   // **HTML5 Time Updates**
   useEffect(() => {
@@ -348,9 +482,9 @@ const TrimmingTool = ({
         }
       };
       videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
-      return () => videoRef.current.removeEventListener('timeupdate', handleTimeUpdate);
+      return () => videoRef.current?.removeEventListener('timeupdate', handleTimeUpdate);
     }
-  }, [isYouTube, endTime, isPlaying]);
+  }, [isYouTube, endTime, isPlaying, startTime]);
 
   // **Trim Duration Updates**
   useEffect(() => {
@@ -477,7 +611,7 @@ const TrimmingTool = ({
         }
         videoRef.current.play().catch((err) => {
           console.error('Error playing HTML5 video:', err);
-          setError('Failed to play video');
+          setError('Failed to play video: ' + err.message);
         });
       }
     }
