@@ -117,31 +117,32 @@ const ClipsPreviewerDemo = () => {
 
   useEffect(() => {
     const fetchClips = async () => {
-      try {
-        if (!selectedClipsData || selectedClipsData.length === 0) {
-          throw new Error('No transcript data available');
-        }
+      onst fetchClips = async () => {
+    try {
+      if (!selectedClipsData || selectedClipsData.length === 0) {
+        throw new Error('No transcript data available');
+      }
 
-        setLoading(true);
-        setError(null);
-        showFeedback('Generating clips...', 'info');
+      setLoading(true);
+      setError(null);
+      showFeedback('Generating clips...', 'info');
 
-        console.log('Sending transcript data to API:', selectedClipsData);
+      console.log('Sending transcript data to API:', selectedClipsData);
 
-        // Extract video duration from selectedClipsData
-        const videoDuration = selectedClipsData[0]?.duration || 600; // Fallback to 600 if not available
+      // Extract video duration from selectedClipsData
+      const videoDuration = selectedClipsData[0]?.duration || 600; // Use 151 seconds from your data
 
-        const response = await fetch(`${YOUTUBE_API}/generateClips`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            transcripts: selectedClipsData,
-            customPrompt: prompt || "Generate 3 clips from the transcript with highly accurate and precise transcription and EXACT timestamps. The timestamps must precisely match the actual video timing with frame-level accuracy. Maintain exact wording from the source material. Prioritize both content accuracy and timestamp precision for perfect synchronization with the video.",
-            videoDuration: videoDuration // Include video duration in the request
-          })
-        });
+      const response = await fetch(`${YOUTUBE_API}/generateClips`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          gotDetails: selectedClipsData, // Match backend expectation
+          customPrompt: prompt || "Generate 3 clips from the transcript with highly accurate timestamps.",
+          videoDuration: videoDuration // Send the correct duration
+        })
+      });
 
         const data = await response.json();
 
