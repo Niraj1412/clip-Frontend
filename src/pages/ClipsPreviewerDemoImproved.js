@@ -179,6 +179,11 @@ const ClipsPreviewerDemo = () => {
               let thumbnailUrl = clip.thumbnailUrl;
               let videoUrl = clip.videoUrl;
 
+              // If the API returns a relative path, prepend backend base host (strip trailing /api/v1)
+              if (videoUrl && !videoUrl.startsWith('http')) {
+                const backendHost = API_BASE_URL.replace(/\/api.*$/, '');
+                videoUrl = `${backendHost}/${videoUrl.replace(/^\/*/, '')}`;
+              }
 
               if (!clip.isYouTube && clip.videoId) {
                 try {
