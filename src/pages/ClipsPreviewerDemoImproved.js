@@ -179,12 +179,6 @@ const ClipsPreviewerDemo = () => {
               let thumbnailUrl = clip.thumbnailUrl;
               let videoUrl = clip.videoUrl;
 
-              // If the API returns a relative path, prepend backend base host (strip trailing /api/v1)
-              if (videoUrl && !videoUrl.startsWith('http')) {
-                const backendHost = API_BASE_URL.replace(/\/api.*$/, '');
-                videoUrl = `${backendHost}/${videoUrl.replace(/^\/*/, '')}`;
-              }
-
               if (!clip.isYouTube && clip.videoId) {
                 try {
                   const response = await axios.get(`${API_BASE_URL}/video/${clip.videoId}/details`, { headers });
@@ -196,6 +190,12 @@ const ClipsPreviewerDemo = () => {
                   thumbnailUrl = `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`; // Fallback
                   videoUrl = `${API_BASE_URL}/videos/${clip.videoId}.mp4`; // Fallback video URL
                 }
+              }
+
+              // Ensure final videoUrl is absolute
+              if (videoUrl && !videoUrl.startsWith('http')) {
+                const backendHost = API_BASE_URL.replace(/\/api.*$/, '');
+                videoUrl = `${backendHost}/${videoUrl.replace(/^\/*/, '')}`;
               }
 
               return {
