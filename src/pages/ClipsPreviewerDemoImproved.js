@@ -117,11 +117,10 @@ const ClipsPreviewerDemo = () => {
 
   useEffect(() => {
     const fetchClips = async () => {
-      onst fetchClips = async () => {
-    try {
-      if (!selectedClipsData || selectedClipsData.length === 0) {
-        throw new Error('No transcript data available');
-      }
+      try {
+        if (!selectedClipsData || selectedClipsData.length === 0) {
+          throw new Error('No transcript data available');
+        }
 
       setLoading(true);
       setError(null);
