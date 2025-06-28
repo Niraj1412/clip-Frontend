@@ -40,8 +40,8 @@ const TrimmingTool = ({
   initialStartTime = 0,
   initialEndTime = 60,
   transcriptText = '',
-  onTimingChange = () => {},
-  onSaveTrim = () => {},
+  onTimingChange = () => { },
+  onSaveTrim = () => { },
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [ready, setReady] = useState(false);
@@ -282,6 +282,7 @@ const TrimmingTool = ({
     if (isYouTube) return;
 
     if (videoRef.current && videoUrl) {
+      console.log('Setting video source:', videoUrl);
       videoRef.current.src = videoUrl;
       videoRef.current.load();
 
@@ -289,7 +290,6 @@ const TrimmingTool = ({
         const videoDuration = videoRef.current.duration;
         setDuration(videoDuration);
         setReady(true);
-
         const validStartTime = Math.max(0, Math.min(parsedStartTime, videoDuration - 0.1));
         const validEndTime = Math.max(validStartTime + 0.1, Math.min(parsedEndTime, videoDuration));
         setStartTime(validStartTime);
@@ -298,20 +298,31 @@ const TrimmingTool = ({
         console.log('HTML5 video loaded. Duration:', videoDuration);
       };
 
-      videoRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
-      videoRef.current.addEventListener('error', () => {
-        setError('Failed to load uploaded video');
+      const handleError = (e) => {
+        const errorCode = e.target.error.code;
+        const errorMessages = {
+          1: 'Video fetching aborted',
+          2: 'Network error occurred',
+          3: 'Video decoding failed',
+          4: 'Video format not supported'
+        };
+        const detailedError = errorMessages[errorCode] || 'Unknown video load error';
+        setError(`Failed to load video: ${detailedError}`);
         setReady(false);
-        console.error('HTML5 video load error');
-      });
+        console.error('HTML5 video error:', detailedError, e.target.error);
+      };
+
+      videoRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
+      videoRef.current.addEventListener('error', handleError);
 
       return () => {
         videoRef.current.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        videoRef.current.removeEventListener('error', () => {});
+        videoRef.current.removeEventListener('error', handleError);
       };
     } else {
       setError('No video URL provided for uploaded video');
       setReady(false);
+      console.error('Missing videoRef or videoUrl:', { videoRef: !!videoRef.current, videoUrl });
     }
   }, [isYouTube, videoUrl, parsedStartTime, parsedEndTime]);
 
