@@ -283,6 +283,14 @@ const TrimmingTool = ({
 
     if (videoRef.current && videoUrl) {
       console.log('Setting video source:', videoUrl);
+      // Check if the browser supports MP4
+      const canPlay = videoRef.current.canPlayType('video/mp4');
+      console.log('Can play MP4:', canPlay); // "probably", "maybe", or ""
+      if (canPlay === "") {
+        setError('This browser does not support MP4 videos');
+        return;
+      }
+
       videoRef.current.src = videoUrl;
       videoRef.current.load();
 
@@ -304,7 +312,7 @@ const TrimmingTool = ({
           1: 'Video fetching aborted',
           2: 'Network error occurred',
           3: 'Video decoding failed',
-          4: 'Video format not supported'
+          4: 'Video format not supported',
         };
         const detailedError = errorMessages[errorCode] || 'Unknown video load error';
         setError(`Failed to load video: ${detailedError}`);
