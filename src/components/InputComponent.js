@@ -35,10 +35,10 @@ const InputComponent = () => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 2;
-
+  
 
   // Validate YouTube URL format
-  // Validate YouTube URL format
+   // Validate YouTube URL format
   const validateYouTubeUrl = (url) => {
     const patterns = [
       /youtube\.com\/watch\?v=([^&]+)/,
@@ -119,7 +119,7 @@ const InputComponent = () => {
     let errorMessage = 'Service unavailable. Please try again later.';
 
     if (error.message.includes('No transcript available') ||
-      error.response?.data?.message?.includes('No transcript available')) {
+        error.response?.data?.message?.includes('No transcript available')) {
       errorMessage = 'This video doesn\'t have captions available. Please try a different video with subtitles.';
     } else if (error.response?.status === 404) {
       errorMessage = 'Video processing service is currently unavailable.';
@@ -133,206 +133,198 @@ const InputComponent = () => {
     console.error('Processing error:', error);
   };
 
-  const uploadFile = async (file) => {
-    const formData = new FormData();
-    formData.append('video', file);
+const uploadFile = async (file) => {
+  const formData = new FormData();
+  formData.append('video', file);
 
-    const config = {
-      onUploadProgress: progressEvent => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadProgress(percentCompleted);
-      },
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      timeout: 300000
-    };
-
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/v1/upload`,
-        formData,
-        config
+  const config = {
+    onUploadProgress: progressEvent => {
+      const percentCompleted = Math.round(
+        (progressEvent.loaded * 100) / progressEvent.total
       );
+      setUploadProgress(percentCompleted);
+    },
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    timeout: 300000
+  };
 
-      if (response.data?.videoId) {
-        return response.data.videoId;
+  try {
+    const response = await axios.post(
+      `${API_URL}/api/v1/upload`,
+      formData,
+      config
+    );
+
+    if (response.data?.videoId) {
+      return response.data.videoId;
+    }
+    throw new Error(response.data?.message || 'File upload failed');
+  } catch (error) {
+    if (error.response?.status === 401) {
+      try {
+        const refreshResponse = await axios.post(`${API_URL}/auth/refresh`, {
+          refreshToken: localStorage.getItem('refreshToken')
+        });
+        localStorage.setItem('token', refreshResponse.data.token);
+        return uploadFile(file);
+      } catch (refreshError) {
+        console.error('Refresh token failed:', refreshError);
+        throw new Error('Session expired. Please log in again.');
       }
-      throw new Error(response.data?.message || 'File upload failed');
-    } catch (error) {
-      if (error.response?.status === 401) {
-        try {
-          const refreshResponse = await axios.post(`${API_URL}/auth/refresh`, {
+    }
+    console.error('Upload error:', error);
+    throw new Error(error.response?.data?.error || 'Failed to upload file. Please try again.');
+  }
+};
+
+// Enhanced processing function with better error handling
+const handleGenerate = async () => {
+  if (isLoading) return;
+
+  setIsLoading(true);
+  setUrlError('');
+  setShowSuccessMessage(false);
+
+  try {
+    // Validate input
+    if (!selectedFile && !validateYouTubeUrl(youtubeUrl)) {
+      throw new Error('Please upload a video file or enter a valid YouTube URL');
+    }
+
+    let videoId;
+
+    if (selectedFile) {
+      // Handle file upload (unchanged from your original code)
+      videoId = await uploadFile(selectedFile);
+
+      // Process the uploaded file with retry logic
+      try {
+        const response = await axios.post(
+          `${API_URL}/api/v1/process/${videoId}`,
+          null,
+          {
+            timeout: 300000, // 5 minute timeout for processing
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+
+        if (response.status === 401) {
+          // Handle token refresh
+          const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
             refreshToken: localStorage.getItem('refreshToken')
           });
           localStorage.setItem('token', refreshResponse.data.token);
-          return uploadFile(file);
-        } catch (refreshError) {
-          console.error('Refresh token failed:', refreshError);
-          throw new Error('Session expired. Please log in again.');
-        }
-      }
-      console.error('Upload error:', error);
-      throw new Error(error.response?.data?.error || 'Failed to upload file. Please try again.');
-    }
-  };
-
-  // Enhanced processing function with better error handling
-  const handleGenerate = async () => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    setUrlError('');
-    setShowSuccessMessage(false);
-
-    try {
-      // Validate input
-      if (!selectedFile && !validateYouTubeUrl(youtubeUrl)) {
-        throw new Error('Please upload a video file or enter a valid YouTube URL');
-      }
-
-      let videoId;
-
-      if (selectedFile) {
-        // Handle file upload (unchanged from your original code)
-        videoId = await uploadFile(selectedFile);
-
-        // Process the uploaded file with retry logic
-        try {
-          const response = await axios.post(
-            `${API_URL}/api/v1/process/${videoId}`,
-            null,
-            {
-              timeout: 300000, // 5 minute timeout for processing
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              }
-            }
-          );
-
-          if (response.status === 401) {
-            // Handle token refresh
-            const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
-              refreshToken: localStorage.getItem('refreshToken')
-            });
-            localStorage.setItem('token', refreshResponse.data.token);
-            return handleGenerate();
-          }
-
-          if (response.data?.success) {
-            await processSuccessResponse(videoId);
-            return;
-          }
-          throw new Error(response.data?.error || 'Failed to process video');
-        } catch (error) {
-          console.error('File processing error:', error);
-
-          if (error.response?.status === 401) {
-            setUrlError('Session expired. Please log in again.');
-            navigate('/login');
-            return;
-          }
-
-          if (error.response?.status === 404) {
-            throw new Error('Video processing service unavailable. Please try again later.');
-          }
-
-          throw new Error('Failed to process uploaded file');
-        }
-      } else {
-        // Handle YouTube URL
-        videoId = extractVideoId(youtubeUrl);
-        if (!videoId) {
-          throw new Error('Could not extract video ID from URL');
+          return handleGenerate();
         }
 
-        try {
-          const response = await axios.post(
-            `${YOUTUBE_API}/video/${videoId}`,
-            null,
-            {
-              timeout: 30000,
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              }
-            }
-          );
-
-          if (response.status === 401) {
-            const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
-              refreshToken: localStorage.getItem('refreshToken')
-            });
-            localStorage.setItem('token', refreshResponse.data.token);
-            return handleGenerate();
-          }
-
-          if (response.data?.status === false) {
-            throw new Error(response.data.message || 'Failed to process video');
-          }
-
-          if (response.data?.status === true) {
-            await processSuccessResponse(videoId);
-            return;
-          }
-
-          throw new Error('Unexpected response format');
-        } catch (error) {
-          console.error('YouTube processing error:', error);
-
-          if (error.response?.status === 429) {
-            const retryAfter = error.response.data.retryAfter || 300;
-            setUrlError(`Rate limit exceeded. Please try again in ${retryAfter} seconds.`);
-            setTimeout(() => {
-              if (retryCount < maxRetries) {
-                console.log(`Retrying in ${retryAfter} seconds... (Attempt ${retryCount + 1})`);
-                setRetryCount(prev => prev + 1);
-                handleGenerate();
-              }
-            }, retryAfter * 1000);
-            return;
-          }
-
-          if (error.response?.status === 404) {
-            throw new Error('This video doesn\'t have captions available. Please try a different video with subtitles.');
-          }
-
-          if (error.response?.status === 401) {
-            setUrlError('Session expired. Please log in again.');
-            navigate('/login');
-            return;
-          }
-
-          throw new Error(error.response?.data?.message ||
-            error.message ||
-            'Failed to process YouTube video');
-        }
-      }
-    } catch (error) {
-      handleProcessingError(error);
-
-      // Only retry for specific errors
-      if (retryCount < maxRetries) {
-        const isNetworkError = error.code === 'ECONNABORTED' || !error.response;
-        const isServerError = error.response?.status >= 500;
-
-        if (isNetworkError || isServerError) {
-          const delay = 3000 * (retryCount + 1);
-          console.log(`Retrying in ${delay / 1000} seconds... (Attempt ${retryCount + 1})`);
-          setTimeout(() => {
-            setRetryCount(prev => prev + 1);
-            handleGenerate();
-          }, delay);
+        if (response.data?.success) {
+          await processSuccessResponse(videoId);
           return;
         }
+        throw new Error(response.data?.error || 'Failed to process video');
+      } catch (error) {
+        console.error('File processing error:', error);
+
+        if (error.response?.status === 401) {
+          setUrlError('Session expired. Please log in again.');
+          navigate('/login');
+          return;
+        }
+
+        if (error.response?.status === 404) {
+          throw new Error('Video processing service unavailable. Please try again later.');
+        }
+
+        throw new Error('Failed to process uploaded file');
       }
-    } finally {
-      setIsLoading(false);
-      setUploadProgress(0);
+    } else {
+      // Handle YouTube URL - Updated section
+      videoId = extractVideoId(youtubeUrl);
+      if (!videoId) {
+        throw new Error('Could not extract video ID from URL');
+      }
+
+      try {
+        const response = await axios.post(
+          `${YOUTUBE_API}/video/${videoId}`,
+          null,
+          {
+            timeout: 30000, // 15 second timeout
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+
+        if (response.status === 401) {
+          // Handle token refresh
+          const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
+            refreshToken: localStorage.getItem('refreshToken')
+          });
+          localStorage.setItem('token', refreshResponse.data.token);
+          return handleGenerate();
+        }
+
+        if (response.data?.status === false) {
+          throw new Error(response.data.message || 'Failed to process video');
+        }
+
+        if (response.data?.status === true) {
+          await processSuccessResponse(videoId);
+          return;
+        }
+
+        throw new Error('Unexpected response format');
+      } catch (error) {
+        console.error('YouTube processing error:', error);
+
+        // Handle specific error cases
+        if (error.response?.status === 404) {
+          throw new Error('This video doesn\'t have captions available. Please try a different video with subtitles.');
+        }
+
+        if (error.response?.status === 401) {
+          setUrlError('Session expired. Please log in again.');
+          navigate('/login');
+          return;
+        }
+
+        // No fallback to Python API here since it's now handled by the backend
+        throw new Error(error.response?.data?.message || 
+                      error.message || 
+                      'Failed to process YouTube video');
+      }
     }
-  };
+  } catch (error) {
+    handleProcessingError(error);
+
+    // Enhanced retry logic
+    if (retryCount < maxRetries) {
+      const isNetworkError = error.code === 'ECONNABORTED' || !error.response;
+      const isServerError = error.response?.status >= 500;
+      const isTemporaryError = error.response?.status === 404 || error.response?.status === 429;
+
+      if (isNetworkError || isServerError || isTemporaryError) {
+        const delay = 3000 * (retryCount + 1);
+        console.log(`Retrying in ${delay/1000} seconds... (Attempt ${retryCount + 1})`);
+        
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          handleGenerate();
+        }, delay);
+        return;
+      }
+    }
+  } finally {
+    setIsLoading(false);
+    setUploadProgress(0);
+  }
+};
 
 
   const promptSuggestions = [
@@ -555,8 +547,8 @@ const InputComponent = () => {
             <button
               className={`w-full py-4 rounded-xl text-white font-medium transition-all duration-300 flex items-center justify-center gap-3
               ${isLoading || (!youtubeUrl && !selectedFile)
-                  ? 'bg-gray-800/50 cursor-not-allowed shadow-inner'
-                  : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transform hover:scale-[1.01] hover:shadow-xl shadow-lg'}`}
+                ? 'bg-gray-800/50 cursor-not-allowed shadow-inner'
+                : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transform hover:scale-[1.01] hover:shadow-xl shadow-lg'}`}
               onClick={handleGenerate}
               disabled={isLoading || (!youtubeUrl && !selectedFile)}
             >
