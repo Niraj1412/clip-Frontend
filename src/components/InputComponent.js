@@ -251,7 +251,7 @@ const handleGenerate = async () => {
 
       try {
         const response = await axios.post(
-          `${YOUTUBE_API}/video/${videoId}`,
+          `http://localhost:4001/api/v1/youtube/video/${videoId}`,
           null,
           {
             timeout: 30000, // 15 second timeout
@@ -304,22 +304,7 @@ const handleGenerate = async () => {
     handleProcessingError(error);
 
     // Enhanced retry logic
-    if (retryCount < maxRetries) {
-      const isNetworkError = error.code === 'ECONNABORTED' || !error.response;
-      const isServerError = error.response?.status >= 500;
-      const isTemporaryError = error.response?.status === 404 || error.response?.status === 429;
-
-      if (isNetworkError || isServerError || isTemporaryError) {
-        const delay = 3000 * (retryCount + 1);
-        console.log(`Retrying in ${delay/1000} seconds... (Attempt ${retryCount + 1})`);
-        
-        setTimeout(() => {
-          setRetryCount(prev => prev + 1);
-          handleGenerate();
-        }, delay);
-        return;
-      }
-    }
+    
   } finally {
     setIsLoading(false);
     setUploadProgress(0);
