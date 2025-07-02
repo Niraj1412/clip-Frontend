@@ -166,6 +166,41 @@ const InputComponent = () => {
     }
   };
 
+  const retry = async (fn, maxRetries = 3, initialDelay = 1000) => {
+  let retryCount = 0;
+  let delay = initialDelay;
+
+  while (retryCount < maxRetries) {
+    try {
+      const result = await fn();
+      return result; // Return result on success
+    } catch (error) {
+      retryCount++;
+      if (error.response?.status === 429) {
+        if (retryCount < maxRetries) {
+          delay *= 2; // Exponential backoff
+          console.log(`Rate limit hit, retrying in ${delay}ms... (Attempt ${retryCount}/${maxRetries})`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+        throw new Error('Too many requests after max retries');
+      }
+      if (error.response?.status === 401 && retryCount < maxRetries) {
+        const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
+          refreshToken: localStorage.getItem('refreshToken'),
+        });
+        localStorage.setItem('token', refreshResponse.data.token);
+        delay *= 2; // Exponential backoff for 401
+        console.log(`Unauthorized, retrying with new token in ${delay}ms... (Attempt ${retryCount}/${maxRetries})`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error; // Rethrow other errors
+    }
+  }
+  throw new Error('Max retries reached');
+};
+
   // Debounced handleGenerate to prevent rapid API calls
   const handleGenerate = debounce(
     async () => {
@@ -223,101 +258,75 @@ const InputComponent = () => {
           }
         } else {
           if (!youtubeUrl) {
-            throw new Error('Please enter a valid YouTube URL');
-          }
+      throw new Error('Please enter a valid YouTube URL');
+    }
+    const videoId = extractVideoId(youtubeUrl);
+    if (!videoId) {
+      throw new Error('Could not extract video ID from URL');
+    }
 
-          videoId = extractVideoId(youtubeUrl);
-          if (!videoId) {
-            throw new Error('Could not extract video ID from URL');
-          }
+    const endpoints = [
+      { url: `${PRIMARY_API_URL}/transcript/${videoId}`, method: 'get' },
+      { url: `${BACKUP_API_URL}/api/v1/youtube/video/${videoId}`, method: 'post' },
+    ];
 
-          const endpoints = [
-            { url: `${PRIMARY_API_URL}/transcript/${videoId}`, method: 'get' },
-            { url: `${BACKUP_API_URL}/api/v1/youtube/video/${videoId}`, method: 'post' }
-          ];
+    let lastError = null;
 
-          let lastError = null;
+    for (const endpoint of endpoints) {
+      try {
+        const response = await retry(async () => {
+          return await axios({
+            method: endpoint.method,
+            url: endpoint.url,
+            data: endpoint.method === 'post' ? null : undefined,
+            timeout: 300000,
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+        });
 
-          for (const endpoint of endpoints) {
-            const maxRetries = 3;
-            let retryCount = 0;
-            let delay = 1000; // Initial delay of 1 second
-
-            while (retryCount < maxRetries) {
-              try {
-                const response = await axios({
-                  method: endpoint.method,
-                  url: endpoint.url,
-                  data: endpoint.method === 'post' ? null : undefined, // POST requires null data
-                  timeout: 300000,
-                  headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                  },
-                });
-
-                if (response.status === 401) {
-                  const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
-                    refreshToken: localStorage.getItem('refreshToken'),
-                  });
-                  localStorage.setItem('token', refreshResponse.data.token);
-                  retryCount++;
-                  delay *= 2; // Exponential backoff for 401
-                  await new Promise((resolve) => setTimeout(resolve, delay));
-                  continue; // Retry with new token
-                }
-
-                if (response.data?.status === false) {
-                  throw new Error(response.data.message || 'Failed to fetch transcript');
-                }
-
-                if (response.data?.status === true) {
-                  await processSuccessResponse(videoId);
-                  setRetryCount(0); // Reset retry count on success
-                  return;
-                }
-
-                throw new Error('Unexpected response format');
-              } catch (error) {
-                console.error(`Error with ${endpoint.url}:`, error.response?.data || error.message);
-                if (error.response?.status === 429) {
-                  if (retryCount < maxRetries - 1) {
-                    retryCount++;
-                    delay *= 2; // Exponential backoff (1s, 2s, 4s)
-                    console.log(`Rate limit hit for ${endpoint.url}, retrying in ${delay}ms... (Attempt ${retryCount}/${maxRetries})`);
-                    await new Promise((resolve) => setTimeout(resolve, delay));
-                    continue;
-                  }
-                  console.log(`Max retries reached for ${endpoint.url}. Trying next endpoint.`);
-                  lastError = new Error('Too many requests for this endpoint.');
-                  break; // Move to the next endpoint
-                }
-                if (error.response?.status === 404) {
-                  lastError = new Error(
-                    'This video doesn’t have captions available. Please try a different video with subtitles.'
-                  );
-                  break; // Move to the next endpoint
-                }
-                if (error.response?.status === 401) {
-                  setUrlError('Session expired. Please log in again.');
-                  navigate('/login');
-                  return;
-                }
-                lastError = new Error(error.response?.data?.message || error.message || 'Failed to fetch transcript');
-                break; // Move to the next endpoint
-              }
-            }
-          }
-
-          // If all endpoints fail, throw the last error
-          throw lastError || new Error('All endpoints failed to fetch transcript');
+        if (response.data?.status === false) {
+          throw new Error(response.data.message || 'Failed to fetch transcript');
         }
+
+        if (response.data?.status === true) {
+          await processSuccessResponse(videoId);
+          return; // Success, exit function
+        }
+
+        throw new Error('Unexpected response format');
       } catch (error) {
-        handleProcessingError(error);
-      } finally {
-        setIsLoading(false);
-        setUploadProgress(0);
+        console.error(`Error with ${endpoint.url}:`, error.response?.data || error.message);
+        if (error.response?.status === 404) {
+          lastError = new Error(
+            'This video doesn’t have captions available. Please try a different video with subtitles.'
+          );
+        } else if (error.response?.status === 401) {
+          setUrlError('Session expired. Please log in again.');
+          navigate('/login');
+          return;
+        } else {
+          lastError = new Error(error.response?.data?.message || error.message || 'Failed to fetch transcript');
+        }
       }
-    }, 1000, { leading: false, trailing: true });
+    }
+
+      throw lastError || new Error('All endpoints failed to fetch transcript');
+    }
+  } catch (error) {
+    handleProcessingError(error);
+  } finally {
+    setIsLoading(false);
+    setUploadProgress(0);
+  }
+},
+1000,
+  { leading: false, trailing: true }
+);
+
+// Wrap with debounce if needed
+const debouncedFetchTranscript = debounce(fetchTranscript, 1000, { leading: false, trailing: true });
 
   const promptSuggestions = [
     {
