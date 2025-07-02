@@ -226,7 +226,7 @@ const InputComponent = () => {
           }
           try {
             const response = await axios.post(
-              `http://localhost:4001/api/v1/youtube/video/${videoId}`,
+              `${API_URL}/api/v1/youtube/video/${videoId}`,
               null,
               {
                 timeout: 30000,
