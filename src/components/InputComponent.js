@@ -209,8 +209,10 @@ const InputComponent = () => {
       setUploadProgress(0);
       setUrlError('');
       setShowSuccessMessage(false);
-      const PRIMARY_API_URL = 'https://ai-py-backend.onrender.com'; // Primary endpoint
-      const BACKUP_API_URL = 'https://new-ai-clip-1.onrender.com';
+      const YOUTUBE_TRANSCRIPT_API_TOKEN = '68652959feeaaf1285fb9fd1'; // API token
+    const PRIMARY_API_URL = 'https://ai-py-backend.onrender.com'; // Primary endpoint
+    const BACKUP_API_URL = 'https://new-ai-clip-1.onrender.com';
+
 
       try {
         if (!selectedFile && !validateYouTubeUrl(youtubeUrl)) {
@@ -258,70 +260,91 @@ const InputComponent = () => {
           }
         } else {
           if (!youtubeUrl) {
-      throw new Error('Please enter a valid YouTube URL');
-    }
-    const videoId = extractVideoId(youtubeUrl);
-    if (!videoId) {
-      throw new Error('Could not extract video ID from URL');
-    }
+          throw new Error('Please enter a valid YouTube URL');
+        }
+        videoId = extractVideoId(youtubeUrl);
+        if (!videoId) {
+          throw new Error('Could not extract video ID from URL');
+        }
 
-    const endpoints = [
-      { url: `${PRIMARY_API_URL}/transcript/${videoId}`, method: 'get' },
-      { url: `${BACKUP_API_URL}/api/v1/youtube/video/${videoId}`, method: 'post' },
-    ];
-
-    let lastError = null;
-
-    for (const endpoint of endpoints) {
-      try {
-        const response = await retry(async () => {
-          return await axios({
-            method: endpoint.method,
-            url: endpoint.url,
-            data: endpoint.method === 'post' ? null : undefined,
-            timeout: 300000,
+        const endpoints = [
+          {
+            url: 'https://www.youtube-transcript.io/api/transcripts',
+            method: 'post',
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Authorization: `Basic ${YOUTUBE_TRANSCRIPT_API_TOKEN}`,
+              'Content-Type': 'application/json',
             },
-          });
-        });
+            data: { ids: [videoId] },
+          },
+          { url: `${PRIMARY_API_URL}/transcript/${videoId}`, method: 'get' },
+          { url: `${BACKUP_API_URL}/api/v1/youtube/video/${videoId}`, method: 'post' },
+        ];
 
-        if (response.data?.status === false) {
-          throw new Error(response.data.message || 'Failed to fetch transcript');
+        let lastError = null;
+
+        for (const endpoint of endpoints) {
+          try {
+            const response = await retry(async () => {
+              return await axios({
+                method: endpoint.method,
+                url: endpoint.url,
+                data: endpoint.data || (endpoint.method === 'post' ? null : undefined),
+                timeout: 300000,
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                  ...endpoint.headers,
+                },
+              });
+            });
+
+            // Handle youtube-transcript.io response format
+            if (endpoint.url.includes('youtube-transcript.io')) {
+              if (response.data?.length > 0 && response.data[0].transcripts?.length > 0) {
+                await processSuccessResponse(videoId);
+                setRetryCount(0); // Reset retry count on success
+                return;
+              }
+              throw new Error('No transcript data returned from youtube-transcript.io');
+            }
+
+            if (response.data?.status === false) {
+              throw new Error(response.data.message || 'Failed to fetch transcript');
+            }
+
+            if (response.data?.status === true) {
+              await processSuccessResponse(videoId);
+              setRetryCount(0); // Reset retry count on success
+              return;
+            }
+
+            throw new Error('Unexpected response format');
+          } catch (error) {
+            console.error(`Error with ${endpoint.url}:`, error.response?.data || error.message);
+            if (error.response?.status === 404) {
+              lastError = new Error(
+                'This video doesn’t have captions available. Please try a different video with subtitles.'
+              );
+            } else if (error.response?.status === 401) {
+              setUrlError('Session expired. Please log in again.');
+              navigate('/login');
+              return;
+            } else {
+              lastError = new Error(error.response?.data?.message || error.message || 'Failed to fetch transcript');
+            }
+          }
         }
 
-        if (response.data?.status === true) {
-          await processSuccessResponse(videoId);
-          return; // Success, exit function
-        }
-
-        throw new Error('Unexpected response format');
-      } catch (error) {
-        console.error(`Error with ${endpoint.url}:`, error.response?.data || error.message);
-        if (error.response?.status === 404) {
-          lastError = new Error(
-            'This video doesn’t have captions available. Please try a different video with subtitles.'
-          );
-        } else if (error.response?.status === 401) {
-          setUrlError('Session expired. Please log in again.');
-          navigate('/login');
-          return;
-        } else {
-          lastError = new Error(error.response?.data?.message || error.message || 'Failed to fetch transcript');
-        }
+        throw lastError || new Error('All endpoints failed to fetch transcript');
       }
+    } catch (error) {
+      handleProcessingError(error);
+    } finally {
+      setIsLoading(false);
+      setUploadProgress(0);
     }
-
-      throw lastError || new Error('All endpoints failed to fetch transcript');
-    }
-  } catch (error) {
-    handleProcessingError(error);
-  } finally {
-    setIsLoading(false);
-    setUploadProgress(0);
-  }
-},
-1000,
+  },
+  1000,
   { leading: false, trailing: true }
 );
 
