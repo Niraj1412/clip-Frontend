@@ -249,7 +249,7 @@ const InputComponent = () => {
                   method: endpoint.method,
                   url: endpoint.url,
                   data: endpoint.method === 'post' ? null : undefined, // POST requires null data
-                  timeout: 30000,
+                  timeout: 300000,
                   headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                   },
