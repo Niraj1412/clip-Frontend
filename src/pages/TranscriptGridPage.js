@@ -38,7 +38,7 @@ const TranscriptGridPage = () => {
   const { setSelectedClipsData } = useClipsData();
   const [retryCounts, setRetryCounts] = useState({}); // Track retries per video
   const [maxRetries] = useState(3); // Maximum number of retry attempts
- const API_BASE_URL = 'https://ai-clip-backend1-1.onrender.com/api/v1';
+ const API_BASE_URL = 'https://new-ai-clip-1.onrender.com/api/v1';
 
   useEffect(() => {
     const initializeFirstVideo = async () => {

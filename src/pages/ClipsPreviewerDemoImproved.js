@@ -50,7 +50,7 @@ const ClipsPreviewerDemo = () => {
   const [processedClips, setProcessedClips] = useState([]);
   const [sortOrder, setSortOrder] = useState('time'); // 'time' or 'length'
   const [searchQuery, setSearchQuery] = useState('');
-  const API_BASE_URL = 'https://ai-clip-backend1-1.onrender.com/api/v1';
+  const API_BASE_URL = 'https://new-ai-clip-1.onrender.com/api/v1';
   const initialSelectionRef = useRef(false);
 
 
@@ -468,7 +468,7 @@ const ClipsPreviewerDemo = () => {
                   e.target.src = `https://img.youtube.com/vi/${clip.videoId}/hqdefault.jpg`;
                 }
                 else if (e.target.src.includes('hqdefault.jpg')) {
-                  e.target.src = `https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`;
+                  e.target.src = `https://new-ai-clip-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`;
                 }
                 else {
                   // Final fallback - use a data URL or empty image

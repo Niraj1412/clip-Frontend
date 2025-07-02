@@ -1,7 +1,7 @@
 const USE_EC2_SERVER = true;
 
-const LOCALHOST_API_URL = 'https://ai-clip-backend1-1.onrender.com';
-const EC2_API_URL = 'https://ai-clip-backend1-1.onrender.com';
+const LOCALHOST_API_URL = 'https://new-ai-clip-1.onrender.com';
+const EC2_API_URL = 'https://new-ai-clip-1.onrender.com';
 
 export const API_URL = USE_EC2_SERVER ? EC2_API_URL : LOCALHOST_API_URL;
 
@@ -13,7 +13,7 @@ export const PROJECTS_API = `${API_URL}/api/projects`;
 export const PYTHON_API =  USE_EC2_SERVER ?  "https://ai-py-backend.onrender.com" :   "http://54.161.100.146:5000" ;
 
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ai-clip-backend1-1.onrender.com/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://new-ai-clip-1.onrender.com/api';
 
 export const USERS_API = `${API_BASE_URL}/users`;
 export const CLIPS_API = `${API_BASE_URL}/clips`;

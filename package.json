@@ -2,7 +2,7 @@
   "name": "clipsmart-ai-frontend",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://ai-clip-backend1-1.onrender.com",
+  "proxy": "https://new-ai-clip-1.onrender.com",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",

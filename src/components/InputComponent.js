@@ -175,7 +175,7 @@ const InputComponent = () => {
       setUrlError('');
       setShowSuccessMessage(false);
       const PRIMARY_API_URL = 'https://ai-py-backend.onrender.com'; // Primary endpoint
-      const BACKUP_API_URL = 'https://ai-clip-backend1-1.onrender.com';
+      const BACKUP_API_URL = 'https://new-ai-clip-1.onrender.com';
 
       try {
         if (!selectedFile && !validateYouTubeUrl(youtubeUrl)) {
