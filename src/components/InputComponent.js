@@ -349,7 +349,7 @@ const InputComponent = () => {
 );
 
 // Wrap with debounce if needed
-const debouncedFetchTranscript = debounce(fetchTranscript, 1000, { leading: false, trailing: true });
+
 
   const promptSuggestions = [
     {
