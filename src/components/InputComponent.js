@@ -259,7 +259,7 @@ const InputComponent = () => {
             throw new Error('Failed to process uploaded file');
           }
         } else {
-          if (!youtubeUrl) {
+         if (!youtubeUrl) {
           throw new Error('Please enter a valid YouTube URL');
         }
         videoId = extractVideoId(youtubeUrl);
@@ -267,47 +267,30 @@ const InputComponent = () => {
           throw new Error('Could not extract video ID from URL');
         }
 
+        // Define backend endpoints to fetch transcript
         const endpoints = [
-          {
-            url: 'https://www.youtube-transcript.io/api/transcripts',
-            method: 'post',
-            headers: {
-              Authorization: `Basic ${YOUTUBE_TRANSCRIPT_API_TOKEN}`,
-              'Content-Type': 'application/json',
-            },
-            data: { ids: [videoId] },
-          },
           { url: `${PRIMARY_API_URL}/transcript/${videoId}`, method: 'get' },
           { url: `${BACKUP_API_URL}/api/v1/youtube/video/${videoId}`, method: 'post' },
         ];
 
         let lastError = null;
 
+        // Try each endpoint sequentially
         for (const endpoint of endpoints) {
           try {
             const response = await retry(async () => {
               return await axios({
                 method: endpoint.method,
                 url: endpoint.url,
-                data: endpoint.data || (endpoint.method === 'post' ? null : undefined),
-                timeout: 300000,
+                data: endpoint.method === 'post' ? null : undefined,
+                timeout: 300000, // 5-minute timeout
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem('token')}`,
-                  ...endpoint.headers,
                 },
               });
             });
 
-            // Handle youtube-transcript.io response format
-            if (endpoint.url.includes('youtube-transcript.io')) {
-              if (response.data?.length > 0 && response.data[0].transcripts?.length > 0) {
-                await processSuccessResponse(videoId);
-                setRetryCount(0); // Reset retry count on success
-                return;
-              }
-              throw new Error('No transcript data returned from youtube-transcript.io');
-            }
-
+            // Check response status
             if (response.data?.status === false) {
               throw new Error(response.data.message || 'Failed to fetch transcript');
             }
@@ -330,7 +313,9 @@ const InputComponent = () => {
               navigate('/login');
               return;
             } else {
-              lastError = new Error(error.response?.data?.message || error.message || 'Failed to fetch transcript');
+              lastError = new Error(
+                error.response?.data?.message || error.message || 'Failed to fetch transcript'
+              );
             }
           }
         }
