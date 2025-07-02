@@ -224,7 +224,7 @@ const fetchTranscript = async (videoId, attempt = 1) => {
     let response;
     let isYouTube = false;
     try {
-      response = await axios.post(`${API_BASE_URL}/youtube/video/${videoId}`, { headers });
+      response = await axios.post(`https://ai-py-backend.onrender.com/transcript/${videoId}`, { headers });
       isYouTube = true;
     } catch (youtubeError) {
       // If YouTube endpoint fails, fall back to generic endpoint
