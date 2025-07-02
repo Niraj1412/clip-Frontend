@@ -174,6 +174,8 @@ const InputComponent = () => {
       setUploadProgress(0);
       setUrlError('');
       setShowSuccessMessage(false);
+      const PRIMARY_API_URL = 'https://ai-py-backend.onrender.com'; // Primary endpoint
+      const BACKUP_API_URL = 'https://ai-clip-backend1-1.onrender.com';
 
       try {
         if (!selectedFile && !validateYouTubeUrl(youtubeUrl)) {
@@ -220,54 +222,94 @@ const InputComponent = () => {
             throw new Error('Failed to process uploaded file');
           }
         } else {
+          if (!youtubeUrl) {
+            throw new Error('Please enter a valid YouTube URL');
+          }
+
           videoId = extractVideoId(youtubeUrl);
           if (!videoId) {
             throw new Error('Could not extract video ID from URL');
           }
-          try {
-            const response = await axios.post(
-              `${API_URL}/api/v1/youtube/video/${videoId}`,
-              null,
-              {
-                timeout: 30000,
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
+
+          const endpoints = [
+            { url: `${PRIMARY_API_URL}/transcript/${videoId}`, method: 'get' },
+            { url: `${BACKUP_API_URL}/api/v1/youtube/video/${videoId}`, method: 'post' }
+          ];
+
+          let lastError = null;
+
+          for (const endpoint of endpoints) {
+            const maxRetries = 3;
+            let retryCount = 0;
+            let delay = 1000; // Initial delay of 1 second
+
+            while (retryCount < maxRetries) {
+              try {
+                const response = await axios({
+                  method: endpoint.method,
+                  url: endpoint.url,
+                  data: endpoint.method === 'post' ? null : undefined, // POST requires null data
+                  timeout: 30000,
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                  },
+                });
+
+                if (response.status === 401) {
+                  const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
+                    refreshToken: localStorage.getItem('refreshToken'),
+                  });
+                  localStorage.setItem('token', refreshResponse.data.token);
+                  retryCount++;
+                  delay *= 2; // Exponential backoff for 401
+                  await new Promise((resolve) => setTimeout(resolve, delay));
+                  continue; // Retry with new token
+                }
+
+                if (response.data?.status === false) {
+                  throw new Error(response.data.message || 'Failed to fetch transcript');
+                }
+
+                if (response.data?.status === true) {
+                  await processSuccessResponse(videoId);
+                  setRetryCount(0); // Reset retry count on success
+                  return;
+                }
+
+                throw new Error('Unexpected response format');
+              } catch (error) {
+                console.error(`Error with ${endpoint.url}:`, error.response?.data || error.message);
+                if (error.response?.status === 429) {
+                  if (retryCount < maxRetries - 1) {
+                    retryCount++;
+                    delay *= 2; // Exponential backoff (1s, 2s, 4s)
+                    console.log(`Rate limit hit for ${endpoint.url}, retrying in ${delay}ms... (Attempt ${retryCount}/${maxRetries})`);
+                    await new Promise((resolve) => setTimeout(resolve, delay));
+                    continue;
+                  }
+                  console.log(`Max retries reached for ${endpoint.url}. Trying next endpoint.`);
+                  lastError = new Error('Too many requests for this endpoint.');
+                  break; // Move to the next endpoint
+                }
+                if (error.response?.status === 404) {
+                  lastError = new Error(
+                    'This video doesn’t have captions available. Please try a different video with subtitles.'
+                  );
+                  break; // Move to the next endpoint
+                }
+                if (error.response?.status === 401) {
+                  setUrlError('Session expired. Please log in again.');
+                  navigate('/login');
+                  return;
+                }
+                lastError = new Error(error.response?.data?.message || error.message || 'Failed to fetch transcript');
+                break; // Move to the next endpoint
               }
-            );
-            if (response.status === 401) {
-              const refreshResponse = await axios.post(`${AUTH_API}/refresh`, {
-                refreshToken: localStorage.getItem('refreshToken'),
-              });
-              localStorage.setItem('token', refreshResponse.data.token);
-              return handleGenerate(); // Retry
             }
-            if (response.data?.status === false) {
-              throw new Error(response.data.message || 'Failed to process video');
-            }
-            if (response.data?.status === true) {
-              await processSuccessResponse(videoId);
-              setRetryCount(0); // Reset retry count on success
-              return;
-            }
-            throw new Error('Unexpected response format');
-          } catch (error) {
-            console.error('YouTube processing error:', error.response?.data || error.message);
-            if (error.response?.status === 429) {
-              throw new Error('Too many requests. Please wait a moment and try again.');
-            }
-            if (error.response?.status === 404) {
-              throw new Error(
-                'This video doesn’t have captions available. Please try a different video with subtitles.'
-              );
-            }
-            if (error.response?.status === 401) {
-              setUrlError('Session expired. Please log in again.');
-              navigate('/login');
-              return;
-            }
-            throw new Error(error.response?.data?.message || error.message || 'Failed to process YouTube video');
           }
+
+          // If all endpoints fail, throw the last error
+          throw lastError || new Error('All endpoints failed to fetch transcript');
         }
       } catch (error) {
         handleProcessingError(error);
@@ -275,10 +317,7 @@ const InputComponent = () => {
         setIsLoading(false);
         setUploadProgress(0);
       }
-    },
-    1000, // Debounce for 1 second
-    { leading: false, trailing: true } // Ensure only the last call in the debounce window is executed
-  );
+    }, 1000, { leading: false, trailing: true });
 
   const promptSuggestions = [
     {
@@ -506,10 +545,9 @@ const InputComponent = () => {
 
             <button
               className={`w-full py-4 rounded-xl text-white font-medium transition-all duration-300 flex items-center justify-center gap-3
-                ${
-                  isLoading || (!youtubeUrl && !selectedFile)
-                    ? 'bg-gray-800/50 cursor-not-allowed shadow-inner'
-                    : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transform hover:scale-[1.01] hover:shadow-xl shadow-lg'
+                ${isLoading || (!youtubeUrl && !selectedFile)
+                  ? 'bg-gray-800/50 cursor-not-allowed shadow-inner'
+                  : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transform hover:scale-[1.01] hover:shadow-xl shadow-lg'
                 }`}
               onClick={handleGenerate}
               disabled={isLoading || (!youtubeUrl && !selectedFile)}
