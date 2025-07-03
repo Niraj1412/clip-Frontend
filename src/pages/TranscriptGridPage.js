@@ -245,9 +245,9 @@ const TranscriptGridPage = () => {
       const processedTranscript = (Array.isArray(transcriptData) ? transcriptData : transcriptData.segments || [])
         .map(segment => ({
           text: segment.text || '',
-          startTime: Number(segment.start || 0), // Already in seconds from backend
-          endTime: Number(segment.end || 0),     // Already in seconds from backend
-          duration: Math.max(0, Number(segment.end || 0) - Number(segment.start || 0)),
+          startTime: Number(segment.startTime || 0), // Use 'startTime' from backend
+          endTime: Number(segment.endTime || 0),     // Use 'endTime' from backend
+          duration: Number(segment.duration || 0),   // Use 'duration' from backend
           speaker: segment.speaker || null,
           confidence: segment.confidence || null
         }));
@@ -256,10 +256,14 @@ const TranscriptGridPage = () => {
         throw new Error('Transcript is empty or unavailable');
       }
 
-      setTranscripts(prev => ({
-        ...prev,
-        [videoId]: processedTranscript
-      }));
+      setTranscripts(prev => {
+        const newTranscripts = {
+          ...prev,
+          [videoId]: processedTranscript
+        };
+        console.log(`Processed transcript for ${videoId}:`, processedTranscript); // Log for debugging
+        return newTranscripts;
+      });
       setRetryCounts(prev => ({ ...prev, [videoId]: 0 }));
 
     } catch (error) {
@@ -675,7 +679,6 @@ const TranscriptGridPage = () => {
                         const endTime = segment.endTime;
                         const duration = segment.duration;
                         const showHeading = shouldShowHeading(index, transcripts[selectedVideo]);
-
                         return (
                           <React.Fragment key={index}>
                             {showHeading && (
@@ -694,7 +697,7 @@ const TranscriptGridPage = () => {
                                   {formatTimeRangePrecise(startTime, endTime)}
                                 </span>
                                 <span className="text-[10px] text-gray-500">
-                                  Duration: {Math.round(duration)}s
+                                  Duration: {duration.toFixed(3)}s
                                 </span>
                               </div>
                               <p className="text-sm text-gray-300 flex-1">{segment.text}</p>
