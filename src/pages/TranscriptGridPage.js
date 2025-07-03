@@ -38,7 +38,7 @@ const TranscriptGridPage = () => {
   const { setSelectedClipsData } = useClipsData();
   const [retryCounts, setRetryCounts] = useState({}); // Track retries per video
   const [maxRetries] = useState(3); // Maximum number of retry attempts
- const API_BASE_URL = 'https://new-ai-clip-1.onrender.com/api/v1';
+  const API_BASE_URL = 'https://new-ai-clip-1.onrender.com/api/v1';
 
   useEffect(() => {
     const initializeFirstVideo = async () => {
@@ -73,267 +73,285 @@ const TranscriptGridPage = () => {
   }, [videoIds]); // Only depend on videoIds to prevent unnecessary re-runs
 
   const checkImageExists = async (url) => {
-  try {
-    const response = await fetch(url, { method: 'HEAD' });
-    return response.ok;
-  } catch {
-    return false;
-  }
-};
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  };
 
 
-const fetchVideoDetails = async (videoId) => {
-  const token = localStorage.getItem('token');
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  
-  try {
-    // First check if we have a valid MongoDB ID format
-    const isMongoId = /^[a-f0-9]{24}$/.test(videoId);
-    let details = {};
-    let isYouTube = false;
+  const fetchVideoDetails = async (videoId) => {
+    const token = localStorage.getItem('token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    if (isMongoId) {
-      // Try to get video details from our database first
-      try {
-        const response = await axios.get(`${API_BASE_URL}/video/${videoId}/details`, { headers });
-        details = response.data.data || response.data;
-        
-        // If we have a YouTube ID associated, fetch those details too
-        if (details.youtubeId) {
-          try {
-            const youtubeResponse = await axios.get(
-              `${API_BASE_URL}/youtube/video/${videoId}`,
-              { headers }
-            );
-            const youtubeData = youtubeResponse.data.data || {};
-            details = { ...details, ...youtubeData };
-            isYouTube = true;
-          } catch (youtubeError) {
-            console.log("YouTube details not available, using basic video info");
+    try {
+      // First check if we have a valid MongoDB ID format
+      const isMongoId = /^[a-f0-9]{24}$/.test(videoId);
+      let details = {};
+      let isYouTube = false;
+
+      if (isMongoId) {
+        // Try to get video details from our database first
+        try {
+          const response = await axios.get(`${API_BASE_URL}/video/${videoId}/details`, { headers });
+          details = response.data.data || response.data;
+
+          // If we have a YouTube ID associated, fetch those details too
+          if (details.youtubeId) {
+            try {
+              const youtubeResponse = await axios.get(
+                `${API_BASE_URL}/youtube/video/${videoId}`,
+                { headers }
+              );
+              const youtubeData = youtubeResponse.data.data || {};
+              details = { ...details, ...youtubeData };
+              isYouTube = true;
+            } catch (youtubeError) {
+              console.log("YouTube details not available, using basic video info");
+            }
+          }
+        } catch (dbError) {
+          // If database lookup fails, try YouTube as fallback
+          if (dbError.response?.status === 404) {
+            try {
+              const youtubeResponse = await axios.post(
+                `${API_BASE_URL}/youtube/details/${videoId}`,
+                {},
+                { headers }
+              );
+              details = youtubeResponse.data.data || youtubeResponse.data;
+              isYouTube = true;
+            } catch (youtubeError) {
+              throw new Error('Neither video nor YouTube details found');
+            }
+          } else {
+            throw dbError;
           }
         }
-      } catch (dbError) {
-        // If database lookup fails, try YouTube as fallback
-        if (dbError.response?.status === 404) {
-          try {
-            const youtubeResponse = await axios.post(
-              `${API_BASE_URL}/youtube/details/${videoId}`, 
-              {}, 
-              { headers }
-            );
-            details = youtubeResponse.data.data || youtubeResponse.data;
-            isYouTube = true;
-          } catch (youtubeError) {
-            throw new Error('Neither video nor YouTube details found');
-          }
-        } else {
-          throw dbError;
+      } else {
+        // If not MongoDB ID, assume it's a YouTube ID
+        try {
+          const response = await axios.post(
+            `${API_BASE_URL}/youtube/details/${videoId}`,
+            {},
+            { headers }
+          );
+          details = response.data.data || response.data;
+          isYouTube = true;
+        } catch (youtubeError) {
+          throw new Error('YouTube details not found');
         }
       }
-    } else {
-      // If not MongoDB ID, assume it's a YouTube ID
+
+      // Parse duration from ISO format or seconds
+      let durationInSeconds;
+      if (isYouTube && details.duration && typeof details.duration === 'string' && details.duration.startsWith('PT')) {
+        durationInSeconds = parseISODuration(details.duration);
+      } else {
+        durationInSeconds = Number(details.duration) || 0;
+      }
+
+      // Determine thumbnail URL
+      let thumbnailUrl;
+      if (isYouTube) {
+        thumbnailUrl = `https://img.youtube.com/vi/${details.youtubeId || videoId}/maxresdefault.jpg`;
+        if (!await checkImageExists(thumbnailUrl)) {
+          thumbnailUrl = `https://img.youtube.com/vi/${details.youtubeId || videoId}/hqdefault.jpg`;
+        }
+      } else {
+        thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${videoId}.jpg`;
+      }
+
+      // Set the video details
+      setVideoDetails(prev => ({
+        ...prev,
+        [videoId]: {
+          title: details.title || (isYouTube ? 'YouTube Video' : 'Uploaded Video'),
+          description: details.description || '',
+          duration: durationInSeconds,
+          durationISO: details.duration || 'PT0M0S',
+          publishedAt: details.publishedAt || details.createdAt || new Date().toISOString(),
+          thumbnail: thumbnailUrl,
+          isYouTubeVideo: isYouTube,
+          isCustomVideo: !isYouTube,
+          status: details.status || 'processed',
+          videoUrl: details.videoUrl || null
+        }
+      }));
+
+    } catch (error) {
+      console.error("Error fetching video details:", error);
+
+      // Set fallback details with appropriate thumbnail
+      const fallbackThumbnail = /^[a-f0-9]{24}$/.test(videoId)
+        ? `${API_BASE_URL}/thumbnails/${videoId}`
+        : `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+
+      setVideoDetails(prev => ({
+        ...prev,
+        [videoId]: {
+          title: 'Video Details Unavailable',
+          description: '',
+          duration: 0,
+          durationISO: 'PT0M0S',
+          publishedAt: new Date().toISOString(),
+          thumbnail: fallbackThumbnail,
+          isYouTubeVideo: false,
+          isCustomVideo: true,
+          status: 'error',
+          videoUrl: null,
+          error: error.message
+        }
+      }));
+    }
+  };
+
+  const fetchTranscript = async (videoId, attempt = 1) => {
+    if (transcripts[videoId]) return;
+
+    const token = localStorage.getItem('token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    setLoading(prev => ({ ...prev, [videoId]: true }));
+    setErrors(prev => ({ ...prev, [videoId]: null }));
+
+    try {
+      console.log(`Fetching transcript for video ${videoId} (attempt ${attempt})...`);
+
+      // First try YouTube-specific endpoint
+      let response;
+      let isYouTube = false;
       try {
-        const response = await axios.post(
-          `${API_BASE_URL}/youtube/details/${videoId}`, 
-          {}, 
-          { headers }
-        );
-        details = response.data.data || response.data;
+        response = await axios.post(`https://ai-py-backend.onrender.com/transcript/${videoId}`, { headers });
         isYouTube = true;
       } catch (youtubeError) {
-        throw new Error('YouTube details not found');
+        // If YouTube endpoint fails, fall back to generic endpoint
+        if (youtubeError.response?.status === 404) {
+          response = await axios.get(`${API_BASE_URL}/video/${videoId}/transcript`, { headers });
+        } else {
+          throw youtubeError;
+        }
       }
-    }
 
-    // Parse duration from ISO format or seconds
-   let durationInSeconds;
-if (isYouTube && details.duration && typeof details.duration === 'string' && details.duration.startsWith('PT')) {
-  durationInSeconds = parseISODuration(details.duration);
-} else {
-  durationInSeconds = Number(details.duration) || 0;
-}
+      const transcriptData = response.data.data?.transcript || response.data.transcript || response.data.data || response.data;
 
-    // Determine thumbnail URL
-    let thumbnailUrl;
-  if (isYouTube) {
-    thumbnailUrl = `https://img.youtube.com/vi/${details.youtubeId || videoId}/maxresdefault.jpg`;
-    if (!await checkImageExists(thumbnailUrl)) {
-      thumbnailUrl = `https://img.youtube.com/vi/${details.youtubeId || videoId}/hqdefault.jpg`;
-    }
-  } else {
-    thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${videoId}.jpg`;
-  }
-
-    // Set the video details
-    setVideoDetails(prev => ({
-      ...prev,
-      [videoId]: {
-        title: details.title || (isYouTube ? 'YouTube Video' : 'Uploaded Video'),
-        description: details.description || '',
-        duration: durationInSeconds,
-        durationISO: details.duration || 'PT0M0S',
-        publishedAt: details.publishedAt || details.createdAt || new Date().toISOString(),
-        thumbnail: thumbnailUrl,
-        isYouTubeVideo: isYouTube,
-        isCustomVideo: !isYouTube,
-        status: details.status || 'processed',
-        videoUrl: details.videoUrl || null
+      if (!transcriptData) {
+        throw new Error('Transcript data not found in response');
       }
-    }));
 
-  } catch (error) {
-    console.error("Error fetching video details:", error);
-    
-    // Set fallback details with appropriate thumbnail
-    const fallbackThumbnail = /^[a-f0-9]{24}$/.test(videoId)
-      ? `${API_BASE_URL}/thumbnails/${videoId}`
-      : `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-    
-    setVideoDetails(prev => ({
-      ...prev,
-      [videoId]: {
-        title: 'Video Details Unavailable',
-        description: '',
-        duration: 0,
-        durationISO: 'PT0M0S',
-        publishedAt: new Date().toISOString(),
-        thumbnail: fallbackThumbnail,
-        isYouTubeVideo: false,
-        isCustomVideo: true,
-        status: 'error',
-        videoUrl: null,
-        error: error.message
-      }
-    }));
-  }
-};
-
-const fetchTranscript = async (videoId, attempt = 1) => {
-  if (transcripts[videoId]) return;
-
-  const token = localStorage.getItem('token');
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-  setLoading(prev => ({ ...prev, [videoId]: true }));
-  setErrors(prev => ({ ...prev, [videoId]: null }));
-
-  try {
-    console.log(`Fetching transcript for video ${videoId} (attempt ${attempt})...`);
-    
-    // First try YouTube-specific endpoint
-    let response;
-    let isYouTube = false;
-    try {
-      response = await axios.post(`https://ai-py-backend.onrender.com/transcript/${videoId}`, { headers });
-      isYouTube = true;
-    } catch (youtubeError) {
-      // If YouTube endpoint fails, fall back to generic endpoint
-      if (youtubeError.response?.status === 404) {
-        response = await axios.get(`${API_BASE_URL}/video/${videoId}/transcript`, { headers });
-      } else {
-        throw youtubeError;
-      }
-    }
-
-    const transcriptData = response.data.data?.transcript || response.data.transcript || response.data.data || response.data; 
-    
-    if (!transcriptData) {
-      throw new Error('Transcript data not found in response');
-    }
-
-    // Process transcript data based on source (YouTube or uploaded video)
+      // Process transcript data based on source (YouTube or uploaded video)
       const processedTranscript = (Array.isArray(transcriptData) ? transcriptData : transcriptData.segments || [])
-    .map(segment => ({
-      text: segment.text || '',
-      startTime: Number(segment.start || 0), // Already in seconds from backend
-      endTime: Number(segment.end || 0),     // Already in seconds from backend
-      duration: Math.max(0, Number(segment.end || 0) - Number(segment.start || 0)),
-      speaker: segment.speaker || null,
-      confidence: segment.confidence || null
-    }));
+        .map(segment => ({
+          text: segment.text || '',
+          startTime: Number(segment.start || 0), // Already in seconds from backend
+          endTime: Number(segment.end || 0),     // Already in seconds from backend
+          duration: Math.max(0, Number(segment.end || 0) - Number(segment.start || 0)),
+          speaker: segment.speaker || null,
+          confidence: segment.confidence || null
+        }));
 
-    if (processedTranscript.length === 0) {
-      throw new Error('Transcript is empty or unavailable');
+      if (processedTranscript.length === 0) {
+        throw new Error('Transcript is empty or unavailable');
+      }
+
+      setTranscripts(prev => ({
+        ...prev,
+        [videoId]: processedTranscript
+      }));
+      setRetryCounts(prev => ({ ...prev, [videoId]: 0 }));
+
+    } catch (error) {
+      console.error('Error fetching transcript:', {
+        error,
+        videoId,
+        attempt,
+        response: error.response?.data
+      });
+
+      if (attempt < maxRetries) {
+        setTimeout(() => {
+          fetchTranscript(videoId, attempt + 1);
+          setRetryCounts(prev => ({ ...prev, [videoId]: attempt }));
+        }, 3000 * attempt);
+        return;
+      }
+
+      setErrors(prev => ({
+        ...prev,
+        [videoId]: error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch transcript. Please check if captions are available for this video."
+      }));
+    } finally {
+      setLoading(prev => ({ ...prev, [videoId]: false }));
     }
-
-    setTranscripts(prev => ({
-      ...prev,
-      [videoId]: processedTranscript
-    }));
-    setRetryCounts(prev => ({ ...prev, [videoId]: 0 }));
-
-  } catch (error) {
-    console.error('Error fetching transcript:', {
-      error,
-      videoId,
-      attempt,
-      response: error.response?.data
-    });
-
-    if (attempt < maxRetries) {
-      setTimeout(() => {
-        fetchTranscript(videoId, attempt + 1);
-        setRetryCounts(prev => ({ ...prev, [videoId]: attempt }));
-      }, 3000 * attempt);
-      return;
-    }
-
-    setErrors(prev => ({
-      ...prev,
-      [videoId]: error.response?.data?.message || 
-                error.message || 
-                "Failed to fetch transcript. Please check if captions are available for this video."
-    }));
-  } finally {
-    setLoading(prev => ({ ...prev, [videoId]: false }));
-  }
-};
+  };
 
 
   // Updated formatTimeRange function
-const formatTime = (seconds) => {
-  if (typeof seconds !== 'number' || isNaN(seconds)) return '0:00';
-  
-  // Handle negative values
-  const isNegative = seconds < 0;
-  const absSeconds = Math.abs(seconds);
-  
-  const minutes = Math.floor(absSeconds / 60);
-  const secs = Math.floor(absSeconds % 60);
-  const millis = Math.floor((absSeconds % 1) * 1000);
-  
-  // Format as M:SS or MM:SS
-  const timeStr = `${minutes}:${secs.toString().padStart(2, '0')}`;
-  
-  return `${isNegative ? '-' : ''}${timeStr}`;
-};
+  const formatTime = (seconds) => {
+    if (typeof seconds !== 'number' || isNaN(seconds)) return '0:00';
+
+    // Handle negative values
+    const isNegative = seconds < 0;
+    const absSeconds = Math.abs(seconds);
+
+    const minutes = Math.floor(absSeconds / 60);
+    const secs = Math.floor(absSeconds % 60);
+    const millis = Math.floor((absSeconds % 1) * 1000);
+
+    // Format as M:SS or MM:SS
+    const timeStr = `${minutes}:${secs.toString().padStart(2, '0')}`;
+
+    return `${isNegative ? '-' : ''}${timeStr}`;
+  };
+
+  const formatTimePrecise = (seconds) => {
+    if (typeof seconds !== 'number' || isNaN(seconds)) return '0:00.000';
+    const isNegative = seconds < 0;
+    const absSeconds = Math.abs(seconds);
+    const minutes = Math.floor(absSeconds / 60);
+    const secs = Math.floor(absSeconds % 60);
+    const millis = Math.floor((absSeconds % 1) * 1000);
+    const timeStr = `${minutes}:${secs.toString().padStart(2, '0')}.${millis.toString().padStart(3, '0')}`;
+    return `${isNegative ? '-' : ''}${timeStr}`;
+  };
+
+  const formatTimeRangePrecise = (start, end) => {
+    const startSec = typeof start === 'number' ? start : 0;
+    const endSec = typeof end === 'number' ? end : startSec + 1;
+    if (isNaN(startSec) || isNaN(endSec)) return '0:00.000 - 0:00.000';
+    return `${formatTimePrecise(startSec)} - ${formatTimePrecise(endSec)}`;
+  };
 
 
   const parseISODuration = (duration) => {
     if (!duration) return 0;
     if (typeof duration === 'number') return duration;
-    
+
     const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
     const hours = parseInt(match[1] || '0');
     const minutes = parseInt(match[2] || '0');
     const seconds = parseInt(match[3] || '0');
-    
+
     return (hours * 3600) + (minutes * 60) + seconds;
   };
 
-// In your frontend code
-const formatDuration = (duration) => {
-  if (typeof duration === 'string' && duration.startsWith('PT')) {
-    // Handle ISO 8601 format if needed
-    return formatTime(parseISODuration(duration));
-  }
-  
-  // Ensure duration is a number
-  const durationNum = Number(duration);
-  if (isNaN(durationNum)) return '0:00';
-  
-  return formatTime(durationNum);
-};
+  // In your frontend code
+  const formatDuration = (duration) => {
+    if (typeof duration === 'string' && duration.startsWith('PT')) {
+      // Handle ISO 8601 format if needed
+      return formatTime(parseISODuration(duration));
+    }
+
+    // Ensure duration is a number
+    const durationNum = Number(duration);
+    if (isNaN(durationNum)) return '0:00';
+
+    return formatTime(durationNum);
+  };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -374,15 +392,15 @@ const formatDuration = (duration) => {
     !searchTerm
   );
 
-const formatTimeRange = (start, end) => {
-  const startSec = typeof start === 'number' ? start : 0;
-  const endSec = typeof end === 'number' ? end : startSec + 1;
-  
-  // Ensure valid times
-  if (isNaN(startSec) || isNaN(endSec)) return '0:00 - 0:00';
-  
-  return `${formatTime(startSec)} - ${formatTime(endSec)}`;
-};
+  const formatTimeRange = (start, end) => {
+    const startSec = typeof start === 'number' ? start : 0;
+    const endSec = typeof end === 'number' ? end : startSec + 1;
+
+    // Ensure valid times
+    if (isNaN(startSec) || isNaN(endSec)) return '0:00 - 0:00';
+
+    return `${formatTime(startSec)} - ${formatTime(endSec)}`;
+  };
 
   // Function to generate section heading based on time
   const generateSectionHeading = (timeInSeconds) => {
@@ -417,7 +435,7 @@ const formatTimeRange = (start, end) => {
     });
   };
 
-  
+
 
   return (
     <div className="h-screen bg-[#121212] text-white flex flex-col">
@@ -653,8 +671,8 @@ const formatTimeRange = (start, end) => {
                     ) : transcripts[selectedVideo] ? (
                       transcripts[selectedVideo].map((segment, index) => {
                         // Floor startTime and ceil endTime
-                        const startTime = Math.floor(segment.startTime);
-                        const endTime = Math.ceil(segment.endTime);
+                        const startTime = segment.startTime;
+                        const endTime = segment.endTime;
                         const duration = segment.duration;
                         const showHeading = shouldShowHeading(index, transcripts[selectedVideo]);
 
@@ -673,7 +691,7 @@ const formatTimeRange = (start, end) => {
                                          transition-colors group flex gap-3">
                               <div className="flex flex-col items-start gap-1 w-32">
                                 <span className="text-xs font-medium text-[#6c5ce7] whitespace-nowrap">
-                                  {formatTimeRange(startTime, endTime)}
+                                  {formatTimeRangePrecise(startTime, endTime)}
                                 </span>
                                 <span className="text-[10px] text-gray-500">
                                   Duration: {Math.round(duration)}s
