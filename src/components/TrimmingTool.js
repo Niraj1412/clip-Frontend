@@ -87,7 +87,7 @@ const TrimmingTool = ({
   // Enhanced video format checking
   const checkVideoSupport = () => {
     if (!videoRef.current) return { mp4: false, webm: false, ogg: false };
-    
+
     return {
       mp4: !!videoRef.current.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"'),
       webm: !!videoRef.current.canPlayType('video/webm; codecs="vp8, vorbis"'),
@@ -114,7 +114,7 @@ const TrimmingTool = ({
     };
 
     let detailedError = errorMessages[errorCode] || 'Unknown video load error';
-    
+
     // Add more specific guidance based on error type
     if (errorCode === 4) {
       const support = checkVideoSupport();
@@ -122,7 +122,7 @@ const TrimmingTool = ({
       if (support.mp4) detailedError += ' MP4';
       if (support.webm) detailedError += ' WebM';
       if (support.ogg) detailedError += ' OGG';
-      
+
       if (!support.mp4 && !support.webm && !support.ogg) {
         detailedError += ' None detected. Your browser may not support video playback.';
       }
@@ -149,13 +149,13 @@ const TrimmingTool = ({
     setVideoLoadAttempts(prev => prev + 1);
     setError('');
     setReady(false);
-    
+
     if (videoRef.current) {
       // Force reload
       const currentSrc = videoRef.current.src;
       videoRef.current.src = '';
       videoRef.current.load();
-      
+
       setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.src = currentSrc + (currentSrc.includes('?') ? '&' : '?') + 't=' + Date.now();
@@ -203,6 +203,12 @@ const TrimmingTool = ({
     };
 
     const initializeYouTubePlayer = () => {
+      console.log('Initializing YouTube player with videoId:', videoId);
+      const playerContainer = videoRef.current;
+      const playerElement = document.createElement('div');
+      playerElement.id = 'youtube-player-element';
+      playerContainer.appendChild(playerElement);
+
       if (!videoRef.current) {
         setError('Player container not found');
         setReady(false);
@@ -269,19 +275,15 @@ const TrimmingTool = ({
   }, [videoId, isYouTube, parsedStartTime]);
 
   const onPlayerReady = (event) => {
-    setYoutubeReady(true);
+    console.log('YouTube player ready for videoId:', videoId);
     const videoDuration = event.target.getDuration();
+    const validStartTime = Math.max(0, Math.min(parsedStartTime, videoDuration - 0.1));
+    const validEndTime = Math.max(validStartTime + 0.1, Math.min(parsedEndTime, videoDuration));
     setDuration(videoDuration);
-
-    setStartTime(parsedStartTime);
-    setEndTime(parsedEndTime);
-    setCurrentTime(parsedStartTime);
-
-    setUserInteracted(false);
-
-    event.target.seekTo(parsedStartTime);
-
-    setReady(true);
+    setStartTime(validStartTime);
+    setEndTime(validEndTime);
+    setCurrentTime(validStartTime);
+    event.target.seekTo(validStartTime);
 
     console.log(`YouTube video ready. Starting playback from ${parsedStartTime.toFixed(2)} seconds`);
   };
@@ -369,14 +371,14 @@ const TrimmingTool = ({
 
     if (videoRef.current && videoUrl) {
       console.log('Setting video source:', videoUrl);
-      
+
       // Reset attempts when URL changes
       setVideoLoadAttempts(0);
-      
+
       // Enhanced browser support checking
       const support = checkVideoSupport();
       console.log('Browser video support:', support);
-      
+
       if (!support.mp4 && !support.webm && !support.ogg) {
         setError('This browser does not support video playback');
         return;
@@ -387,12 +389,12 @@ const TrimmingTool = ({
       video.crossOrigin = 'anonymous';
       video.preload = 'metadata';
       video.playsInline = true;
-      
+
       // Try to get video info first
       const testVideo = document.createElement('video');
       testVideo.crossOrigin = 'anonymous';
       testVideo.preload = 'metadata';
-      
+
       testVideo.addEventListener('loadedmetadata', () => {
         setVideoInfo({
           duration: testVideo.duration,
@@ -410,13 +412,13 @@ const TrimmingTool = ({
 
       const handleLoadedMetadata = () => {
         const videoDuration = video.duration;
-        
+
         // Validate duration
         if (!videoDuration || !isFinite(videoDuration) || videoDuration <= 0) {
           setError('Invalid video duration. The video file may be corrupted.');
           return;
         }
-        
+
         setDuration(videoDuration);
         setReady(true);
         const validStartTime = Math.max(0, Math.min(parsedStartTime, videoDuration - 0.1));

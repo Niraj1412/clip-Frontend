@@ -184,11 +184,11 @@ const ClipsPreviewerDemo = () => {
                   const response = await axios.get(`${API_BASE_URL}/video/${clip.videoId}/details`, { headers });
                   const details = response.data.data || response.data;
                   thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
-                  videoUrl = details.videoUrl || `${API_BASE_URL}/video/${clip.videoId}/stream`; // Use stream endpoint
+                  videoUrl = details.videoUrl || `${API_BASE_URL}/video/${clip.videoId}`; // Use stream endpoint
                 } catch (error) {
                   console.error('Error fetching video details:', error);
                   thumbnailUrl = `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`; // Fallback
-                  videoUrl = `${API_BASE_URL}/video/${clip.videoId}/stream`; // Fallback to stream endpoint
+                  videoUrl = `${API_BASE_URL}/video/${clip.videoId}`; // Fallback to stream endpoint
                 }
               }
 
@@ -267,7 +267,13 @@ const ClipsPreviewerDemo = () => {
   };
 
   const handlePlayClip = (clip) => {
-    console.log('Clip selected:', clip);
+    console.log('Clip selected:', {
+      id: clip.id,
+      videoId: clip.videoId,
+      isYouTube: clip.isYouTube,
+      videoUrl: clip.videoUrl,
+      thumbnail: clip.thumbnail,
+    });
     setCurrentClip(clip);
   };
 
@@ -848,9 +854,9 @@ const ClipsPreviewerDemo = () => {
                   >
                     <div className="w-full h-full flex items-center justify-center p-6">
                       <TrimmingTool
-                        videoId={currentClip.isYouTube ? currentClip.videoId : ''} // Only set for YouTube
-                        videoUrl={currentClip.isYouTube ? currentClip.thumbnail : currentClip.videoUrl} // Thumbnail for YouTube, video file for uploaded
-                        isYouTube={currentClip.isYouTube || false} // Explicitly set based on clip type
+                        videoId={currentClip.isYouTube ? currentClip.videoId : ''}
+                        videoUrl={currentClip.isYouTube ? '' : currentClip.videoUrl} // Fix: Empty string for YouTube
+                        isYouTube={currentClip.isYouTube || false}
                         initialDuration={currentClip.originalVideoDuration}
                         initialStartTime={currentClip.startTime}
                         initialEndTime={currentClip.endTime}
