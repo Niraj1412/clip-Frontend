@@ -45,6 +45,7 @@ const InputComponent = () => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 2;
+  const [youtubeUrl, setYoutubeUrl] = useState('');
 
 
    const detectPlatformFromUrl = (url) => {
