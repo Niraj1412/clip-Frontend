@@ -113,6 +113,19 @@ const InputComponent = () => {
     }
   };
 
+  const isYouTubeUrl = (url) => {
+  return url.includes('youtube.com') || url.includes('youtu.be');
+};
+
+// Function to validate a YouTube URL (e.g., ensure it has a valid video ID)
+const validateYouTubeUrl = (url) => {
+  if (!isYouTubeUrl(url)) return false;
+  const videoId = url.includes('v=') 
+    ? url.split('v=')[1]?.split('&')[0] 
+    : url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+  return videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId);
+};
+
   const extractVideoId = (url, platform) => {
     if (!url) return null;
     if (platform === 'youtube' || (platform === 'auto' && detectPlatformFromUrl(url) === 'youtube')) {
