@@ -264,9 +264,14 @@ const validateYouTubeUrl = (url) => {
 
 
       try {
-        if (!selectedFile && !validateYouTubeUrl(youtubeUrl)) {
-          throw new Error('Please upload a video file or enter a valid YouTube URL');
-        }
+      if (!selectedFile && !detectPlatformFromUrl(youtubeUrl)) {
+        throw new Error('Please upload a video file or enter a valid URL from a supported platform (YouTube, Vimeo, etc.)');
+      }
+
+      if (youtubeUrl && !validateUrl(youtubeUrl, platform)) {
+      throw new Error('Invalid URL format for the selected platform');
+    }
+
 
         let videoId;
 
