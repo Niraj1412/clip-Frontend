@@ -379,7 +379,7 @@ const validateYouTubeUrl = (url) => {
           // Non-YouTube URL handling
           const response = await retry(async () => {
             return await axios.post(
-              `${BACKUP_API_URL}/api/v1/youtube/video/${videoId}`,
+              `${BACKUP_API_URL}/api/v1/youtube/video`,
               { url: youtubeUrl },
               {
                 timeout: 300000,
