@@ -381,6 +381,7 @@ const handleGenerate = debounce(
         } else {
           // Non-YouTube URL handling (e.g., Vimeo)
           const endpoints = [
+            { url: `https://clip-py-backend-1.onrender.com/url/transcript`, method: 'post' },
             { url: `${PRIMARY_API_URL}/url/transcript`, method: 'post' },
           ];
 
