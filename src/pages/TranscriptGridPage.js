@@ -224,7 +224,7 @@ const TranscriptGridPage = () => {
       let response;
       let isYouTube = false;
       try {
-        response = await axios.post(`https://ai-py-backend.onrender.com/transcript/${videoId}`, { headers });
+        response = await axios.post(`https://clip-py-backend-1.onrender.com/transcript/${videoId}`, { headers });
         isYouTube = true;
       } catch (youtubeError) {
         // If YouTube endpoint fails, fall back to generic endpoint

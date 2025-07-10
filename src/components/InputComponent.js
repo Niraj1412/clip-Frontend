@@ -260,7 +260,7 @@ const handleGenerate = debounce(
       setUploadProgress(0);
       setUrlError('');
       setShowSuccessMessage(false);
-      const PRIMARY_API_URL = 'https://ai-py-backend.onrender.com'; // Primary endpoint
+      const PRIMARY_API_URL = 'https://clip-py-backend-1.onrender.com'; // Primary endpoint
       const BACKUP_API_URL = 'https://new-ai-clip-1.onrender.com';
 
       // Enhanced URL validation: check if youtubeUrl is falsy or platform detection fails
