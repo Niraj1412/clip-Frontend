@@ -319,7 +319,7 @@ const handleGenerate = debounce(
         // Handle URL input
         if (isYouTubeUrl(youtubeUrl)) {
           // YouTube URL handling
-          videoId = extractVideoId(youtubeUrl);
+          videoId = extractVideoId(youtubeUrl, 'youtube');
           if (!videoId) {
             throw new Error('Could not extract video ID from YouTube URL');
           }
