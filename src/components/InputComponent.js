@@ -252,17 +252,17 @@ const validateYouTubeUrl = (url) => {
 };
 
   // Debounced handleGenerate to prevent rapid API calls
-  const handleGenerate = debounce(
+const handleGenerate = debounce(
   async () => {
-    if (isLoading) return;
-    setIsLoading(true);
-    setUploadProgress(0);
-    setUrlError('');
-    setShowSuccessMessage(false);
-    const PRIMARY_API_URL = 'https://ai-py-backend.onrender.com'; // Primary endpoint
-    const BACKUP_API_URL = 'https://new-ai-clip-1.onrender.com';
-
     try {
+      if (isLoading) return;
+      setIsLoading(true);
+      setUploadProgress(0);
+      setUrlError('');
+      setShowSuccessMessage(false);
+      const PRIMARY_API_URL = 'https://ai-py-backend.onrender.com'; // Primary endpoint
+      const BACKUP_API_URL = 'https://new-ai-clip-1.onrender.com';
+
       // Enhanced URL validation: check if youtubeUrl is falsy or platform detection fails
       if (!selectedFile && (!youtubeUrl || !detectPlatformFromUrl(youtubeUrl))) {
         throw new Error('Please upload a video file or enter a valid URL from a supported platform (YouTube, Vimeo, etc.)');
@@ -380,31 +380,45 @@ const validateYouTubeUrl = (url) => {
           throw lastError || new Error('All endpoints failed to fetch transcript');
         } else {
           // Non-YouTube URL handling (e.g., Vimeo)
-          const response = await retry(async () => {
-            return await axios.post(
-              `${PRIMARY_API_URL}/url/transcript`,
-              { video_url: youtubeUrl },
-              {
-                timeout: 300000,
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
+          const endpoints = [
+            { url: `${PRIMARY_API_URL}/url/transcript`, method: 'post' },
+          ];
+
+          let lastError = null;
+          for (const endpoint of endpoints) {
+            try {
+              const response = await retry(async () => {
+                return await axios({
+                  method: endpoint.method,
+                  url: endpoint.url,
+                  data: { video_url: youtubeUrl },
+                  timeout: 300000,
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                  },
+                });
+              });
+
+              if (response.data?.status === true) {
+                await processSuccessResponse(youtubeUrl);
+                setRetryCount(0);
+                return;
               }
-            );
-          });
-
-          // Check response status
-          if (response.data?.status === false) {
-            throw new Error(response.data.message || 'Failed to fetch transcript');
+              throw new Error(response.data?.message || 'Failed to fetch transcript');
+            } catch (error) {
+              console.error(`Error with ${endpoint.url}:`, error);
+              if (error.response?.status === 404) {
+                lastError = new Error('Transcript service unavailable. Please try again later.');
+              } else if (error.response?.status === 401) {
+                setUrlError('Session expired. Please log in again.');
+                navigate('/login');
+                return;
+              } else {
+                lastError = error;
+              }
+            }
           }
-
-          if (response.data?.status === true) {
-            await processSuccessResponse(youtubeUrl); // Use URL as identifier
-            setRetryCount(0); // Reset retry count on success
-            return;
-          }
-
-          throw new Error(response.data?.message || 'Failed to fetch transcript');
+          throw lastError || new Error('All endpoints failed to fetch transcript');
         }
       }
     } catch (error) {
@@ -413,10 +427,8 @@ const validateYouTubeUrl = (url) => {
       setIsLoading(false);
       setUploadProgress(0);
     }
-  },
-  1000,
-  { leading: false, trailing: true }
-);
+  }
+, 1000, { leading: false, trailing: true });
 
 // Wrap with debounce if needed
 
