@@ -10,7 +10,7 @@ export const MERGE_API = `${API_URL}/api/merge`;
 export const AUTH_API = `${API_URL}/api/v1/auth`;
 export const PROJECTS_API = `${API_URL}/api/projects`;
 
-export const PYTHON_API =  USE_EC2_SERVER ?  "https://clip-py-backend-1.onrender.com" :   "http://54.161.100.146:5000" ;
+export const PYTHON_API =  USE_EC2_SERVER ?  "https://ai-py-backend.onrender.com" :   "http://54.161.100.146:5000" ;
 
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://new-ai-clip-1.onrender.com/api';
