@@ -123,7 +123,7 @@ const OutputPage = () => {
       let response;
       try {
         console.log('Trying Python backend...');
-        response = await axios.post(`https://ai-py-backend.onrender.com/merge-clips`, { 
+        response = await axios.post(`https://clip-py-backend-1.onrender.com/merge-clips`, { 
           clips: clipsToMerge 
         }, { 
           headers,
