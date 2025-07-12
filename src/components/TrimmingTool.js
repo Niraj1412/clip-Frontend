@@ -275,18 +275,20 @@ const TrimmingTool = ({
   }, [videoId, isYouTube, parsedStartTime]);
 
   const onPlayerReady = (event) => {
-    console.log('YouTube player ready for videoId:', videoId);
-    const videoDuration = event.target.getDuration();
-    const validStartTime = Math.max(0, Math.min(parsedStartTime, videoDuration - 0.1));
-    const validEndTime = Math.max(validStartTime + 0.1, Math.min(parsedEndTime, videoDuration));
-    setDuration(videoDuration);
-    setStartTime(validStartTime);
-    setEndTime(validEndTime);
-    setCurrentTime(validStartTime);
-    event.target.seekTo(validStartTime);
-
-    console.log(`YouTube video ready. Starting playback from ${parsedStartTime.toFixed(2)} seconds`);
-  };
+  console.log('YouTube player ready for videoId:', videoId);
+  const videoDuration = event.target.getDuration();
+  const validStartTime = Math.max(0, Math.min(parsedStartTime, videoDuration - 0.1));
+  const validEndTime = Math.max(validStartTime + 0.1, Math.min(parsedEndTime, videoDuration));
+  setDuration(videoDuration);
+  setStartTime(validStartTime);
+  setEndTime(validEndTime);
+  setCurrentTime(validStartTime);
+  event.target.seekTo(validStartTime);
+  event.target.pauseVideo(); // Explicitly pause to prevent auto-play
+  setReady(true); // Hide loading indicator
+  setYoutubeReady(true); // Enable time updates
+  console.log(`YouTube video ready. Positioned at ${validStartTime.toFixed(2)} seconds`);
+};
 
   const onPlayerStateChange = (event) => {
     if (event.data === window.YT.PlayerState.PLAYING) {
