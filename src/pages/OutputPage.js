@@ -127,7 +127,7 @@ const OutputPage = () => {
           clips: clipsToMerge 
         }, { 
           headers,
-          timeout: 300000 // 5 minutes timeout
+          timeout: 3000000 // 5 minutes timeout
         });
         
         console.log('Python backend response:', response.data);
