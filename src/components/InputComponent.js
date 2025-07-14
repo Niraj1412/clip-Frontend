@@ -119,7 +119,15 @@ const InputComponent = () => {
 
 // Function to validate a YouTube URL (e.g., ensure it has a valid video ID)
 const validateYouTubeUrl = (url) => {
-  if (!isYouTubeUrl(url)) return false;
+  if (!isYouTubeUrl(url)) return { isValid: false, type: null, id: null };
+
+  // Handle playlist URLs
+  if (url.includes('playlist?list=')) {
+    const playlistId = url.split('list=')[1]?.split('&')[0];
+    // YouTube playlist IDs typically start with 'PL' or other prefixes and are 34 characters long
+    const isValidPlaylist = playlistId && /^[a-zA-Z0-9_-]{34}$/.test(playlistId);
+    return { isValid: isValidPlaylist, type: 'playlist', id: playlistId || null };
+  }
   const videoId = url.includes('v=') 
     ? url.split('v=')[1]?.split('&')[0]
     : url.includes('youtu.be/') 
@@ -131,19 +139,25 @@ const validateYouTubeUrl = (url) => {
           : url.includes('youtube.com/shorts/') 
             ? url.split('youtube.com/shorts/')[1]?.split(/[?&]/)[0]
             : url;
-  return videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId);
+  const isValidVideo = videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId);
+  return { isValid: isValidVideo, type: 'video', id: videoId || null }
 };
 
   const extractVideoId = (url, platform) => {
     if (!url) return null;
-    if (platform === 'youtube' || (platform === 'auto' && detectPlatformFromUrl(url) === 'youtube')) {
-    if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
-    if (url.includes('v=')) return url.split('v=')[1].split('&')[0];
-    if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split(/[?&]/)[0];
-    if (url.includes('youtube.com/embed/')) return url.split('youtube.com/embed/')[1].split(/[?&]/)[0];
-    if (url.includes('youtube.com/live/')) return url.split('youtube.com/live/')[1].split(/[?&]/)[0];
-    if (url.includes('youtube.com/shorts/')) return url.split('youtube.com/shorts/')[1].split(/[?&]/)[0];
-  } else if (platform === 'vimeo') {
+
+  if (platform === 'youtube' || (platform === 'auto' && detectPlatformFromUrl(url) === 'youtube')) {
+    if (extractType === 'playlist' && url.includes('list=')) {
+      return url.split('list=')[1]?.split('&')[0];
+    }
+
+    if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url; // Direct video ID
+    if (url.includes('v=')) return url.split('v=')[1]?.split('&')[0];
+    if (url.includes('youtu.be/')) return url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+    if (url.includes('youtube.com/embed/')) return url.split('youtube.com/embed/')[1]?.split(/[?&]/)[0];
+    if (url.includes('youtube.com/live/')) return url.split('youtube.com/live/')[1]?.split(/[?&]/)[0];
+    if (url.includes('youtube.com/shorts/')) return url.split('youtube.com/shorts/')[1]?.split(/[?&]/)[0];
+  }else if (platform === 'vimeo') {
       const match = url.match(/vimeo\.com\/(\d+)/);
       return match ? match[1] : null;
     } else if (platform === 'dailymotion') {
