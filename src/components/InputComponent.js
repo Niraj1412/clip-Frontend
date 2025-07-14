@@ -121,18 +121,29 @@ const InputComponent = () => {
 const validateYouTubeUrl = (url) => {
   if (!isYouTubeUrl(url)) return false;
   const videoId = url.includes('v=') 
-    ? url.split('v=')[1]?.split('&')[0] 
-    : url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+    ? url.split('v=')[1]?.split('&')[0]
+    : url.includes('youtu.be/') 
+      ? url.split('youtu.be/')[1]?.split(/[?&]/)[0]
+      : url.includes('youtube.com/embed/') 
+        ? url.split('youtube.com/embed/')[1]?.split(/[?&]/)[0]
+        : url.includes('youtube.com/live/') 
+          ? url.split('youtube.com/live/')[1]?.split(/[?&]/)[0]
+          : url.includes('youtube.com/shorts/') 
+            ? url.split('youtube.com/shorts/')[1]?.split(/[?&]/)[0]
+            : url;
   return videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId);
 };
 
   const extractVideoId = (url, platform) => {
     if (!url) return null;
     if (platform === 'youtube' || (platform === 'auto' && detectPlatformFromUrl(url) === 'youtube')) {
-      if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
-      if (url.includes('v=')) return url.split('v=')[1].split('&')[0];
-      if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split(/[?&]/)[0];
-    } else if (platform === 'vimeo') {
+    if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+    if (url.includes('v=')) return url.split('v=')[1].split('&')[0];
+    if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split(/[?&]/)[0];
+    if (url.includes('youtube.com/embed/')) return url.split('youtube.com/embed/')[1].split(/[?&]/)[0];
+    if (url.includes('youtube.com/live/')) return url.split('youtube.com/live/')[1].split(/[?&]/)[0];
+    if (url.includes('youtube.com/shorts/')) return url.split('youtube.com/shorts/')[1].split(/[?&]/)[0];
+  } else if (platform === 'vimeo') {
       const match = url.match(/vimeo\.com\/(\d+)/);
       return match ? match[1] : null;
     } else if (platform === 'dailymotion') {

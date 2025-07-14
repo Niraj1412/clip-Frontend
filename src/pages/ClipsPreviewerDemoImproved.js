@@ -128,8 +128,7 @@ const ClipsPreviewerDemo = () => {
 
         console.log('Sending transcript data to API:', selectedClipsData);
 
-        // Extract video duration from selectedClipsData
-        const videoDuration = selectedClipsData[0]?.duration || 600; // Fallback to 600 if not available
+        const videoDuration = selectedClipsData[0]?.duration || 600;
 
         const response = await fetch(`${YOUTUBE_API}/generateClips`, {
           method: 'POST',
@@ -139,7 +138,7 @@ const ClipsPreviewerDemo = () => {
           body: JSON.stringify({
             transcripts: selectedClipsData,
             customPrompt: prompt || "Generate 3 clips from the transcript with highly accurate and precise transcription and EXACT timestamps. The timestamps must precisely match the actual video timing with frame-level accuracy. Maintain exact wording from the source material. Prioritize both content accuracy and timestamp precision for perfect synchronization with the video.",
-            videoDuration: videoDuration // Include video duration in the request
+            videoDuration: videoDuration
           })
         });
 
@@ -153,73 +152,63 @@ const ClipsPreviewerDemo = () => {
         if (data.success && data.data.script) {
           console.log('Received script data:', data.data.script);
 
-          try {
-            // Enhanced cleaning and sanitization
-            const cleanScript = data.data.script
-              .replace(/```json/g, '')
-              .replace(/```/g, '')
-              .replace(/\((\d+\.?\d*)\)\.toFixed\(2\)/g, '$1')
-              .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\)\.toFixed\(2\)/g, (match) => {
-                return eval(match.replace('.toFixed(2)', '')).toFixed(2);
-              })
-              .trim();
+          const cleanScript = data.data.script
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .replace(/\((\d+\.?\d*)\).toFixed\(2\)/g, '$1')
+            .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\).toFixed\(2\)/g, (match) => {
+              return eval(match.replace('.toFixed(2)', '')).toFixed(2);
+            })
+            .trim();
 
-            const clipsArray = JSON.parse(cleanScript);
-            console.log('Parsed clips array:', clipsArray);
+          const clipsArray = JSON.parse(cleanScript);
+          console.log('Parsed clips array:', clipsArray);
 
-            if (!Array.isArray(clipsArray) || clipsArray.length === 0) {
-              throw new Error('No valid clips were generated');
+          if (!Array.isArray(clipsArray) || clipsArray.length === 0) {
+            throw new Error('No valid clips were generated');
+          }
+
+          const processed = await Promise.all(clipsArray.map(async (clip, index) => {
+            const token = localStorage.getItem('token');
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+            let thumbnailUrl = clip.thumbnailUrl;
+            let videoUrl = clip.videoUrl;
+
+            if (!clip.isYouTube && clip.videoId) {
+              try {
+                const response = await axios.get(`${API_BASE_URL}/video/${clip.videoId}/details`, { headers });
+                const details = response.data.data || response.data;
+                thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
+                videoUrl = details.videoUrl || `${API_BASE_URL}/video/${clip.videoId}`;
+              } catch (error) {
+                console.error('Error fetching video details:', error);
+                thumbnailUrl = `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
+                videoUrl = `${API_BASE_URL}/video/${clip.videoId}`;
+              }
             }
 
-            // Process each clip with exact timestamp precision
-            const processed = await Promise.all(clipsArray.map(async (clip, index) => {
-              const token = localStorage.getItem('token');
-              const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            if (videoUrl && !videoUrl.startsWith('http')) {
+              videoUrl = `${API_BASE_URL}/${videoUrl.replace(/^\/*/, '')}`;
+            }
 
-              let thumbnailUrl = clip.thumbnailUrl;
-              let videoUrl = clip.videoUrl;
+            return {
+              id: `clip_${index + 1}`,
+              videoId: clip.videoId,
+              isYouTube: clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11),
+              videoUrl: clip.isYouTube ? '' : videoUrl,
+              title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
+              originalVideoDuration: clip.originalVideoDuration || 60,
+              duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
+              startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
+              endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
+              transcriptText: (clip.transcriptText || '').replace(/'/g, "'"),
+              thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`,
+            };
+          }));
 
-              if (!clip.isYouTube && clip.videoId) {
-                try {
-                  const response = await axios.get(`${API_BASE_URL}/video/${clip.videoId}/details`, { headers });
-                  const details = response.data.data || response.data;
-                  thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
-                  videoUrl = details.videoUrl || `${API_BASE_URL}/video/${clip.videoId}`; // Use stream endpoint
-                } catch (error) {
-                  console.error('Error fetching video details:', error);
-                  thumbnailUrl = `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`; // Fallback
-                  videoUrl = `${API_BASE_URL}/video/${clip.videoId}`; // Fallback to stream endpoint
-                }
-              }
-
-              // Ensure final videoUrl is absolute
-              if (videoUrl && !videoUrl.startsWith('http')) {
-                videoUrl = `${API_BASE_URL}/${videoUrl.replace(/^\/*/, '')}`;
-              }
-
-              return {
-                id: `clip_${index + 1}`,
-                videoId: clip.videoId,
-                isYouTube: clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11),
-                videoUrl: clip.isYouTube ? '' : videoUrl,
-                title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
-                originalVideoDuration: clip.originalVideoDuration || 60,
-                duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
-                startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
-                endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
-                transcriptText: (clip.transcriptText || '').replace(/&#39;/g, "'"),
-                thumbnail: clip.isYouTube
-                  ? `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`
-                  : thumbnailUrl,
-              };
-            }));
-
-            setProcessedClips(processed);
-            showFeedback('Clips generated successfully!', 'success');
-          } catch (parseError) {
-            console.error('Error parsing script:', parseError, data.data.script);
-            throw new Error(`Failed to parse generated clips: ${parseError.message}`);
-          }
+          setProcessedClips(processed);
+          showFeedback('Clips generated successfully!', 'success');
         } else {
           console.error('Invalid API response format:', data);
           throw new Error(data.message || 'Invalid response format');
@@ -233,10 +222,10 @@ const ClipsPreviewerDemo = () => {
       }
     };
 
-    if (selectedClipsData) {
+    if (processedClips.length === 0 && selectedClipsData) {
       fetchClips();
     }
-  }, [selectedClipsData]);
+  }, [selectedClipsData, processedClips]);
 
   const [selectedClips, setSelectedClips] = useState([]);
   const [currentClip, setCurrentClip] = useState(null);
