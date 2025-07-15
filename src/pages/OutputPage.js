@@ -104,23 +104,25 @@ const mergeClips = async () => {
   setVideoError(false);
 
   try {
-    // Step 1: Validate and prepare clip data
-    const clipsToMerge = selectedClipsData.map(clip => {
-      const videoDuration = clip.duration || 600; // Fallback duration if unknown
-      const startTime = Math.max(0, Math.min(Number(clip.startTime), videoDuration - 0.1));
-      const endTime = Math.max(startTime + 0.1, Math.min(Number(clip.endTime), videoDuration));
-      return {
-        videoId: clip.videoId,
-        transcriptText: clip.transcriptText,
-        startTime,
-        endTime,
-        duration: videoDuration, // Include duration for backend validation
-        isYouTube: clip.videoId.length === 11, // Flag to identify YouTube videos
-        videoUrl: clip.videoId.length !== 11 ? `${API_BASE_URL}/video/${clip.videoId}` : '' // URL for non-YouTube videos
-      };
-    });
+    // Flatten segments from all videos into a single array of clips
+    const clipsToMerge = selectedClipsData.flatMap(videoData =>
+      videoData.segments.map(segment => {
+        const videoDuration = videoData.duration || 600; // Fallback duration
+        const startTime = Math.max(0, Math.min(parseFloat(segment.startTime) || 0, videoDuration - 0.1));
+        const endTime = Math.max(startTime + 0.1, Math.min(parseFloat(segment.endTime) || startTime + 1, videoDuration));
+        return {
+          videoId: videoData.videoId,
+          transcriptText: segment.text || '',
+          startTime,
+          endTime,
+          duration: videoDuration,
+          isYouTube: videoData.videoId.length === 11,
+          videoUrl: videoData.videoId.length !== 11 ? `${API_BASE_URL}/video/${videoData.videoId}` : ''
+        };
+      })
+    );
 
-    console.log('Clips to merge:', JSON.stringify(clipsToMerge, null, 2)); // Debugging log
+    console.log('Clips to merge:', JSON.stringify(clipsToMerge, null, 2)); // Debug log
 
     const token = localStorage.getItem('token');
     const headers = token ? {
@@ -131,14 +133,13 @@ const mergeClips = async () => {
     let response;
     let pythonError = null;
 
-    // Step 2: Enhanced backend request with detailed error handling
     try {
       console.log('Trying Python backend...');
       response = await axios.post(`https://clip-py-backend-1.onrender.com/merge-clips`, {
         clips: clipsToMerge
       }, {
         headers,
-        timeout: 3000000
+        timeout: 3000000 // 50 minutes
       });
       console.log('Python backend response:', response.data);
       if (!response.data?.success || !response.data?.s3Url) {
@@ -146,11 +147,7 @@ const mergeClips = async () => {
       }
     } catch (err) {
       pythonError = err;
-      console.error('Python backend error:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
+      console.error('Python backend failed, trying Node backend:', err);
       try {
         console.log('Trying Node backend...');
         response = await axios.post(`${API_URL}/api/merge/videoMerge`, {
@@ -161,39 +158,22 @@ const mergeClips = async () => {
         });
         console.log('Node backend response:', response.data);
       } catch (nodeError) {
-        console.error('Node backend error:', {
-          message: nodeError.message,
-          response: nodeError.response?.data,
-          status: nodeError.response?.status
-        });
         throw new Error(`All backends failed. Python: ${pythonError.message}, Node: ${nodeError.message}`);
       }
     }
 
-    // Handle various response structures
-    const rawVideoUrl = response.data?.videoUrl ||
-      response.data?.data?.videoUrl ||
-      response.data?.s3Url ||
-      response.data?.data?.s3Url;
-
-    console.log('Raw video URL received:', rawVideoUrl);
+    const rawVideoUrl = response.data?.videoUrl || response.data?.data?.videoUrl ||
+      response.data?.s3Url || response.data?.data?.s3Url;
 
     if (!rawVideoUrl) {
-      console.error('No video URL found in response. Full response:', response.data);
-      throw new Error(
-        response.data?.message ||
-        response.data?.data?.message ||
-        'Video was processed but no URL was returned. Please check console for details.'
-      );
+      throw new Error('Video processed but no URL returned');
     }
 
-    // Validate and clean the video URL
     const cleanVideoUrl = validateVideoUrl(rawVideoUrl);
     if (!cleanVideoUrl) {
       throw new Error('Invalid video URL format received from server');
     }
 
-    console.log('Clean video URL:', cleanVideoUrl);
     setVideoUrl(cleanVideoUrl);
     setLoadingProgress(98);
 
