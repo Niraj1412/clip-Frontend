@@ -27,7 +27,7 @@ import {
   faLinkedin,
   faWhatsapp
 } from '@fortawesome/free-brands-svg-icons';
-import { API_URL, PYTHON_API, INITIAL_VERSION_API, API_BASE_URL } from '../config';
+import { API_URL, PYTHON_API, INITIAL_VERSION_API } from '../config';
 import authService from '../services/authService';
 
 const OutputPage = () => {
@@ -42,6 +42,7 @@ const OutputPage = () => {
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const navigate = useNavigate();
+  const API_BASE_URL = 'https://ai-clip-backend1-1.onrender.com/api/v1';
 
   // Simulated loading progress
   useEffect(() => {
