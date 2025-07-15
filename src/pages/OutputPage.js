@@ -95,144 +95,144 @@ const OutputPage = () => {
   };
 
   // Function to send clips data to backend for merging
-const mergeClips = async () => {
-  setLoading(true);
-  setError(null);
-  setLoadingProgress(0);
-  setSavedToDatabase(false);
-  setVideoLoaded(false);
-  setVideoError(false);
-
-  try {
-    // Flatten segments from all videos into a single array of clips
-    const clipsToMerge = selectedClipsData.flatMap(videoData =>
-      videoData.segments.map(segment => {
-        const videoDuration = videoData.duration || 600; // Fallback duration
-        const startTime = Math.max(0, Math.min(parseFloat(segment.startTime) || 0, videoDuration - 0.1));
-        const endTime = Math.max(startTime + 0.1, Math.min(parseFloat(segment.endTime) || startTime + 1, videoDuration));
-        return {
-          videoId: videoData.videoId,
-          transcriptText: segment.text || '',
-          startTime,
-          endTime,
-          duration: videoDuration,
-          isYouTube: videoData.videoId.length === 11,
-          videoUrl: videoData.videoId.length !== 11 ? `${API_BASE_URL}/video/${videoData.videoId}` : ''
-        };
-      })
-    );
-
-    console.log('Clips to merge:', JSON.stringify(clipsToMerge, null, 2)); // Debug log
-
-    const token = localStorage.getItem('token');
-    const headers = token ? {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    } : { 'Content-Type': 'application/json' };
-
-    let response;
-    let pythonError = null;
+  const mergeClips = async () => {
+    setLoading(true);
+    setError(null);
+    setLoadingProgress(0);
+    setSavedToDatabase(false);
+    setVideoLoaded(false);
+    setVideoError(false);
 
     try {
-      console.log('Trying Python backend...');
-      response = await axios.post(`https://clip-py-backend-1.onrender.com/merge-clips`, {
-        clips: clipsToMerge
-      }, {
-        headers,
-        timeout: 3000000 // 50 minutes
-      });
-      console.log('Python backend response:', response.data);
-      if (!response.data?.success || !response.data?.s3Url) {
-        throw new Error('Python backend response invalid, trying fallback');
-      }
-    } catch (err) {
-      pythonError = err;
-      console.error('Python backend failed, trying Node backend:', err);
+      // Flatten segments from all videos into a single array of clips
+      const clipsToMerge = selectedClipsData.flatMap(videoData =>
+        videoData.segments.map(segment => {
+          const videoDuration = videoData.duration || 600; // Fallback duration
+          const startTime = Math.max(0, Math.min(parseFloat(segment.startTime) || 0, videoDuration - 0.1));
+          const endTime = Math.max(startTime + 0.1, Math.min(parseFloat(segment.endTime) || startTime + 1, videoDuration));
+          return {
+            videoId: videoData.videoId,
+            transcriptText: segment.text || '',
+            startTime,
+            endTime,
+            duration: videoDuration,
+            isYouTube: videoData.videoId.length === 11,
+            videoUrl: videoData.videoId.length !== 11 ? `${API_BASE_URL}/video/${videoData.videoId}` : ''
+          };
+        })
+      );
+
+      console.log('Clips to merge:', JSON.stringify(clipsToMerge, null, 2)); // Debug log
+
+      const token = localStorage.getItem('token');
+      const headers = token ? {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      } : { 'Content-Type': 'application/json' };
+
+      let response;
+      let pythonError = null;
+
       try {
-        console.log('Trying Node backend...');
-        response = await axios.post(`${API_URL}/api/merge/videoMerge`, {
+        console.log('Trying Python backend...');
+        response = await axios.post(`https://clip-py-backend-1.onrender.com/merge-clips`, {
           clips: clipsToMerge
         }, {
           headers,
-          timeout: 300000
+          timeout: 3000000 // 50 minutes
         });
-        console.log('Node backend response:', response.data);
-      } catch (nodeError) {
-        throw new Error(`All backends failed. Python: ${pythonError.message}, Node: ${nodeError.message}`);
+        console.log('Python backend response:', response.data);
+        if (!response.data?.success || !response.data?.s3Url) {
+          throw new Error('Python backend response invalid, trying fallback');
+        }
+      } catch (err) {
+        pythonError = err;
+        console.error('Python backend failed, trying Node backend:', err);
+        try {
+          console.log('Trying Node backend...');
+          response = await axios.post(`${API_URL}/api/merge/videoMerge`, {
+            clips: clipsToMerge
+          }, {
+            headers,
+            timeout: 300000
+          });
+          console.log('Node backend response:', response.data);
+        } catch (nodeError) {
+          throw new Error(`All backends failed. Python: ${pythonError.message}, Node: ${nodeError.message}`);
+        }
       }
-    }
 
-    const rawVideoUrl = response.data?.videoUrl || response.data?.data?.videoUrl ||
-      response.data?.s3Url || response.data?.data?.s3Url;
+      const rawVideoUrl = response.data?.videoUrl || response.data?.data?.videoUrl ||
+        response.data?.s3Url || response.data?.data?.s3Url;
 
-    if (!rawVideoUrl) {
-      throw new Error('Video processed but no URL returned');
-    }
-
-    const cleanVideoUrl = validateVideoUrl(rawVideoUrl);
-    if (!cleanVideoUrl) {
-      throw new Error('Invalid video URL format received from server');
-    }
-
-    setVideoUrl(cleanVideoUrl);
-    setLoadingProgress(98);
-
-    // Test video accessibility
-    try {
-      const testResponse = await fetch(cleanVideoUrl, {
-        method: 'HEAD',
-        mode: 'cors'
-      });
-      console.log('Video accessibility test:', testResponse.status, testResponse.statusText);
-
-      if (!testResponse.ok) {
-        console.warn('Video URL might not be accessible:', testResponse.status);
+      if (!rawVideoUrl) {
+        throw new Error('Video processed but no URL returned');
       }
-    } catch (testError) {
-      console.warn('Could not test video accessibility:', testError.message);
-    }
 
-    // Database save logic for authenticated users
-    try {
-      const userDataFromStorage = JSON.parse(localStorage.getItem('user') || '{}');
-      const authUser = authService.getCurrentUser();
+      const cleanVideoUrl = validateVideoUrl(rawVideoUrl);
+      if (!cleanVideoUrl) {
+        throw new Error('Invalid video URL format received from server');
+      }
 
-      if ((userDataFromStorage && userDataFromStorage.id) || (authUser && authUser.id)) {
-        const userId = userDataFromStorage.id || authUser?.id;
-        const userEmail = userDataFromStorage.email || authUser?.email || "guest@clipsmart.ai";
-        const userName = userDataFromStorage.name || authUser?.name || "Guest User";
+      setVideoUrl(cleanVideoUrl);
+      setLoadingProgress(98);
 
-        const dbResponse = await axios.post(`${API_URL}/api/v1/youtube/addFinalVideo`, {
-          clipsInfo: clipsToMerge,
-          fileNames3: cleanVideoUrl.split('/').pop(),
-          s3Url: cleanVideoUrl,
-          userId,
-          userEmail,
-          userName
-        }, { headers });
+      // Test video accessibility
+      try {
+        const testResponse = await fetch(cleanVideoUrl, {
+          method: 'HEAD',
+          mode: 'cors'
+        });
+        console.log('Video accessibility test:', testResponse.status, testResponse.statusText);
 
-        if (dbResponse.data?.success) {
-          setSavedToDatabase(true);
-          if (dbResponse.data.data?.s3Url) {
-            const dbVideoUrl = validateVideoUrl(dbResponse.data.data.s3Url);
-            if (dbVideoUrl) {
-              setVideoUrl(dbVideoUrl);
+        if (!testResponse.ok) {
+          console.warn('Video URL might not be accessible:', testResponse.status);
+        }
+      } catch (testError) {
+        console.warn('Could not test video accessibility:', testError.message);
+      }
+
+      // Database save logic for authenticated users
+      try {
+        const userDataFromStorage = JSON.parse(localStorage.getItem('user') || '{}');
+        const authUser = authService.getCurrentUser();
+
+        if ((userDataFromStorage && userDataFromStorage.id) || (authUser && authUser.id)) {
+          const userId = userDataFromStorage.id || authUser?.id;
+          const userEmail = userDataFromStorage.email || authUser?.email || "guest@clipsmart.ai";
+          const userName = userDataFromStorage.name || authUser?.name || "Guest User";
+
+          const dbResponse = await axios.post(`${API_URL}/api/v1/youtube/addFinalVideo`, {
+            clipsInfo: clipsToMerge,
+            fileNames3: cleanVideoUrl.split('/').pop(),
+            s3Url: cleanVideoUrl,
+            userId,
+            userEmail,
+            userName
+          }, { headers });
+
+          if (dbResponse.data?.success) {
+            setSavedToDatabase(true);
+            if (dbResponse.data.data?.s3Url) {
+              const dbVideoUrl = validateVideoUrl(dbResponse.data.data.s3Url);
+              if (dbVideoUrl) {
+                setVideoUrl(dbVideoUrl);
+              }
             }
           }
         }
+      } catch (dbError) {
+        console.error('Database save error (non-critical):', dbError);
+      } finally {
+        setLoadingProgress(100);
+        setLoading(false);
       }
-    } catch (dbError) {
-      console.error('Database save error (non-critical):', dbError);
-    } finally {
-      setLoadingProgress(100);
+    } catch (err) {
+      console.error('Merge error:', err);
+      setError(err.message || 'Failed to merge clips');
       setLoading(false);
     }
-  } catch (err) {
-    console.error('Merge error:', err);
-    setError(err.message || 'Failed to merge clips');
-    setLoading(false);
-  }
-};
+  };
 
 
   const handleBackToClips = () => {
@@ -408,8 +408,14 @@ const mergeClips = async () => {
 
   // Get total duration of all clips
   const getTotalDuration = () => {
-    return selectedClipsData.reduce((acc, clip) =>
-      acc + (clip.endTime - clip.startTime), 0);
+    return selectedClipsData.reduce((acc, video) =>
+      acc + (video.segments ? video.segments.reduce((sum, segment) =>
+        sum + (parseFloat(segment.endTime) - parseFloat(segment.startTime)), 0) : 0), 0);
+  };
+
+  const getTotalClips = () => {
+    return selectedClipsData.reduce((acc, video) =>
+      acc + (video.segments ? video.segments.length : 0), 0);
   };
 
   return (
@@ -423,7 +429,7 @@ const mergeClips = async () => {
           <h1 className="text-lg font-medium text-white">
             Video Output
             <span className="ml-2 text-sm text-gray-400">
-              ({selectedClipsData.length} clips merged)
+              ({getTotalClips()} clips merged)
             </span>
           </h1>
         </div>
@@ -645,24 +651,26 @@ const mergeClips = async () => {
                 <div className="mt-6 pt-6 border-t border-[#2d2d2d]">
                   <h4 className="text-gray-400 text-sm mb-3">Clips Being Processed</h4>
                   <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                  {selectedClipsData.length > 0 ? (
-                    selectedClipsData.map((clip, index) => (
-                      <div key={index} className="bg-[#252525] rounded-lg p-2 text-xs">
-                        <div className="flex justify-between mb-1">
-                          <span className="text-[#6c5ce7]">Clip {index + 1}</span>
-                          <span className="text-gray-500">
-                            {(clip.endTime - clip.startTime).toFixed(1)}s
-                          </span>
-                        </div>
-                        <div className="text-gray-400 truncate">
-                          {clip.transcriptText?.slice(0, 30)}...
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-gray-400">No clips to display</div>
-                  )}
-                </div>
+                    {selectedClipsData.length > 0 && selectedClipsData.some(video => video.segments && video.segments.length > 0) ? (
+                      selectedClipsData.flatMap((video, videoIndex) =>
+                        video.segments.map((segment, segmentIndex) => (
+                          <div key={`${videoIndex}-${segmentIndex}`} className="bg-[#252525] rounded-lg p-2 text-xs">
+                            <div className="flex justify-between mb-1">
+                              <span className="text-[#6c5ce7]">Clip {videoIndex + 1}.{segmentIndex + 1}</span>
+                              <span className="text-gray-500">
+                                {(parseFloat(segment.endTime) - parseFloat(segment.startTime)).toFixed(1)}s
+                              </span>
+                            </div>
+                            <div className="text-gray-400 truncate">
+                              {segment.text?.slice(0, 30)}...
+                            </div>
+                          </div>
+                        ))
+                      )
+                    ) : (
+                      <div className="text-gray-400">No clips to display</div>
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -877,25 +885,33 @@ const mergeClips = async () => {
                   </div>
 
                   <div className="p-2 max-h-[300px] overflow-y-auto custom-purple-scrollbar">
-                    {selectedClipsData.map((clip, index) => (
-                      <div
-                        key={index}
-                        className="bg-[#252525] rounded-lg p-3 mb-2 hover:bg-[#2a2a2a] transition-colors"
-                      >
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex items-center">
-                            <div className="w-6 h-6 rounded-full bg-[#6c5ce7]/20 flex items-center justify-center mr-2">
-                              <span className="text-xs text-[#6c5ce7] font-bold">{index + 1}</span>
+                    {selectedClipsData.length > 0 && selectedClipsData.some(video => video.segments && video.segments.length > 0) ? (
+                      selectedClipsData.flatMap((video, videoIndex) =>
+                        video.segments.map((segment, segmentIndex) => (
+                          <div
+                            key={`${videoIndex}-${segmentIndex}`}
+                            className="bg-[#252525] rounded-lg p-3 mb-2 hover:bg-[#2a2a2a] transition-colors"
+                          >
+                            <div className="flex justify-between items-center mb-2">
+                              <div className="flex items-center">
+                                <div className="w-6 h-6 rounded-full bg-[#6c5ce7]/20 flex items-center justify-center mr-2">
+                                  <span className="text-xs text-[#6c5ce7] font-bold">{videoIndex + 1}.{segmentIndex + 1}</span>
+                                </div>
+                                <span className="font-medium text-sm">Clip {videoIndex + 1}.{segmentIndex + 1}</span>
+                              </div>
+                              <span className="text-gray-500 text-xs">
+                                {(parseFloat(segment.endTime) - parseFloat(segment.startTime)).toFixed(1)}s
+                              </span>
                             </div>
-                            <span className="font-medium text-sm">Clip {index + 1}</span>
+                            <div className="text-gray-400 text-xs line-clamp-2">
+                              {segment.text}
+                            </div>
                           </div>
-                          <span className="text-gray-500 text-xs">{(clip.endTime - clip.startTime).toFixed(1)}s</span>
-                        </div>
-                        <div className="text-gray-400 text-xs line-clamp-2">
-                          {clip.transcriptText}
-                        </div>
-                      </div>
-                    ))}
+                        ))
+                      )
+                    ) : (
+                      <div className="text-gray-400">No clips to display</div>
+                    )}
                   </div>
 
                   <div className="px-6 py-4 border-t border-[#2d2d2d] bg-[#151515]">
