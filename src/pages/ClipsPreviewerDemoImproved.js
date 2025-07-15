@@ -118,116 +118,78 @@ const ClipsPreviewerDemo = () => {
   }, [loading, processedClips.length]);
 
   useEffect(() => {
-    const fetchClips = async () => {
-      try {
-        if (!selectedClipsData || selectedClipsData.length === 0) {
-          throw new Error('No transcript data available');
-        }
+  const fetchClips = async () => {
+    try {
+      if (!selectedClipsData || selectedClipsData.length === 0) {
+        throw new Error('No transcript data available');
+      }
 
-        setLoading(true);
-        setError(null);
-        showFeedback('Generating clips...', 'info');
+      setLoading(true);
+      setError(null);
+      showFeedback('Generating clips...', 'info');
 
-        console.log('Sending transcript data to API:', selectedClipsData);
+      // Process clips for each video separately
+      const allProcessedClips = await Promise.all(
+        selectedClipsData.map(async (videoData, videoIndex) => {
+          const videoDuration = videoData.duration || 600;
+          const response = await fetch(`${YOUTUBE_API}/generateClips`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              transcripts: [videoData], // Send one video's data at a time
+              customPrompt: prompt || "Generate 3 clips...",
+              videoDuration: videoDuration,
+            }),
+          });
 
-        const videoDuration = selectedClipsData[0]?.duration || 600;
-
-        const response = await fetch(`${YOUTUBE_API}/generateClips`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            transcripts: selectedClipsData,
-            customPrompt: prompt || "Generate 3 clips from the transcript with highly accurate and precise transcription and EXACT timestamps. The timestamps must precisely match the actual video timing with frame-level accuracy. Maintain exact wording from the source material. Prioritize both content accuracy and timestamp precision for perfect synchronization with the video.",
-            videoDuration: videoDuration
-          })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          console.error('API error response:', data);
-          throw new Error(data.message || data.error || `Failed to generate clips (Status: ${response.status})`);
-        }
-
-        if (data.success && data.data.script) {
-          console.log('Received script data:', data.data.script);
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.message || 'Failed to generate clips');
 
           const cleanScript = data.data.script
             .replace(/```json/g, '')
             .replace(/```/g, '')
             .replace(/\((\d+\.?\d*)\).toFixed\(2\)/g, '$1')
-            .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\).toFixed\(2\)/g, (match) => {
-              return eval(match.replace('.toFixed(2)', '')).toFixed(2);
-            })
+            .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\).toFixed\(2\)/g, (match) =>
+              eval(match.replace('.toFixed(2)', '')).toFixed(2)
+            )
             .trim();
 
           const clipsArray = JSON.parse(cleanScript);
-          console.log('Parsed clips array:', clipsArray);
-
           if (!Array.isArray(clipsArray) || clipsArray.length === 0) {
-            throw new Error('No valid clips were generated');
+            throw new Error('No valid clips generated for video');
           }
 
-          const processed = await Promise.all(clipsArray.map(async (clip, index) => {
-            const token = localStorage.getItem('token');
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-            let thumbnailUrl = clip.thumbnailUrl;
-            let videoUrl = clip.videoUrl;
-
-            if (!clip.isYouTube && clip.videoId) {
-              try {
-                const response = await axios.get(`${API_BASE_URL}/video/${clip.videoId}/details`, { headers });
-                const details = response.data.data || response.data;
-                thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
-                videoUrl = details.videoUrl || `${API_BASE_URL}/video/${clip.videoId}`;
-              } catch (error) {
-                console.error('Error fetching video details:', error);
-                thumbnailUrl = `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
-                videoUrl = `${API_BASE_URL}/video/${clip.videoId}`;
-              }
-            }
-
-            if (videoUrl && !videoUrl.startsWith('http')) {
-              videoUrl = `${API_BASE_URL}/${videoUrl.replace(/^\/*/, '')}`;
-            }
-
-            return {
-              id: `clip_${index + 1}`,
-              videoId: clip.videoId,
-              isYouTube: clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11),
-              videoUrl: clip.isYouTube ? '' : videoUrl,
-              title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
-              originalVideoDuration: clip.originalVideoDuration || 60,
-              duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
-              startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
-              endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
-              transcriptText: (clip.transcriptText || '').replace(/'/g, "'"),
-              thumbnail: `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`,
-            };
+          return clipsArray.map((clip, index) => ({
+            id: `clip_${videoIndex}_${index + 1}`,
+            videoId: videoData.videoId,
+            isYouTube: videoData.videoId.length === 11,
+            videoUrl: videoData.videoId.length !== 11 ? `${API_BASE_URL}/video/${videoData.videoId}` : '',
+            title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
+            originalVideoDuration: videoDuration,
+            duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
+            startTime: parseFloat(parseFloat(clip.startTime || 0).toFixed(2)),
+            endTime: parseFloat(parseFloat(clip.endTime || 0).toFixed(2)),
+            transcriptText: (clip.transcriptText || '').replace(/'/g, "'"),
+            thumbnail: `https://img.youtube.com/vi/${videoData.videoId}/maxresdefault.jpg`,
           }));
+        })
+      );
 
-          setProcessedClips(processed);
-          showFeedback('Clips generated successfully!', 'success');
-        } else {
-          console.error('Invalid API response format:', data);
-          throw new Error(data.message || 'Invalid response format');
-        }
-      } catch (err) {
-        console.error('Error details:', err);
-        setError(err.message);
-        showFeedback(`Error: ${err.message}`, 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (processedClips.length === 0 && selectedClipsData) {
-      fetchClips();
+      setProcessedClips(allProcessedClips.flat());
+      showFeedback('Clips generated successfully!', 'success');
+    } catch (err) {
+      console.error('Error details:', err);
+      setError(err.message);
+      showFeedback(`Error: ${err.message}`, 'error');
+    } finally {
+      setLoading(false);
     }
-  }, [selectedClipsData, processedClips]);
+  };
+
+  if (processedClips.length === 0 && selectedClipsData) {
+    fetchClips();
+  }
+}, [selectedClipsData, processedClips]);
 
   const [selectedClips, setSelectedClips] = useState([]);
   const [currentClip, setCurrentClip] = useState(null);
@@ -342,38 +304,34 @@ const ClipsPreviewerDemo = () => {
 };
 
 const handleFinishAndSave = () => {
-  if (processedClips && processedClips.length > 0) {
-    const clipsWithVideoId = processedClips.map(clip => {
-      let videoId = clip.videoId;
-
-      // Extract from videoUrl if missing or invalid
-      if (!videoId || !validateVideoId(videoId)) {
-        if (clip.videoUrl) {
-          const videoIdMatch = clip.videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-          videoId = videoIdMatch ? videoIdMatch[1] : null;
-        }
-      }
-
-      // Fallback to commonVideoId if still invalid
-      if (!videoId || !validateVideoId(videoId)) {
-        const urlMatch = selectedClipsData[0]?.url?.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-        videoId = urlMatch ? urlMatch[1] : null;
-      }
-
-      if (!videoId || !validateVideoId(videoId)) {
-        showFeedback('Error: Invalid video ID detected. Please check your input.', 'error');
-        return clip; // Return as-is to avoid breaking the process, but flag the issue
-      }
-
-      return { ...clip, videoId };
-    });
-
-    setSelectedClipsData(clipsWithVideoId);
-    showFeedback('Clips saved successfully! Redirecting to merge page...', 'success');
-    setTimeout(() => navigate('/merge'), 1500);
-  } else {
+  if (processedClips.length === 0) {
     showFeedback('No clips to save. Please create some clips first.', 'error');
+    return;
   }
+
+  const clipsByVideo = processedClips.reduce((acc, clip) => {
+    if (!acc[clip.videoId]) acc[clip.videoId] = [];
+    acc[clip.videoId].push(clip);
+    return acc;
+  }, {});
+
+  const updatedClipsData = Object.entries(clipsByVideo).map(([videoId, clips]) => {
+    const originalVideoData = selectedClipsData.find(data => data.videoId === videoId) || {};
+    return {
+      ...originalVideoData,
+      videoId,
+      segments: clips.map(clip => ({
+        startTime: clip.startTime,
+        endTime: clip.endTime,
+        duration: clip.duration,
+        text: clip.transcriptText,
+      })),
+    };
+  });
+
+  setSelectedClipsData(updatedClipsData);
+  showFeedback('Clips saved successfully! Redirecting to merge page...', 'success');
+  setTimeout(() => navigate('/merge'), 1500);
 };
 
   // Format time function
