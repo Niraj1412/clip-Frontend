@@ -27,7 +27,7 @@ import {
   faLinkedin,
   faWhatsapp
 } from '@fortawesome/free-brands-svg-icons';
-import { API_URL, PYTHON_API, INITIAL_VERSION_API } from '../config';
+import { API_URL, PYTHON_API, INITIAL_VERSION_API, API_BASE_URL } from '../config';
 import authService from '../services/authService';
 
 const OutputPage = () => {
