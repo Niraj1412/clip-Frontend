@@ -275,20 +275,20 @@ const TrimmingTool = ({
   }, [videoId, isYouTube, parsedStartTime]);
 
   const onPlayerReady = (event) => {
-  console.log('YouTube player ready for videoId:', videoId);
-  const videoDuration = event.target.getDuration();
-  const validStartTime = Math.max(0, Math.min(parsedStartTime, videoDuration - 0.1));
-  const validEndTime = Math.max(validStartTime + 0.1, Math.min(parsedEndTime, videoDuration));
-  setDuration(videoDuration);
-  setStartTime(validStartTime);
-  setEndTime(validEndTime);
-  setCurrentTime(validStartTime);
-  event.target.seekTo(validStartTime);
-  event.target.pauseVideo(); // Explicitly pause to prevent auto-play
-  setReady(true); // Hide loading indicator
-  setYoutubeReady(true); // Enable time updates
-  console.log(`YouTube video ready. Positioned at ${validStartTime.toFixed(2)} seconds`);
-};
+    console.log('YouTube player ready for videoId:', videoId);
+    const videoDuration = event.target.getDuration();
+    const validStartTime = Math.max(0, Math.min(parsedStartTime, videoDuration - 0.1));
+    const validEndTime = Math.max(validStartTime + 0.1, Math.min(parsedEndTime, videoDuration));
+    setDuration(videoDuration);
+    setStartTime(validStartTime);
+    setEndTime(validEndTime);
+    setCurrentTime(validStartTime);
+    event.target.seekTo(validStartTime);
+    event.target.pauseVideo(); // Explicitly pause to prevent auto-play
+    setReady(true); // Hide loading indicator
+    setYoutubeReady(true); // Enable time updates
+    console.log(`YouTube video ready. Positioned at ${validStartTime.toFixed(2)} seconds`);
+  };
 
   const onPlayerStateChange = (event) => {
     if (event.data === window.YT.PlayerState.PLAYING) {
@@ -502,7 +502,7 @@ const TrimmingTool = ({
   }, [startTime, endTime, onTimingChange, userInteracted]);
 
   const updateStartTime = (newStartTime) => {
-    const validStartTime = Math.max(0, Math.min(newStartTime, endTime - 0.1));
+    const validStartTime = Math.max(0, Math.min(Number(newStartTime), endTime - 0.1));
 
     if (validStartTime !== startTime) {
       setStartTime(validStartTime);
@@ -519,7 +519,7 @@ const TrimmingTool = ({
   };
 
   const updateEndTime = (newEndTime) => {
-    const validEndTime = Math.max(startTime + 0.1, Math.min(newEndTime, duration));
+    const validEndTime = Math.max(startTime + 0.1, Math.min(Number(newEndTime), duration));
 
     if (validEndTime !== endTime) {
       setEndTime(validEndTime);

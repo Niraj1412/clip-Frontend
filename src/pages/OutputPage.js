@@ -4,11 +4,11 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faDownload, 
-  faArrowLeft, 
-  faSpinner, 
-  faShare, 
+import {
+  faDownload,
+  faArrowLeft,
+  faSpinner,
+  faShare,
   faCheckCircle,
   faExclamationCircle,
   faCopy,
@@ -54,7 +54,7 @@ const OutputPage = () => {
         });
       }, 1000);
     }
-    
+
     return () => clearInterval(interval);
   }, [loading, loadingProgress]);
 
@@ -64,17 +64,17 @@ const OutputPage = () => {
       setError('No clips selected for merging');
       return;
     }
-    
+
     mergeClips();
   }, []);
 
   // Function to validate and clean video URL
   const validateVideoUrl = (url) => {
     if (!url) return null;
-    
+
     // Handle different URL formats
     let cleanUrl = url.trim();
-    
+
     // If it's an S3 URL, ensure it's properly formatted
     if (cleanUrl.includes('s3.amazonaws.com') || cleanUrl.includes('amazonaws.com')) {
       // Ensure HTTPS
@@ -84,12 +84,12 @@ const OutputPage = () => {
       // Add CORS headers for S3 if needed
       return cleanUrl;
     }
-    
+
     // If it's a relative path, make it absolute
     if (cleanUrl.startsWith('/')) {
       cleanUrl = `${window.location.origin}${cleanUrl}`;
     }
-    
+
     return cleanUrl;
   };
 
@@ -107,43 +107,42 @@ const OutputPage = () => {
         videoId: clip.videoId,
         transcriptText: clip.transcriptText,
         startTime: clip.startTime,
-        endTime: clip.endTime
+        endTime: clip.endTime,
+        isYouTube: clip.videoId.length === 11, // Flag to identify YouTube videos
+        videoUrl: clip.videoId.length !== 11 ? `${API_BASE_URL}/video/${clip.videoId}` : '' // URL for non-YouTube videos
       }));
 
-      // Debugging logs
-      console.log('Sending merge request with clips:', clipsToMerge);
+      console.log('Clips to merge:', JSON.stringify(clipsToMerge, null, 2)); // Debugging log
 
       const token = localStorage.getItem('token');
-      const headers = token ? { 
+      const headers = token ? {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       } : { 'Content-Type': 'application/json' };
 
-      // Try the first method (Python backend)
       let response;
+      let pythonError = null;
       try {
         console.log('Trying Python backend...');
-        response = await axios.post(`https://clip-py-backend-1.onrender.com/merge-clips`, { 
-          clips: clipsToMerge 
-        }, { 
+        response = await axios.post(`https://clip-py-backend-1.onrender.com/merge-clips`, {
+          clips: clipsToMerge
+        }, {
           headers,
-          timeout: 3000000 // 5 minutes timeout
+          timeout: 3000000
         });
-        
         console.log('Python backend response:', response.data);
-        
         if (!response.data?.success || !response.data?.s3Url) {
           throw new Error('Python backend response invalid, trying fallback');
         }
-      } catch (pythonError) {
-        console.log('Python backend failed, trying Node backend:', pythonError.message);
-        // Fall back to Node backend if Python backend fails
+      } catch (err) {
+        pythonError = err;
         try {
+          console.log('Python backend failed, trying Node backend:', pythonError.message);
           response = await axios.post(`${API_URL}/api/merge/videoMerge`, {
             clips: clipsToMerge
-          }, { 
+          }, {
             headers,
-            timeout: 300000 // 5 minutes timeout
+            timeout: 300000
           });
           console.log('Node backend response:', response.data);
         } catch (nodeError) {
@@ -152,19 +151,19 @@ const OutputPage = () => {
         }
       }
 
-      // Handle both possible response structures:
-      const rawVideoUrl = response.data?.videoUrl || 
-                          response.data?.data?.videoUrl || 
-                          response.data?.s3Url || 
-                          response.data?.data?.s3Url;
+      // Handle various response structures
+      const rawVideoUrl = response.data?.videoUrl ||
+        response.data?.data?.videoUrl ||
+        response.data?.s3Url ||
+        response.data?.data?.s3Url;
 
       console.log('Raw video URL received:', rawVideoUrl);
 
       if (!rawVideoUrl) {
         console.error('No video URL found in response. Full response:', response.data);
         throw new Error(
-          response.data?.message || 
-          response.data?.data?.message || 
+          response.data?.message ||
+          response.data?.data?.message ||
           'Video was processed but no URL was returned. Please check console for details.'
         );
       }
@@ -181,25 +180,24 @@ const OutputPage = () => {
 
       // Test video accessibility
       try {
-        const testResponse = await fetch(cleanVideoUrl, { 
+        const testResponse = await fetch(cleanVideoUrl, {
           method: 'HEAD',
           mode: 'cors'
         });
         console.log('Video accessibility test:', testResponse.status, testResponse.statusText);
-        
+
         if (!testResponse.ok) {
           console.warn('Video URL might not be accessible:', testResponse.status);
         }
       } catch (testError) {
         console.warn('Could not test video accessibility:', testError.message);
-        // Don't fail the whole process for this
       }
 
-      // Database save logic (only for authenticated users)
+      // Database save logic for authenticated users
       try {
         const userDataFromStorage = JSON.parse(localStorage.getItem('user') || '{}');
         const authUser = authService.getCurrentUser();
-        
+
         if ((userDataFromStorage && userDataFromStorage.id) || (authUser && authUser.id)) {
           const userId = userDataFromStorage.id || authUser?.id;
           const userEmail = userDataFromStorage.email || authUser?.email || "guest@clipsmart.ai";
@@ -207,7 +205,7 @@ const OutputPage = () => {
 
           const dbResponse = await axios.post(`${API_URL}/api/v1/youtube/addFinalVideo`, {
             clipsInfo: clipsToMerge,
-            fileNames3: cleanVideoUrl.split('/').pop(), // Extract filename from URL
+            fileNames3: cleanVideoUrl.split('/').pop(),
             s3Url: cleanVideoUrl,
             userId,
             userEmail,
@@ -216,7 +214,6 @@ const OutputPage = () => {
 
           if (dbResponse.data?.success) {
             setSavedToDatabase(true);
-            // Update URL if database returned a different one
             if (dbResponse.data.data?.s3Url) {
               const dbVideoUrl = validateVideoUrl(dbResponse.data.data.s3Url);
               if (dbVideoUrl) {
@@ -227,24 +224,13 @@ const OutputPage = () => {
         }
       } catch (dbError) {
         console.error('Database save error (non-critical):', dbError);
-        // Don't fail the operation if database save fails
       } finally {
         setLoadingProgress(100);
         setLoading(false);
       }
     } catch (err) {
-      console.error('Merge error details:', {
-        error: err,
-        response: err.response,
-        message: err.message
-      });
-      
-      setError(
-        err.response?.data?.message || 
-        err.response?.data?.data?.message || 
-        err.message || 
-        'Failed to merge clips. Please check console for details.'
-      );
+      console.error('Merge error:', err);
+      setError(err.message || 'Failed to merge clips');
       setLoading(false);
     }
   };
@@ -259,20 +245,20 @@ const OutputPage = () => {
 
   const downloadVideo = async () => {
     if (!videoUrl) return;
-    
+
     try {
       // For S3 URLs, we might need to handle CORS
       const response = await fetch(videoUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.href = url;
       link.download = `merged-video-${Date.now()}.mp4`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up the blob URL
       window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -298,7 +284,7 @@ const OutputPage = () => {
   const shareToSocial = (platform) => {
     let shareUrl;
 
-    switch(platform) {
+    switch (platform) {
       case 'twitter':
         shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(videoUrl)}&text=${encodeURIComponent('Check out this video I created with ClipSmart AI!')}`;
         break;
@@ -344,9 +330,9 @@ const OutputPage = () => {
   // Database save notification component
   const DatabaseSaveNotification = () => {
     if (!savedToDatabase || !videoUrl) return null;
-    
+
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
@@ -371,8 +357,8 @@ const OutputPage = () => {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1.0] }
     }
@@ -416,13 +402,13 @@ const OutputPage = () => {
     if (!seconds) return '0:00';
     const minutes = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    
+
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
   // Get total duration of all clips
   const getTotalDuration = () => {
-    return selectedClipsData.reduce((acc, clip) => 
+    return selectedClipsData.reduce((acc, clip) =>
       acc + (clip.endTime - clip.startTime), 0);
   };
 
@@ -441,7 +427,7 @@ const OutputPage = () => {
             </span>
           </h1>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -466,7 +452,7 @@ const OutputPage = () => {
 
       {/* Background Elements */}
       <ParticleBackground />
-      
+
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;
@@ -509,7 +495,7 @@ const OutputPage = () => {
           transform-origin: 50% 50%;
         }
       `}</style>
-      
+
       {/* Main Content Area */}
       <div className="flex-1 overflow-hidden flex">
         {/* Main Grid Layout - Error State */}
@@ -544,11 +530,11 @@ const OutputPage = () => {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {/* Main Grid Layout - Loading State */}
         <AnimatePresence>
           {loading && !error && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -559,9 +545,9 @@ const OutputPage = () => {
                 <div className="relative w-40 h-40 mb-8">
                   {/* Outer ring */}
                   <svg className="w-full h-full" viewBox="0 0 100 100">
-                    <circle 
-                      cx="50" 
-                      cy="50" 
+                    <circle
+                      cx="50"
+                      cy="50"
                       r="46"
                       fill="none"
                       stroke="#232323"
@@ -586,16 +572,16 @@ const OutputPage = () => {
                       </linearGradient>
                     </defs>
                   </svg>
-                  
+
                   {/* Inner spinner */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-24 h-24 rounded-full bg-[#151515] flex items-center justify-center">
                       <div className="w-20 h-20 rounded-full bg-[#6c5ce7]/5 flex items-center justify-center">
                         <motion.div
                           animate={{ rotate: 360 }}
-                          transition={{ 
+                          transition={{
                             duration: 1.5,
-                            repeat: Infinity, 
+                            repeat: Infinity,
                             ease: "linear"
                           }}
                         >
@@ -604,23 +590,23 @@ const OutputPage = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Percentage display */}
                   <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-[#151515] px-4 py-1 rounded-full border border-[#2A2A2A] shadow-xl">
                     <span className="font-mono text-sm font-bold text-[#6c5ce7]">{Math.round(loadingProgress)}%</span>
                   </div>
                 </div>
-                
+
                 <h2 className="text-2xl font-bold text-white mb-3">Processing Your Video</h2>
                 <p className="text-gray-400 text-center max-w-md mb-2">
                   We're merging and processing your clips. This may take a few minutes depending on the complexity.
                 </p>
               </div>
-              
+
               {/* Processing Steps Sidebar */}
               <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] p-6 shadow-lg lg:w-[350px]">
                 <h3 className="text-xl font-bold mb-4 text-white">Processing Steps</h3>
-                
+
                 <div className="space-y-4">
                   {[
                     { label: 'Initializing', done: loadingProgress > 10 },
@@ -629,7 +615,7 @@ const OutputPage = () => {
                     { label: 'Applying Transitions', done: loadingProgress > 80 },
                     { label: 'Finalizing Video', done: loadingProgress > 95 }
                   ].map((step, index) => (
-                    <div 
+                    <div
                       key={index}
                       className="flex items-center gap-3"
                     >
@@ -655,12 +641,12 @@ const OutputPage = () => {
                     </div>
                   ))}
                 </div>
-                
+
                 <div className="mt-6 pt-6 border-t border-[#2d2d2d]">
                   <h4 className="text-gray-400 text-sm mb-3">Clips Being Processed</h4>
                   <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
                     {selectedClipsData.map((clip, index) => (
-                      <div 
+                      <div
                         key={index}
                         className="bg-[#252525] rounded-lg p-2 text-xs"
                       >
@@ -679,11 +665,11 @@ const OutputPage = () => {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {/* Main Grid Layout - Success State */}
         <AnimatePresence>
           {videoUrl && !loading && !error && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -701,7 +687,7 @@ const OutputPage = () => {
                     <span>Ready</span>
                   </div>
                 </div>
-                
+
                 {/* Player Area */}
                 <div className="p-6 flex-1">
                   <div className="rounded-lg overflow-hidden shadow-lg group">
@@ -714,7 +700,7 @@ const OutputPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Action Buttons */}
                 <div className="bg-[#151515] border-t border-[#2d2d2d] px-6 py-4">
                   <div className="flex flex-wrap gap-4">
@@ -729,7 +715,7 @@ const OutputPage = () => {
                         <span>Download Video</span>
                       </div>
                     </motion.button>
-                    
+
                     <div className="relative flex-1">
                       <motion.button
                         whileHover={{ scale: 1.02 }}
@@ -742,7 +728,7 @@ const OutputPage = () => {
                           <span>Share Video</span>
                         </div>
                       </motion.button>
-                      
+
                       {/* Share Dropdown Menu */}
                       <AnimatePresence>
                         {showShareMenu && (
@@ -767,7 +753,7 @@ const OutputPage = () => {
                                 </div>
                                 <span className="text-sm">Twitter</span>
                               </motion.button>
-                              
+
                               <motion.button
                                 whileHover={{ backgroundColor: 'rgba(108, 92, 231, 0.1)' }}
                                 className="flex items-center gap-3 p-3 rounded-lg"
@@ -778,7 +764,7 @@ const OutputPage = () => {
                                 </div>
                                 <span className="text-sm">Facebook</span>
                               </motion.button>
-                              
+
                               <motion.button
                                 whileHover={{ backgroundColor: 'rgba(108, 92, 231, 0.1)' }}
                                 className="flex items-center gap-3 p-3 rounded-lg"
@@ -789,7 +775,7 @@ const OutputPage = () => {
                                 </div>
                                 <span className="text-sm">LinkedIn</span>
                               </motion.button>
-                              
+
                               <motion.button
                                 whileHover={{ backgroundColor: 'rgba(108, 92, 231, 0.1)' }}
                                 className="flex items-center gap-3 p-3 rounded-lg"
@@ -801,7 +787,7 @@ const OutputPage = () => {
                                 <span className="text-sm">WhatsApp</span>
                               </motion.button>
                             </div>
-                            
+
                             <div className="p-2 border-t border-[#2d2d2d]">
                               <motion.button
                                 whileHover={{ backgroundColor: 'rgba(108, 92, 231, 0.1)' }}
@@ -821,7 +807,7 @@ const OutputPage = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Information Panel */}
               <div className="lg:w-[350px] flex flex-col gap-4">
                 {/* Video Information Card */}
@@ -832,7 +818,7 @@ const OutputPage = () => {
                       Video Information
                     </h3>
                   </div>
-                  
+
                   <div className="p-6">
                     <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                       <div>
@@ -842,23 +828,23 @@ const OutputPage = () => {
                           {formatDuration(getTotalDuration())}
                         </div>
                       </div>
-                      
+
                       <div>
                         <div className="text-gray-500 text-xs mb-1">Format</div>
                         <div className="font-medium">MP4</div>
                       </div>
-                      
+
                       <div>
                         <div className="text-gray-500 text-xs mb-1">Clips Merged</div>
                         <div className="font-medium">{selectedClipsData.length}</div>
                       </div>
-                      
+
                       <div>
                         <div className="text-gray-500 text-xs mb-1">Status</div>
                         <div className="font-medium text-[#6c5ce7]">Completed</div>
                       </div>
                     </div>
-                    
+
                     <div className="mt-6 pt-4 border-t border-[#2d2d2d]">
                       <div className="text-gray-500 text-xs mb-3">Video URL</div>
                       <div className="bg-[#252525] rounded-lg p-2 flex items-center justify-between">
@@ -877,7 +863,7 @@ const OutputPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Clip List */}
                 <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] shadow-lg overflow-hidden flex-1">
                   <div className="px-6 py-4 border-b border-[#2d2d2d]">
@@ -886,10 +872,10 @@ const OutputPage = () => {
                       Merged Clips
                     </h3>
                   </div>
-                  
+
                   <div className="p-2 max-h-[300px] overflow-y-auto custom-purple-scrollbar">
                     {selectedClipsData.map((clip, index) => (
-                      <div 
+                      <div
                         key={index}
                         className="bg-[#252525] rounded-lg p-3 mb-2 hover:bg-[#2a2a2a] transition-colors"
                       >
@@ -908,7 +894,7 @@ const OutputPage = () => {
                       </div>
                     ))}
                   </div>
-                  
+
                   <div className="px-6 py-4 border-t border-[#2d2d2d] bg-[#151515]">
                     <div className="flex flex-col sm:flex-row gap-2">
                       <motion.button
@@ -936,7 +922,7 @@ const OutputPage = () => {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {/* Empty State */}
         <AnimatePresence>
           {!videoUrl && !loading && !error && (
@@ -976,7 +962,7 @@ const OutputPage = () => {
           )}
         </AnimatePresence>
       </div>
-      
+
       {/* Database Save Notification */}
       <AnimatePresence>
         <DatabaseSaveNotification />
