@@ -645,21 +645,24 @@ const mergeClips = async () => {
                 <div className="mt-6 pt-6 border-t border-[#2d2d2d]">
                   <h4 className="text-gray-400 text-sm mb-3">Clips Being Processed</h4>
                   <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                    {selectedClipsData.map((clip, index) => (
-                      <div
-                        key={index}
-                        className="bg-[#252525] rounded-lg p-2 text-xs"
-                      >
+                  {selectedClipsData.length > 0 ? (
+                    selectedClipsData.map((clip, index) => (
+                      <div key={index} className="bg-[#252525] rounded-lg p-2 text-xs">
                         <div className="flex justify-between mb-1">
                           <span className="text-[#6c5ce7]">Clip {index + 1}</span>
-                          <span className="text-gray-500">{(clip.endTime - clip.startTime).toFixed(1)}s</span>
+                          <span className="text-gray-500">
+                            {(clip.endTime - clip.startTime).toFixed(1)}s
+                          </span>
                         </div>
                         <div className="text-gray-400 truncate">
                           {clip.transcriptText?.slice(0, 30)}...
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    ))
+                  ) : (
+                    <div className="text-gray-400">No clips to display</div>
+                  )}
+                </div>
                 </div>
               </div>
             </motion.div>
