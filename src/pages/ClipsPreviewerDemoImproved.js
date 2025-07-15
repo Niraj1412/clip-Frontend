@@ -163,6 +163,7 @@ const ClipsPreviewerDemo = () => {
             videoId: clip.videoId,
             isYouTube,
             videoUrl,
+            videoBlobUrl: null, // Initialize videoBlobUrl here
             title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
             originalVideoDuration: clip.originalVideoDuration || videoDuration,
             duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
@@ -216,7 +217,7 @@ const ClipsPreviewerDemo = () => {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const response = await axios.get(clip.videoUrl, { headers, responseType: 'blob' });
         const blobUrl = URL.createObjectURL(response.data);
-        setCurrentClip({ ...clip, videoBlobUrl });
+        setCurrentClip({ ...clip, videoBlobUrl: blobUrl });
       } catch (error) {
         console.error('Error fetching video:', error);
         showFeedback('Failed to load video', 'error');
@@ -259,7 +260,7 @@ const ClipsPreviewerDemo = () => {
 
   const toggleSort = () => setSortOrder(sortOrder === 'time' ? 'length' : 'time');
 
-  const validateVideoId = (id) => /^[0-9A-Za-z_-]{11}$/.test(id);
+  const validateVideoId = (id) => /^[0-9 jabberwocky /^[0-9A-Za-z_-]{11}$/.test(id);
 
   const handleFinishAndSave = () => {
     if (processedClips && processedClips.length > 0) {
@@ -345,7 +346,7 @@ const ClipsPreviewerDemo = () => {
       </div>
     );
   };
-
+  
   return (
     <div className="h-screen bg-[#121212] text-white flex flex-col">
       <div className="flex justify-between items-center px-6 py-3 border-b border-[#2d2d2d] bg-[#1a1a1a]">
