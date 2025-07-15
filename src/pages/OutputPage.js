@@ -95,146 +95,165 @@ const OutputPage = () => {
   };
 
   // Function to send clips data to backend for merging
-  const mergeClips = async () => {
-    setLoading(true);
-    setError(null);
-    setLoadingProgress(0);
-    setSavedToDatabase(false);
-    setVideoLoaded(false);
-    setVideoError(false);
+const mergeClips = async () => {
+  setLoading(true);
+  setError(null);
+  setLoadingProgress(0);
+  setSavedToDatabase(false);
+  setVideoLoaded(false);
+  setVideoError(false);
 
-    try {
-      const clipsToMerge = selectedClipsData.map(clip => ({
+  try {
+    // Step 1: Validate and prepare clip data
+    const clipsToMerge = selectedClipsData.map(clip => {
+      const videoDuration = clip.duration || 600; // Fallback duration if unknown
+      const startTime = Math.max(0, Math.min(Number(clip.startTime), videoDuration - 0.1));
+      const endTime = Math.max(startTime + 0.1, Math.min(Number(clip.endTime), videoDuration));
+      return {
         videoId: clip.videoId,
         transcriptText: clip.transcriptText,
-        startTime: clip.startTime,
-        endTime: clip.endTime,
+        startTime,
+        endTime,
+        duration: videoDuration, // Include duration for backend validation
         isYouTube: clip.videoId.length === 11, // Flag to identify YouTube videos
         videoUrl: clip.videoId.length !== 11 ? `${API_BASE_URL}/video/${clip.videoId}` : '' // URL for non-YouTube videos
-      }));
+      };
+    });
 
-      console.log('Clips to merge:', JSON.stringify(clipsToMerge, null, 2)); // Debugging log
+    console.log('Clips to merge:', JSON.stringify(clipsToMerge, null, 2)); // Debugging log
 
-      const token = localStorage.getItem('token');
-      const headers = token ? {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      } : { 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('token');
+    const headers = token ? {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    } : { 'Content-Type': 'application/json' };
 
-      let response;
-      let pythonError = null;
+    let response;
+    let pythonError = null;
+
+    // Step 2: Enhanced backend request with detailed error handling
+    try {
+      console.log('Trying Python backend...');
+      response = await axios.post(`https://clip-py-backend-1.onrender.com/merge-clips`, {
+        clips: clipsToMerge
+      }, {
+        headers,
+        timeout: 3000000
+      });
+      console.log('Python backend response:', response.data);
+      if (!response.data?.success || !response.data?.s3Url) {
+        throw new Error('Python backend response invalid, trying fallback');
+      }
+    } catch (err) {
+      pythonError = err;
+      console.error('Python backend error:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       try {
-        console.log('Trying Python backend...');
-        response = await axios.post(`https://clip-py-backend-1.onrender.com/merge-clips`, {
+        console.log('Trying Node backend...');
+        response = await axios.post(`${API_URL}/api/merge/videoMerge`, {
           clips: clipsToMerge
         }, {
           headers,
-          timeout: 3000000
+          timeout: 300000
         });
-        console.log('Python backend response:', response.data);
-        if (!response.data?.success || !response.data?.s3Url) {
-          throw new Error('Python backend response invalid, trying fallback');
-        }
-      } catch (err) {
-        pythonError = err;
-        try {
-          console.log('Python backend failed, trying Node backend:', pythonError.message);
-          response = await axios.post(`${API_URL}/api/merge/videoMerge`, {
-            clips: clipsToMerge
-          }, {
-            headers,
-            timeout: 300000
-          });
-          console.log('Node backend response:', response.data);
-        } catch (nodeError) {
-          console.error('Both backends failed:', { pythonError, nodeError });
-          throw new Error(`All backends failed. Python: ${pythonError.message}, Node: ${nodeError.message}`);
-        }
-      }
-
-      // Handle various response structures
-      const rawVideoUrl = response.data?.videoUrl ||
-        response.data?.data?.videoUrl ||
-        response.data?.s3Url ||
-        response.data?.data?.s3Url;
-
-      console.log('Raw video URL received:', rawVideoUrl);
-
-      if (!rawVideoUrl) {
-        console.error('No video URL found in response. Full response:', response.data);
-        throw new Error(
-          response.data?.message ||
-          response.data?.data?.message ||
-          'Video was processed but no URL was returned. Please check console for details.'
-        );
-      }
-
-      // Validate and clean the video URL
-      const cleanVideoUrl = validateVideoUrl(rawVideoUrl);
-      if (!cleanVideoUrl) {
-        throw new Error('Invalid video URL format received from server');
-      }
-
-      console.log('Clean video URL:', cleanVideoUrl);
-      setVideoUrl(cleanVideoUrl);
-      setLoadingProgress(98);
-
-      // Test video accessibility
-      try {
-        const testResponse = await fetch(cleanVideoUrl, {
-          method: 'HEAD',
-          mode: 'cors'
+        console.log('Node backend response:', response.data);
+      } catch (nodeError) {
+        console.error('Node backend error:', {
+          message: nodeError.message,
+          response: nodeError.response?.data,
+          status: nodeError.response?.status
         });
-        console.log('Video accessibility test:', testResponse.status, testResponse.statusText);
-
-        if (!testResponse.ok) {
-          console.warn('Video URL might not be accessible:', testResponse.status);
-        }
-      } catch (testError) {
-        console.warn('Could not test video accessibility:', testError.message);
+        throw new Error(`All backends failed. Python: ${pythonError.message}, Node: ${nodeError.message}`);
       }
+    }
 
-      // Database save logic for authenticated users
-      try {
-        const userDataFromStorage = JSON.parse(localStorage.getItem('user') || '{}');
-        const authUser = authService.getCurrentUser();
+    // Handle various response structures
+    const rawVideoUrl = response.data?.videoUrl ||
+      response.data?.data?.videoUrl ||
+      response.data?.s3Url ||
+      response.data?.data?.s3Url;
 
-        if ((userDataFromStorage && userDataFromStorage.id) || (authUser && authUser.id)) {
-          const userId = userDataFromStorage.id || authUser?.id;
-          const userEmail = userDataFromStorage.email || authUser?.email || "guest@clipsmart.ai";
-          const userName = userDataFromStorage.name || authUser?.name || "Guest User";
+    console.log('Raw video URL received:', rawVideoUrl);
 
-          const dbResponse = await axios.post(`${API_URL}/api/v1/youtube/addFinalVideo`, {
-            clipsInfo: clipsToMerge,
-            fileNames3: cleanVideoUrl.split('/').pop(),
-            s3Url: cleanVideoUrl,
-            userId,
-            userEmail,
-            userName
-          }, { headers });
+    if (!rawVideoUrl) {
+      console.error('No video URL found in response. Full response:', response.data);
+      throw new Error(
+        response.data?.message ||
+        response.data?.data?.message ||
+        'Video was processed but no URL was returned. Please check console for details.'
+      );
+    }
 
-          if (dbResponse.data?.success) {
-            setSavedToDatabase(true);
-            if (dbResponse.data.data?.s3Url) {
-              const dbVideoUrl = validateVideoUrl(dbResponse.data.data.s3Url);
-              if (dbVideoUrl) {
-                setVideoUrl(dbVideoUrl);
-              }
+    // Validate and clean the video URL
+    const cleanVideoUrl = validateVideoUrl(rawVideoUrl);
+    if (!cleanVideoUrl) {
+      throw new Error('Invalid video URL format received from server');
+    }
+
+    console.log('Clean video URL:', cleanVideoUrl);
+    setVideoUrl(cleanVideoUrl);
+    setLoadingProgress(98);
+
+    // Test video accessibility
+    try {
+      const testResponse = await fetch(cleanVideoUrl, {
+        method: 'HEAD',
+        mode: 'cors'
+      });
+      console.log('Video accessibility test:', testResponse.status, testResponse.statusText);
+
+      if (!testResponse.ok) {
+        console.warn('Video URL might not be accessible:', testResponse.status);
+      }
+    } catch (testError) {
+      console.warn('Could not test video accessibility:', testError.message);
+    }
+
+    // Database save logic for authenticated users
+    try {
+      const userDataFromStorage = JSON.parse(localStorage.getItem('user') || '{}');
+      const authUser = authService.getCurrentUser();
+
+      if ((userDataFromStorage && userDataFromStorage.id) || (authUser && authUser.id)) {
+        const userId = userDataFromStorage.id || authUser?.id;
+        const userEmail = userDataFromStorage.email || authUser?.email || "guest@clipsmart.ai";
+        const userName = userDataFromStorage.name || authUser?.name || "Guest User";
+
+        const dbResponse = await axios.post(`${API_URL}/api/v1/youtube/addFinalVideo`, {
+          clipsInfo: clipsToMerge,
+          fileNames3: cleanVideoUrl.split('/').pop(),
+          s3Url: cleanVideoUrl,
+          userId,
+          userEmail,
+          userName
+        }, { headers });
+
+        if (dbResponse.data?.success) {
+          setSavedToDatabase(true);
+          if (dbResponse.data.data?.s3Url) {
+            const dbVideoUrl = validateVideoUrl(dbResponse.data.data.s3Url);
+            if (dbVideoUrl) {
+              setVideoUrl(dbVideoUrl);
             }
           }
         }
-      } catch (dbError) {
-        console.error('Database save error (non-critical):', dbError);
-      } finally {
-        setLoadingProgress(100);
-        setLoading(false);
       }
-    } catch (err) {
-      console.error('Merge error:', err);
-      setError(err.message || 'Failed to merge clips');
+    } catch (dbError) {
+      console.error('Database save error (non-critical):', dbError);
+    } finally {
+      setLoadingProgress(100);
       setLoading(false);
     }
-  };
+  } catch (err) {
+    console.error('Merge error:', err);
+    setError(err.message || 'Failed to merge clips');
+    setLoading(false);
+  }
+};
+
 
   const handleBackToClips = () => {
     navigate('/transcripts');
