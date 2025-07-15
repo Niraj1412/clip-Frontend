@@ -4,19 +4,25 @@ import {
   faInfo, faBackwardStep, faForwardStep, faCheck, faFilm, faSave, faExclamationTriangle,
   faSearch, faSpinner, faExclamationCircle, faList, faScissors, faInfoCircle, faSort,
   faClock, faRuler, faTimes, faCheckSquare, faSquare, faArrowRight, faBrain, faFileAlt,
-  faVideo, faMagic, faLightbulb
+  faLaptopCode, faVideo, faMagic, faLightbulb
 } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ClipsPreviewer from '../components/ClipsPreviewer';
 import TrimmingTool from '../components/TrimmingTool';
 import VideoDetails from '../components/VideoDetails';
+import videoPlayer from '../components/videoPlayer';
+import { useClipsData } from '../context/clipsData';
+import { usePrompt } from '../context/promptContext';
+import { useVideoIds } from '../context/videoIds';
+import { YOUTUBE_API } from '../config';
 import axios from 'axios';
 
 const ClipsPreviewerDemo = () => {
-  const { selectedClipsData, setSelectedClipsData } = useClipsData();
+  const { selectedClipsData, setSelectedClipsData, transcriptData } = useClipsData();
   const { prompt } = usePrompt();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [processedClips, setProcessedClips] = useState([]);
@@ -30,17 +36,32 @@ const ClipsPreviewerDemo = () => {
   const loadingInterval = useRef(null);
   const stageMessages = [
     { title: "Analyzing transcript", subtitle: "Identifying key moments in your content" },
-    { title: "Extracting segments", subtitle: "Finding the most engaging parts" },
-    { title: "Creating clips", subtitle: "Crafting perfect segments" },
-    { title: "Finalizing clips", subtitle: "Perfecting timestamps" },
-    { title: "Almost ready", subtitle: "Preparing clips for editing" }
+    { title: "Extracting meaningful segments", subtitle: "Finding the most engaging parts of your video" },
+    { title: "Creating clip sequences", subtitle: "Crafting the perfect segments from your content" },
+    { title: "Finalizing clips", subtitle: "Perfecting timestamps and transitions" },
+    { title: "Almost ready", subtitle: "Your clips are being prepared for editing" }
   ];
 
-  const isYouTubeUrl = (url) => url.includes('youtube.com') || url.includes('youtu.be');
+  const isYouTubeUrl = (url) => url && (url.includes('youtube.com') || url.includes('youtu.be'));
 
   const validateYouTubeUrl = (url) => {
     if (!isYouTubeUrl(url)) return { isValid: false, type: null, id: null };
-    const videoId = extractVideoId(url);
+    if (url.includes('playlist?list=')) {
+      const playlistId = url.split('list=')[1]?.split('&')[0];
+      const isValidPlaylist = playlistId && /^[a-zA-Z0-9_-]{34}$/.test(playlistId);
+      return { isValid: isValidPlaylist, type: 'playlist', id: playlistId || null };
+    }
+    const videoId = url.includes('v=')
+      ? url.split('v=')[1]?.split('&')[0]
+      : url.includes('youtu.be/')
+        ? url.split('youtu.be/')[1]?.split(/[?&]/)[0]
+        : url.includes('youtube.com/embed/')
+          ? url.split('youtube.com/embed/')[1]?.split(/[?&]/)[0]
+          : url.includes('youtube.com/live/')
+            ? url.split('youtube.com/live/')[1]?.split(/[?&]/)[0]
+            : url.includes('youtube.com/shorts/')
+              ? url.split('youtube.com/shorts/')[1]?.split(/[?&]/)[0]
+              : url;
     const isValidVideo = videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId);
     return { isValid: isValidVideo, type: 'video', id: videoId || null };
   };
@@ -50,6 +71,9 @@ const ClipsPreviewerDemo = () => {
     if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
     if (url.includes('v=')) return url.split('v=')[1]?.split('&')[0];
     if (url.includes('youtu.be/')) return url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+    if (url.includes('youtube.com/embed/')) return url.split('youtube.com/embed/')[1]?.split(/[?&]/)[0];
+    if (url.includes('youtube.com/live/')) return url.split('youtube.com/live/')[1]?.split(/[?&]/)[0];
+    if (url.includes('youtube.com/shorts/')) return url.split('youtube.com/shorts/')[1]?.split(/[?&]/)[0];
     return null;
   };
 
@@ -84,8 +108,12 @@ const ClipsPreviewerDemo = () => {
           throw new Error('No transcript data available');
         }
 
-        const processedClipsData = selectedClipsData.map(clip => {
-          const validation = clip.url ? validateYouTubeUrl(clip.url) : { isValid: false };
+        const processedClipsData = selectedClipsData.map((clip) => {
+          if (!clip.url) throw new Error('Clip is missing URL');
+          const validation = validateYouTubeUrl(clip.url);
+          if (!validation.isValid && !clip.videoId) {
+            throw new Error('Invalid YouTube URL and no videoId provided: ' + clip.url);
+          }
           const videoId = validation.isValid ? extractVideoId(clip.url) : clip.videoId;
           return { ...clip, videoId, isYouTube: validation.isValid };
         });
@@ -98,57 +126,52 @@ const ClipsPreviewerDemo = () => {
         const token = localStorage.getItem('token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-        const response = await axios.post(`${API_BASE_URL}/generateClips`, {
-          transcripts: processedClipsData,
-          customPrompt: prompt || "Generate 3 clips with exact timestamps.",
-          videoDuration
-        }, { headers });
+        const response = await fetch(`${YOUTUBE_API}/generateClips`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify({
+            transcripts: processedClipsData,
+            customPrompt: prompt || "Generate 3 clips with exact timestamps.",
+            videoDuration
+          })
+        });
 
-        const data = response.data;
-
-        if (!data.success || !data.data.script) {
+        const data = await response.json();
+        if (!response.ok || !data.success || !data.data.script) {
           throw new Error(data.message || 'Failed to generate clips');
         }
 
-        const clipsArray = JSON.parse(data.data.script.replace(/```json/g, '').replace(/```/g, '').trim());
+        const cleanScript = data.data.script
+          .replace(/```json/g, '')
+          .replace(/```/g, '')
+          .replace(/\((\d+\.?\d*)\).toFixed\(2\)/g, '$1')
+          .replace(/\((\d+\.?\d*)\s*[-+]\s*\d+\.?\d*\).toFixed\(2\)/g, (match) =>
+            eval(match.replace('.toFixed(2)', '')).toFixed(2)
+          )
+          .trim();
 
-        const processed = await Promise.all(clipsArray.map(async (clip, index) => {
-          let thumbnailUrl, videoUrl, blobUrl;
+        const clipsArray = JSON.parse(cleanScript);
+
+        const processed = clipsArray.map((clip, index) => {
           const isYouTube = clip.source === 'youtube' || (clip.videoId && clip.videoId.length === 11);
-
-          if (!isYouTube && clip.videoId) {
-            try {
-              const detailsResponse = await axios.get(`${API_BASE_URL}/video/${clip.videoId}/details`, { headers });
-              const details = detailsResponse.data.data;
-              thumbnailUrl = details.thumbnailUrl;
-              videoUrl = details.videoUrl;
-
-              const videoResponse = await axios.get(videoUrl, { headers, responseType: 'blob' });
-              blobUrl = URL.createObjectURL(videoResponse.data);
-            } catch (error) {
-              console.error('Error fetching uploaded video:', error);
-              thumbnailUrl = `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
-              videoUrl = `${API_BASE_URL}/video/${clip.videoId}`;
-            }
-          } else {
-            thumbnailUrl = `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`;
-            videoUrl = `https://www.youtube.com/watch?v=${clip.videoId}`;
-          }
-
+          const videoUrl = isYouTube ? '' : `${API_BASE_URL}/video/${clip.videoId}`;
+          const thumbnailUrl = isYouTube
+            ? `https://img.youtube.com/vi/${clip.videoId}/maxresdefault.jpg`
+            : `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
           return {
             id: `clip_${index + 1}`,
             videoId: clip.videoId,
             isYouTube,
-            videoUrl: isYouTube ? videoUrl : blobUrl || videoUrl,
+            videoUrl,
             title: `Clip ${index + 1}: ${clip.transcriptText?.substring(0, 50) || 'No transcript'}...`,
             originalVideoDuration: clip.originalVideoDuration || videoDuration,
-            duration: parseFloat((clip.endTime - clip.startTime).toFixed(2)),
-            startTime: parseFloat(clip.startTime.toFixed(2)),
-            endTime: parseFloat(clip.endTime.toFixed(2)),
-            transcriptText: clip.transcriptText || '',
+            duration: parseFloat(((clip.endTime || 0) - (clip.startTime || 0)).toFixed(2)),
+            startTime: parseFloat((clip.startTime || 0).toFixed(2)),
+            endTime: parseFloat((clip.endTime || 0).toFixed(2)),
+            transcriptText: (clip.transcriptText || '').replace(/'/g, "'"),
             thumbnail: thumbnailUrl
           };
-        }));
+        });
 
         setProcessedClips(processed);
         showFeedback('Clips generated successfully!', 'success');
@@ -171,21 +194,45 @@ const ClipsPreviewerDemo = () => {
     if (processedClips.length > 0 && selectedClips.length === 0 && !initialSelectionRef.current) {
       setSelectedClips([...processedClips]);
       initialSelectionRef.current = true;
-      setCurrentClip(processedClips[0]);
+      if (processedClips[0]) setCurrentClip(processedClips[0]);
     }
   }, [processedClips]);
+
+  useEffect(() => {
+    return () => {
+      if (currentClip?.videoBlobUrl) URL.revokeObjectURL(currentClip.videoBlobUrl);
+    };
+  }, [currentClip]);
 
   const showFeedback = (message, type = 'success') => {
     setFeedback({ message, type });
     setTimeout(() => setFeedback(null), type === 'warning' || type === 'error' ? 5000 : 3000);
   };
 
-  const handlePlayClip = (clip) => setCurrentClip(clip);
+  const handlePlayClip = async (clip) => {
+    if (!clip.isYouTube && clip.videoUrl && !clip.videoBlobUrl) {
+      try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await axios.get(clip.videoUrl, { headers, responseType: 'blob' });
+        const blobUrl = URL.createObjectURL(response.data);
+        setCurrentClip({ ...clip, videoBlobUrl });
+      } catch (error) {
+        console.error('Error fetching video:', error);
+        showFeedback('Failed to load video', 'error');
+        setCurrentClip(clip);
+      }
+    } else {
+      setCurrentClip(clip);
+    }
+  };
+
   const handleDeleteClip = (clipToDelete) => {
     setProcessedClips(clips => clips.filter(clip => clip.id !== clipToDelete.id));
     setSelectedClips(selected => selected.filter(clip => clip.id !== clipToDelete.id));
     if (currentClip?.id === clipToDelete.id) setCurrentClip(null);
   };
+
   const handleSelectClip = (clip) => setSelectedClips(prev => [...prev, clip]);
   const handleUnselectClip = (clipToRemove) => setSelectedClips(prev => prev.filter(clip => clip.id !== clipToRemove.id));
   const handleTimingChange = ({ startTime, endTime, duration }) => {
@@ -209,11 +256,23 @@ const ClipsPreviewerDemo = () => {
   };
   const handleClearSelection = () => setSelectedClips([]);
   const handleUnselectAll = () => setSelectedClips([]);
+
   const toggleSort = () => setSortOrder(sortOrder === 'time' ? 'length' : 'time');
+
+  const validateVideoId = (id) => /^[0-9A-Za-z_-]{11}$/.test(id);
+
   const handleFinishAndSave = () => {
-    setSelectedClipsData(selectedClips);
-    showFeedback('Clips saved! Redirecting...', 'success');
-    setTimeout(() => navigate('/merge'), 1500);
+    if (processedClips && processedClips.length > 0) {
+      const validClips = processedClips.filter(clip => clip.isYouTube ? validateVideoId(clip.videoId) : true);
+      if (validClips.length < processedClips.length) {
+        showFeedback('Some clips have invalid video IDs and were skipped.', 'warning');
+      }
+      setSelectedClipsData(validClips);
+      showFeedback('Clips saved successfully! Redirecting to merge page...', 'success');
+      setTimeout(() => navigate('/merge'), 1500);
+    } else {
+      showFeedback('No clips to save. Please create some clips first.', 'error');
+    }
   };
 
   const formatTimeRange = (startTime, endTime) => {
@@ -258,7 +317,16 @@ const ClipsPreviewerDemo = () => {
               src={clip.thumbnail}
               alt={clip.title}
               className="w-full h-full object-cover"
-              onError={(e) => e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjgiIGhlaWdodD0iNzIiPjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iNzIiIGZpbGw9IiMyMjIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNTU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5ObyBQcmV2aWV3PC90ZXh0Pjwvc3ZnPg=='}
+              onError={(e) => {
+                e.target.onerror = null;
+                if (e.target.src.includes('maxresdefault.jpg')) {
+                  e.target.src = `https://img.youtube.com/vi/${clip.videoId}/hqdefault.jpg`;
+                } else if (e.target.src.includes('hqdefault.jpg')) {
+                  e.target.src = `${API_BASE_URL}/thumbnails/${clip.videoId}.jpg`;
+                } else {
+                  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjgiIGhlaWdodD0iNzIiPjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iNzIiIGZpbGw9IiMyMjIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNTU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5ObyBQcmV2aWV3PC90ZXh0Pjwvc3ZnPg==';
+                }
+              }}
             />
             <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1 py-0.5 rounded">
               {Math.round(clip.duration)}s
@@ -277,7 +345,6 @@ const ClipsPreviewerDemo = () => {
       </div>
     );
   };
-
 
   return (
     <div className="h-screen bg-[#121212] text-white flex flex-col">
@@ -307,16 +374,11 @@ const ClipsPreviewerDemo = () => {
             className={`fixed top-12 right-4 z-50 px-4 py-2 rounded-lg shadow-lg ${
               feedback.type === 'success' ? 'bg-green-500' :
               feedback.type === 'error' ? 'bg-red-500' :
-              feedback.type === 'warning' ? 'bg-amber-500' :
-              'bg-blue-500'
+              feedback.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
             } text-white text-sm flex items-center gap-2`}
           >
             <FontAwesomeIcon
-              icon={
-                feedback.type === 'success' ? faCheck :
-                feedback.type === 'warning' ? faExclamationTriangle :
-                faInfo
-              }
+              icon={feedback.type === 'success' ? faCheck : feedback.type === 'warning' ? faExclamationTriangle : faInfo}
               className="text-base"
             />
             {feedback.message}
@@ -339,13 +401,7 @@ const ClipsPreviewerDemo = () => {
                     <div className="absolute inset-0 rounded-full border-4 border-[#6c5ce7]/30 border-t-[#6c5ce7] animate-spin"></div>
                     <div className="w-16 h-16 bg-[#232323] rounded-full flex items-center justify-center">
                       <FontAwesomeIcon
-                        icon={
-                          loadingStage === 0 ? faBrain :
-                          loadingStage === 1 ? faFileAlt :
-                          loadingStage === 2 ? faVideo :
-                          loadingStage === 3 ? faScissors :
-                          faMagic
-                        }
+                        icon={loadingStage === 0 ? faBrain : loadingStage === 1 ? faFileAlt : loadingStage === 2 ? faVideo : loadingStage === 3 ? faScissors : faMagic}
                         className="text-[#6c5ce7] text-xl"
                       />
                     </div>
@@ -416,11 +472,11 @@ const ClipsPreviewerDemo = () => {
                         exit={{ opacity: 0, y: -5 }}
                         className="text-gray-400 text-xs leading-relaxed"
                       >
-                        {loadingStage === 0 && "Our AI is scanning through all your video content to identify the most engaging moments based on speech patterns, content, and context."}
-                        {loadingStage === 1 && "We're extracting meaningful segments from your video and arranging them to form the most compelling narrative structure."}
-                        {loadingStage === 2 && "Creating a seamless viewing experience by selecting clips that flow naturally together while maintaining context."}
-                        {loadingStage === 3 && "Fine-tuning the precise start and end points of each clip for perfect timing and smooth transitions."}
-                        {loadingStage === 4 && "Your clips are almost ready! We're optimizing the final selections to ensure they deliver maximum impact."}
+                        {loadingStage === 0 && "Our AI is scanning through all your video content..."}
+                        {loadingStage === 1 && "We're extracting meaningful segments from your video..."}
+                        {loadingStage === 2 && "Creating a seamless viewing experience..."}
+                        {loadingStage === 3 && "Fine-tuning the precise start and end points..."}
+                        {loadingStage === 4 && "Your clips are almost ready!..."}
                       </motion.p>
                     </AnimatePresence>
                   </div>
@@ -435,8 +491,7 @@ const ClipsPreviewerDemo = () => {
                   transition={{ duration: 0.5 }}
                   className="text-center text-gray-500 text-xs"
                 >
-                  {[
-                    "Did you know? The human brain can process video 60,000 times faster than text.",
+                  {["Did you know? The human brain can process video 60,000 times faster than text.",
                     "Short video clips capture 30% more audience attention than longer ones.",
                     "Our AI analyzes hundreds of data points to find the perfect clip moments.",
                     "The best video clips tell a complete story in just seconds.",
@@ -464,10 +519,7 @@ const ClipsPreviewerDemo = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-[#252525] text-sm px-10 py-2 rounded text-gray-300 placeholder-gray-500 outline-none focus:ring-1 focus:ring-[#6c5ce7]"
                 />
-                <FontAwesomeIcon
-                  icon={faSearch}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-                />
+                <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
               </div>
             </div>
             <div className="flex justify-between items-center px-4 py-2 border-b border-[#2d2d2d] bg-gray-900">
@@ -511,9 +563,7 @@ const ClipsPreviewerDemo = () => {
               )}
             </div>
             <div className="p-3 border-t border-[#2d2d2d] bg-gray-900 flex justify-between items-center">
-              <div className="text-sm text-gray-400">
-                {selectedClips.length} selected
-              </div>
+              <div className="text-sm text-gray-400">{selectedClips.length} selected</div>
               {selectedClips.length > 0 && (
                 <button
                   className="flex items-center text-xs px-3 py-1.5 rounded-md bg-[#252525] text-gray-300 hover:bg-[#303030] transition-colors"
@@ -543,14 +593,14 @@ const ClipsPreviewerDemo = () => {
               {currentClip && processedClips.length > 1 && (
                 <div className="flex gap-3">
                   <button
-                    className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-xs font-medium transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:pointer-events-none"
+                    className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-xs font-medium transition-all flex items-center justify-center gap-1"
                     onClick={handlePreviousClip}
                   >
                     <FontAwesomeIcon icon={faBackwardStep} className="text-xs" />
                     <span>Previous</span>
                   </button>
                   <button
-                    className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-xs font-medium transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:pointer-events-none"
+                    className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-xs font-medium transition-all flex items-center justify-center gap-1"
                     onClick={handleNextClip}
                   >
                     <span>Next</span>
@@ -573,8 +623,8 @@ const ClipsPreviewerDemo = () => {
                     <div className="w-full h-full flex items-center justify-center p-6">
                       <TrimmingTool
                         videoId={currentClip.isYouTube ? currentClip.videoId : ''}
-                        videoUrl={currentClip.isYouTube ? '' : currentClip.videoUrl}
-                        isYouTube={currentClip.isYouTube || false}
+                        videoUrl={currentClip.isYouTube ? '' : currentClip.videoBlobUrl || currentClip.videoUrl}
+                        isYouTube={currentClip.isYouTube}
                         initialDuration={currentClip.originalVideoDuration}
                         initialStartTime={currentClip.startTime}
                         initialEndTime={currentClip.endTime}
@@ -593,12 +643,10 @@ const ClipsPreviewerDemo = () => {
                     className="flex flex-col items-center justify-center h-full w-full p-6"
                   >
                     <div className="bg-gray-800/50 p-6 rounded-lg max-w-lg w-full text-center">
-                      <div className="w-12 h-12 rounded-full bg-[#6c5ce7]/20 flex items-center justify-center mx-auto mb-4">
+                      <div className="w-12 h-12 rounded-full bg-[#6c5 PRc5ce7]/20 flex items-center justify-center mx-auto mb-4">
                         <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7] text-xl" />
                       </div>
-                      <h2 className="text-lg font-bold text-white mb-2">
-                        Trim Your Clips
-                      </h2>
+                      <h2 className="text-lg font-bold text-white mb-2">Trim Your Clips</h2>
                       <p className="text-gray-300 text-sm leading-relaxed mb-4">
                         Select a clip from the left panel to adjust its starting and ending points.
                       </p>
@@ -633,10 +681,7 @@ const ClipsPreviewerDemo = () => {
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto custom-purple-scrollbar p-4">
-                <VideoDetails
-                  currentClip={currentClip}
-                  showTranscript={true}
-                />
+                <VideoDetails currentClip={currentClip} showTranscript={true} />
               </div>
               <div className="p-4 border-t border-[#2d2d2d] bg-[#1f1f1f]">
                 <button
@@ -655,38 +700,15 @@ const ClipsPreviewerDemo = () => {
       )}
       <style>
         {`
-        .custom-purple-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-        .custom-purple-scrollbar::-webkit-scrollbar-track {
-          background: #1a1a1a;
-        }
-        .custom-purple-scrollbar::-webkit-scrollbar-thumb {
-          background: #6c5ce7;
-          border-radius: 4px;
-          opacity: 0.3;
-        }
-        .custom-purple-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #8b7cf7;
-        }
-        .custom-purple-scrollbar {
-          scrollbar-width: thin;
-          scrollbar-color: #6c5ce7 #1a1a1a;
-        }
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.6; }
-        }
-        @keyframes pulse-slower {
-          0%, 100% { opacity: 0.2; }
-          50% { opacity: 0.5; }
-        }
-        .animate-pulse-slow {
-          animation: pulse-slow 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        .animate-pulse-slower {
-          animation: pulse-slower 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
+          .custom-purple-scrollbar::-webkit-scrollbar { width: 8px; }
+          .custom-purple-scrollbar::-webkit-scrollbar-track { background: #1a1a1a; }
+          .custom-purple-scrollbar::-webkit-scrollbar-thumb { background: #6c5ce7; border-radius: 4px; opacity: 0.3; }
+          .custom-purple-scrollbar::-webkit-scrollbar-thumb:hover { background: #8b7cf7; }
+          .custom-purple-scrollbar { scrollbar-width: thin; scrollbar-color: #6c5ce7 #1a1a1a; }
+          @keyframes pulse-slow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.6; } }
+          @keyframes pulse-slower { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.5; } }
+          .animate-pulse-slow { animation: pulse-slow 6s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+          .animate-pulse-slower { animation: pulse-slower 8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         `}
       </style>
     </div>
