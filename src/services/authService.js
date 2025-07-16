@@ -391,7 +391,32 @@ const authService = {
       console.error('Twitter login error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.message || 'Twitter login failed');
     }
-  }
+  },
+  signupWithGoogle: async ({ token }) => {
+    try {
+      const response = await api.post("/signup/google", { token });
+
+      if (response.data.status && response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+
+        // Dispatch event for successful signup
+        window.dispatchEvent(new CustomEvent("auth:signedUp"));
+        return response.data;
+      } else {
+        throw new Error(response.data.message || "Google signup failed");
+      }
+    } catch (error) {
+      console.error("Google signup error:", error.response?.data || error.message);
+      let message = "Google signup failed";
+
+      if (error.response?.data?.message) {
+        message = error.response.data.message;
+      }
+
+      throw new Error(message);
+    }
+  },
 };
 
 export default authService;
