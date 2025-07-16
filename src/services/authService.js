@@ -116,6 +116,28 @@ const isTokenExpired = (token) => {
 
 // Auth service object
 const authService = {
+  // New method to request password reset
+  requestPasswordReset: async (email) => {
+    try {
+      const response = await api.post('/forgot-password', { email });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to request password reset');
+    }
+  },
+
+  // New method to reset password
+  resetPassword: async (token, newPassword) => {
+    try {
+      const response = await api.post('/reset-password', { token, newPassword });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to reset password');
+    }
+  },
+
+
+
   // Login user with email and password
   login: async (email, password) => {
     try {

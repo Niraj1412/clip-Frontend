@@ -56,6 +56,8 @@ function App() {
                       {/* Public routes */}
                       <Route path="/" element={<LandingPage />} />
                       <Route path="/signin" element={<SignInPage />} />
+                      <Route path="/forgot-password" element={<ForgotPassword />} />
+                      <Route path="/reset-password" element={<ResetPassword />} />
                       <Route path="/signup" element={<SignUpPage />} />
                       <Route path="/auth/github/callback" element={<GitHubCallback />} />
                       <Route path="/auth/twitter/callback" element={<TwitterCallback />} />

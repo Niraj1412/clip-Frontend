@@ -219,16 +219,76 @@ const TranscriptGridPage = () => {
 
     try {
       console.log(`Fetching transcript for video ${videoId} (attempt ${attempt})...`);
-
-      // First try YouTube-specific endpoint
       let response;
       let isYouTube = false;
-      try {
-        response = await axios.post(`https://clip-py-backend-1.onrender.com/transcript/${videoId}`, { headers });
+
+      const extractYouTubeVideoId = (input) => {
+      const patterns = [
+        /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, // Standard video URL
+        /youtu\.be\/([a-zA-Z0-9_-]{11})/,              // Shortened URL
+        /watch\?v=([a-zA-Z0-9_-]{11})&list=/          // Video in playlist
+      ];
+      for (const pattern of patterns) {
+        const match = input.match(pattern);
+        if (match && match[1]) return match[1];
+      }
+      return null;
+    };
+
+    // Function to extract YouTube playlist ID from a URL
+    const extractYouTubePlaylistId = (input) => {
+      const pattern = /youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/;
+      const match = input.match(pattern);
+      return match && match[1] ? match[1] : null;
+    };
+
+    // Check if the input is a URL (contains 'http' or 'www')
+    const isUrl = /^(https?:\/\/|www\.)/i.test(videoInput);
+    let videoId = videoInput;
+
+    if (isUrl) {
+      // Try to extract a video ID from the URL
+      const youtubeVideoId = extractYouTubeVideoId(videoInput);
+      const youtubePlaylistId = extractYouTubePlaylistId(videoInput);
+
+      if (youtubeVideoId) {
+        // It’s a video URL (standard, shortened, or in a playlist)
+        videoId = youtubeVideoId;
         isYouTube = true;
+      } else if (youtubePlaylistId) {
+        // It’s a playlist URL
+        console.log(`Detected playlist ID: ${youtubePlaylistId}`);
+        throw new Error('Playlist links are not supported for direct transcript fetching. Please provide a video link or ID.');
+        // Alternatively, handle playlist by fetching video IDs (requires backend support)
+      } else {
+        throw new Error('Invalid YouTube URL format');
+      }
+    } else {
+      // Input is not a URL, treat it as an ID
+      const isYouTubeId = /^[a-zA-Z0-9_-]{11}$/.test(videoInput);
+      const isMongoId = /^[a-f0-9]{24}$/.test(videoInput);
+
+      if (isYouTubeId) {
+        isYouTube = true;
+      } else if (!isMongoId) {
+        throw new Error('Invalid ID format. Expected YouTube (11 chars) or MongoDB (24 hex chars) ID.');
+      }
+      // If neither matches but not a URL, assume MongoDB ID for now (as per original logic)
+    }
+
+      try {
+        // Check if videoId is a YouTube ID (11 characters, alphanumeric)
+        const isYouTubeId = /^[a-zA-Z0-9_-]{11}$/.test(videoId);
+        if (isYouTubeId) {
+          response = await axios.post(`https://clip-py-backend-1.onrender.com/transcript/${videoId}`, { headers });
+          isYouTube = true;
+        } else {
+          response = await axios.get(`${API_BASE_URL}/video/${videoId}/transcript`, { headers });
+        }
       } catch (youtubeError) {
-        // If YouTube endpoint fails, fall back to generic endpoint
+        console.error('Transcript fetch error:', youtubeError);
         if (youtubeError.response?.status === 404) {
+          // Fallback to generic endpoint if YouTube endpoint fails
           response = await axios.get(`${API_BASE_URL}/video/${videoId}/transcript`, { headers });
         } else {
           throw youtubeError;
