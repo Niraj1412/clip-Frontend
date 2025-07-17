@@ -367,15 +367,12 @@ const InputComponent = () => {
             let endpoints = [];
             if (urlValidation.type === 'playlist') {
               const playlistId = urlValidation.playlistId;
-              // Define endpoints for playlists
               endpoints = [
                 { url: `${PRIMARY_API_URL}/transcript/playlist/${playlistId}`, method: 'get' },
-                // Add backup endpoints if applicable, e.g.:
-                // { url: `${BACKUP_API_URL}/api/v1/youtube/playlist/${playlistId}`, method: 'post' }
+                // Add backup endpoints if applicable
               ];
             } else {
               const videoId = urlValidation.videoId;
-              // Existing endpoints for single videos
               endpoints = [
                 { url: `${PRIMARY_API_URL}/transcript/${videoId}`, method: 'get' },
                 { url: `${BACKUP_API_URL}/api/v1/youtube/video/${videoId}`, method: 'post' },
@@ -399,14 +396,15 @@ const InputComponent = () => {
                   });
                 });
 
-                // Check response status
                 if (response.data?.status === false) {
                   throw new Error(response.data.message || 'Failed to fetch transcript');
                 }
 
                 if (response.data?.status === true) {
-                  // Adjust success handling if needed for playlists vs. videos
-                  await processSuccessResponse(urlValidation.type === 'playlist' ? playlistId : videoId);
+                  // Fix: Use urlValidation properties directly
+                  await processSuccessResponse(
+                    urlValidation.type === 'playlist' ? urlValidation.playlistId : urlValidation.videoId
+                  );
                   setRetryCount(0); // Reset retry count on success
                   return;
                 }
