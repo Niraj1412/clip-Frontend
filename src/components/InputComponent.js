@@ -119,29 +119,63 @@ const InputComponent = () => {
 
   // Function to validate a YouTube URL (e.g., ensure it has a valid video ID)
   const validateYouTubeUrl = (url) => {
-    if (!isYouTubeUrl(url)) return { isValid: false, type: null, id: null };
+  if (!isYouTubeUrl(url)) return { isValid: false, type: null, videoId: null, playlistId: null };
 
-    // Handle playlist URLs
-    if (url.includes('playlist?list=')) {
-      const playlistId = url.split('list=')[1]?.split('&')[0];
-      // YouTube playlist IDs typically start with 'PL' or other prefixes and are 34 characters long
-      const isValidPlaylist = playlistId && /^[a-zA-Z0-9_-]{34}$/.test(playlistId);
-      return { isValid: isValidPlaylist, type: 'playlist', id: playlistId || null };
-    }
-    const videoId = url.includes('v=')
-      ? url.split('v=')[1]?.split('&')[0]
-      : url.includes('youtu.be/')
-        ? url.split('youtu.be/')[1]?.split(/[?&]/)[0]
-        : url.includes('youtube.com/embed/')
-          ? url.split('youtube.com/embed/')[1]?.split(/[?&]/)[0]
-          : url.includes('youtube.com/live/')
-            ? url.split('youtube.com/live/')[1]?.split(/[?&]/)[0]
-            : url.includes('youtube.com/shorts/')
-              ? url.split('youtube.com/shorts/')[1]?.split(/[?&]/)[0]
-              : url;
-    const isValidVideo = videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId);
-    return { isValid: isValidVideo, type: 'video', id: videoId || null }
-  };
+  let videoId = null;
+  let playlistId = null;
+
+  // Handle playlist URLs
+  if (url.includes('playlist?list=')) {
+    playlistId = url.split('list=')[1]?.split('&')[0];
+    const isValidPlaylist = playlistId && /^[a-zA-Z0-9_-]{34}$/.test(playlistId);
+    return {
+      isValid: isValidPlaylist,
+      type: 'playlist',
+      videoId: null,
+      playlistId: isValidPlaylist ? playlistId : null
+    };
+  }
+
+  // Extract video ID
+  if (url.includes('v=')) {
+    videoId = url.split('v=')[1]?.split('&')[0];
+  } else if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+  } else if (url.includes('youtube.com/embed/')) {
+    videoId = url.split('youtube.com/embed/')[1]?.split(/[?&]/)[0];
+  } else if (url.includes('youtube.com/live/')) {
+    videoId = url.split('youtube.com/live/')[1]?.split(/[?&]/)[0];
+  } else if (url.includes('youtube.com/shorts/')) {
+    videoId = url.split('youtube.com/shorts/')[1]?.split(/[?&]/)[0];
+  }
+
+  // Extract playlist ID if present
+  if (url.includes('list=')) {
+    playlistId = url.split('list=')[1]?.split('&')[0];
+  }
+
+  // Validate IDs
+  const isValidVideo = videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId);
+  const isValidPlaylist = playlistId && /^[a-zA-Z0-9_-]{34}$/.test(playlistId);
+
+  if (isValidVideo) {
+    return {
+      isValid: true,
+      type: 'video',
+      videoId,
+      playlistId: isValidPlaylist ? playlistId : null
+    };
+  } else if (isValidPlaylist) {
+    return {
+      isValid: true,
+      type: 'playlist',
+      videoId: null,
+      playlistId
+    };
+  }
+
+  return { isValid: false, type: null, videoId: null, playlistId: null };
+};
 
   const extractVideoId = (url, platform, extractType = 'video') => {
     if (!url) return null;
