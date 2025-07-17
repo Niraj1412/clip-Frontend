@@ -359,27 +359,28 @@ const InputComponent = () => {
         } else {
           // Handle URL input
           if (isYouTubeUrl(youtubeUrl)) {
-            // YouTube URL handling
             const urlValidation = validateYouTubeUrl(youtubeUrl);
             if (!urlValidation.isValid) {
               throw new Error('Invalid YouTube URL format');
             }
 
-            let videoId;
+            let endpoints = [];
             if (urlValidation.type === 'playlist') {
-              const playlistId = urlValidation.id;
-              // Optional: Fetch video IDs from playlist (requires backend API or YouTube Data API)
-              throw new Error('Playlist processing is not yet supported. Please provide a single video URL.');
-              // Alternatively, you could call an API to get video IDs from the playlist
+              const playlistId = urlValidation.playlistId;
+              // Define endpoints for playlists
+              endpoints = [
+                { url: `${PRIMARY_API_URL}/transcript/playlist/${playlistId}`, method: 'get' },
+                // Add backup endpoints if applicable, e.g.:
+                // { url: `${BACKUP_API_URL}/api/v1/youtube/playlist/${playlistId}`, method: 'post' }
+              ];
             } else {
-              videoId = urlValidation.id; // Use validated video ID
+              const videoId = urlValidation.videoId;
+              // Existing endpoints for single videos
+              endpoints = [
+                { url: `${PRIMARY_API_URL}/transcript/${videoId}`, method: 'get' },
+                { url: `${BACKUP_API_URL}/api/v1/youtube/video/${videoId}`, method: 'post' },
+              ];
             }
-
-            // Define backend endpoints for YouTube
-            const endpoints = [
-              { url: `${PRIMARY_API_URL}/transcript/${videoId}`, method: 'get' },
-              { url: `${BACKUP_API_URL}/api/v1/youtube/video/${videoId}`, method: 'post' },
-            ];
 
             let lastError = null;
 
@@ -404,7 +405,8 @@ const InputComponent = () => {
                 }
 
                 if (response.data?.status === true) {
-                  await processSuccessResponse(videoId);
+                  // Adjust success handling if needed for playlists vs. videos
+                  await processSuccessResponse(urlValidation.type === 'playlist' ? playlistId : videoId);
                   setRetryCount(0); // Reset retry count on success
                   return;
                 }
@@ -414,7 +416,7 @@ const InputComponent = () => {
                 console.error(`Error with ${endpoint.url}:`, error.response?.data || error.message);
                 if (error.response?.status === 404) {
                   lastError = new Error(
-                    'This video doesn’t have captions available. Please try a different video with subtitles.'
+                    'This resource doesn’t have captions available. Please try a different URL.'
                   );
                 } else if (error.response?.status === 401) {
                   setUrlError('Session expired. Please log in again.');
