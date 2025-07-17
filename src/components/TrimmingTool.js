@@ -284,10 +284,11 @@ const TrimmingTool = ({
     setEndTime(validEndTime);
     setCurrentTime(validStartTime);
     event.target.seekTo(validStartTime);
-    event.target.pauseVideo(); // Explicitly pause to prevent auto-play
+    event.target.playVideo(); // Start playing the video automatically
+    setIsPlaying(true); // Update state to reflect playing status
     setReady(true); // Hide loading indicator
     setYoutubeReady(true); // Enable time updates
-    console.log(`YouTube video ready. Positioned at ${validStartTime.toFixed(2)} seconds`);
+    console.log(`YouTube video ready. Positioned at ${validStartTime.toFixed(2)} seconds and playing`);
   };
 
   const onPlayerStateChange = (event) => {
