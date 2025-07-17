@@ -15,6 +15,8 @@ import HomePage from './pages/HomePage';
 import ExplorePage from './pages/ExplorePage';
 import LandingPage from './pages/LandingPage';
 import SignInPage from './pages/SignInPage';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import SignUpPage from './pages/SignUpPage';
 import ClipsPreviewerDemo from './pages/ClipsPreviewerDemo';
 import ClipsPreviewerDemoImproved from './pages/ClipsPreviewerDemoImproved';
