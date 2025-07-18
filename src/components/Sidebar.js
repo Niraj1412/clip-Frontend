@@ -65,17 +65,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => { // Renamed props to match HomeP
         className={`fixed top-0 w-[280px] bg-[#121212] shadow-xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A] overflow-hidden transition-all duration-300 ${isOpen ? "left-0" : "-left-[280px]"} lg:left-0 z-50`}
         style={{ height: "calc(100vh - 3.5rem)" }}
       >
-        {isOpen && (
-          <motion.button
-            className="absolute top-4 right-4 text-white lg:hidden"
-            onClick={toggleSidebar}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <FontAwesomeIcon icon={faTimes} size="lg" />
-          </motion.button>
-        )}
         {/* Rest of the sidebar content remains unchanged */}
         <div className="absolute inset-0 overflow-hidden z-0">
           <motion.div 
