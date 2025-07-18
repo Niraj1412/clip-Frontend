@@ -5,8 +5,10 @@ import Sidebar from '../components/Sidebar';
 import InputComponent from '../components/InputComponent';
 import authService from '../services/authService';
 
+
 const HomePage = () => {
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Check if the user is authenticated
@@ -28,7 +30,7 @@ const HomePage = () => {
     <>
       <Navbar />
       <div className="flex">
-        <Sidebar />
+        <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="ml-0 md:ml-[280px] mt-7 flex-1 p-6">
           <InputComponent />
         </main>

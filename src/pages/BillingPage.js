@@ -9,6 +9,7 @@ const FeedbackPage = () => {
   const [feedback, setFeedback] = useState('');
   const [rating, setRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
