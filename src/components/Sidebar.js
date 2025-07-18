@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import authService from "../services/authService";
 
-const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
+const Sidebar = ({ isOpen, toggleSidebar }) => { // Renamed props to match HomePage
   const location = useLocation();
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
@@ -30,7 +30,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
   // Prevent body scrolling when sidebar is open on mobile
   useEffect(() => {
-    if (isSidebarOpen) {
+    if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -38,7 +38,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isSidebarOpen]);
+  }, [isOpen]);
 
   const handleLogout = () => {
     authService.logout();
@@ -52,27 +52,27 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   return (
     <>
       {/* Overlay for mobile when sidebar is open */}
-      {isSidebarOpen && (
+      {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 bg-black/50 lg:hidden z-40"
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={toggleSidebar} // Use toggleSidebar to close
         ></motion.div>
       )}
       <motion.div
-        className={`fixed top-0 w-[280px] bg-[#121212] shadow-xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A] overflow-hidden transition-all duration-300 ${isSidebarOpen ? "left-0" : "-left-[280px]"} lg:left-0 z-50`}
+        className={`fixed top-0 w-[280px] bg-[#121212] shadow-xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A] overflow-hidden transition-all duration-300 ${isOpen ? "left-0" : "-left-[280px]"} lg:left-0 z-50`}
         style={{ height: "calc(100vh - 3.5rem)" }}
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         {/* Close button for mobile */}
-        {isSidebarOpen && (
+        {isOpen && (
           <motion.button
             className="absolute top-4 right-4 text-white lg:hidden"
-            onClick={() => setIsSidebarOpen(false)}
+            onClick={toggleSidebar} // Use toggleSidebar to close
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -203,7 +203,6 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   );
 };
 
-// SidebarItem and BottomLink components remain unchanged
 const SidebarItem = ({ to, icon, text, isActive, delay = 0 }) => {
   return (
     <motion.li 

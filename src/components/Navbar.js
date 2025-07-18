@@ -9,14 +9,15 @@ import {
   faChevronDown,
   faStar,
   faMagic,
-  faUserCircle
+  faUserCircle,
+  faBars // Added for hamburger menu
 } from "@fortawesome/free-solid-svg-icons";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../images/clipsmartAI-Icon1.webp";
 import authService from "../services/authService";
 
-const Navbar = () => {
+const Navbar = ({ setSidebarOpen }) => { // Add setSidebarOpen prop
   const location = useLocation();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -27,7 +28,6 @@ const Navbar = () => {
   });
 
   useEffect(() => {
-    // Get current user data from auth service
     const currentUser = authService.getCurrentUser();
     if (currentUser) {
       setUserData({
@@ -50,26 +50,22 @@ const Navbar = () => {
     };
   }, []);
 
-  // Handle sign out
   const handleSignOut = () => {
     authService.logout();
     navigate('/signin');
     setShowUserMenu(false);
   };
 
-  // Get first letter of name for avatar
   const getInitial = (name) => {
     return name ? name.charAt(0).toUpperCase() : 'U';
   };
 
-  // Check if the current route matches a nav item route
   const isActive = (path) => {
     return location.pathname === path;
   };
 
   return (
     <>
-      {/* Decorative background element */}
       <div className="fixed top-0 left-0 w-full h-20 z-40">
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#6c5ce7]/10 rounded-full filter blur-[80px] transform translate-x-1/3 -translate-y-1/2"></div>
         <div className="absolute top-0 left-1/4 w-32 h-32 bg-purple-500/10 rounded-full filter blur-[60px] transform -translate-y-1/2"></div>
@@ -80,12 +76,10 @@ const Navbar = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="fixed top-0 left-0 w-full bg-[#1a1a1a]/80 backdrop-blur-xl flex items-center justify-between px-3 py-2 sm:px-6 sm:py-3 z-50 font-roboto shadow-lg border-b border-gray-800/30"
-        style={{ zIndex: 1000 }}>
-        
-        {/* Subtle gradient line at the top */}
+        style={{ zIndex: 1000 }}
+      >
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-[#6c5ce7]/0 via-[#6c5ce7]/50 to-[#6c5ce7]/0"></div>
         
-        {/* Animated sparkle elements */}
         <div className="absolute left-1/3 top-1/2 transform -translate-y-1/2 text-[#6c5ce7]/20 text-xs animate-pulse">
           <FontAwesomeIcon icon={faMagic} />
         </div>
@@ -132,6 +126,17 @@ const Navbar = () => {
 
         {/* Right Side Actions */}
         <div className="flex items-center space-x-4">
+          {/* Hamburger Menu for Mobile */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setSidebarOpen(true)} // Open the sidebar
+            className="lg:hidden p-2 text-white"
+            aria-label="Open sidebar"
+          >
+            <FontAwesomeIcon icon={faBars} size="lg" />
+          </motion.button>
+
           {/* User Profile */}
           <div className="relative" ref={userMenuRef}>
             <motion.button
@@ -155,7 +160,6 @@ const Navbar = () => {
               </motion.div>
             </motion.button>
 
-            {/* User Dropdown Menu */}
             <AnimatePresence>
               {showUserMenu && (
                 <motion.div

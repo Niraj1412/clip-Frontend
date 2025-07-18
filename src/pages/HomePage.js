@@ -11,13 +11,11 @@ const HomePage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    // Check if the user is authenticated
     if (!authService.isAuthenticated()) {
       navigate('/signin');
       return;
     }
 
-    // Remove only videoIds from localStorage instead of clearing everything
     const keys = Object.keys(localStorage);
     keys.forEach(key => {
       if (key.includes('videoId') || key === 'videoIds') {
@@ -26,9 +24,9 @@ const HomePage = () => {
     });
   }, [navigate]);
 
-  return(
+  return (
     <>
-      <Navbar />
+      <Navbar setSidebarOpen={setIsSidebarOpen} /> {/* Pass setSidebarOpen to Navbar */}
       <div className="flex">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="ml-0 md:ml-[280px] mt-7 flex-1 p-6">
@@ -36,7 +34,7 @@ const HomePage = () => {
         </main>
       </div>
     </>
-  )
-}
+  );
+};
 
 export default HomePage;
