@@ -79,7 +79,7 @@ const Navbar = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="fixed top-0 left-0 w-full bg-[#1a1a1a]/80 backdrop-blur-xl flex items-center justify-between px-6 py-3 z-50 font-roboto shadow-lg border-b border-gray-800/30"
+        className="fixed top-0 left-0 w-full bg-[#1a1a1a]/80 backdrop-blur-xl flex items-center justify-between px-4 py-3 sm:px-6 z-50 font-roboto shadow-lg border-b border-gray-800/30"
         style={{ zIndex: 1000 }}>
         
         {/* Subtle gradient line at the top */}

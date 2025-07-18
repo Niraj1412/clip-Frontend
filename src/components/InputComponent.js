@@ -513,7 +513,7 @@ const InputComponent = () => {
   ];
 
   return (
-    <div className="min-h-screen pt-14 pb-6 px-6">
+    <div className="min-h-screen pt-14 pb-6 px-4 sm:px-6">
       <div className="absolute inset-0 overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.03]"

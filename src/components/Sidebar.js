@@ -54,8 +54,8 @@ const Sidebar = () => {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 w-[280px] bg-[#121212] shadow-xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A] overflow-hidden"
-      style={{ height: 'calc(100vh - 3.5rem)', zIndex: 900 }}
+      className="fixed top-0 md:top-0 left-0 w-[280px] bg-[#121212] shadow-xl flex flex-col items-center py-6 px-4 text-white mt-0 md:mt-14 border-r border-[#2A2A2A] overflow-hidden hidden md:flex"
+      style={{ height: '100vh', zIndex: 900 }}
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}

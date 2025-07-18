@@ -29,7 +29,7 @@ const HomePage = () => {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="ml-[280px] mt-7 flex-1 p-6">
+        <main className="ml-0 md:ml-[280px] mt-7 flex-1 p-6">
           <InputComponent />
         </main>
       </div>
