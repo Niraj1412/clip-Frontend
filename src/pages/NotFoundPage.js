@@ -12,7 +12,7 @@ const NotFoundPage = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-[#121212] pt-20 pb-12 flex items-center justify-center">
+      <div className="min-h-screen bg-[#121212] pt-20 pb-12 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -22,7 +22,7 @@ const NotFoundPage = () => {
           >
             <div className="mb-8">
               <div className="relative inline-block">
-                <div className="text-[150px] font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-600">
+                <div className="text-7xl md:text-[150px] font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-600">
                   404
                 </div>
                 <motion.div 
@@ -42,11 +42,11 @@ const NotFoundPage = () => {
               </div>
             </div>
             
-            <h1 className="text-4xl font-bold text-white mb-4">
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-4">
               Page Not Found
             </h1>
             
-            <p className="text-xl text-gray-300 mb-8">
+            <p className="text-base md:text-xl text-gray-300 mb-8">
               We couldn't find the page you're looking for: <span className="text-purple-400 font-mono">{path}</span>
             </p>
             
@@ -69,7 +69,7 @@ const NotFoundPage = () => {
                 
                 <button 
                   onClick={() => window.history.back()}
-                  className="px-6 py-3 bg-[#2a2a2a] hover:bg-[#333] rounded-xl font-medium text-white flex items-center gap-2"
+                  className="px-6 py-3 bg-[#2a2a2a] hover:bg-[#333] rounded-xl font-medium text-white flex items-center gap-2 w-full sm:w-auto"
                 >
                   <FontAwesomeIcon icon={faArrowLeft} />
                   Go Back

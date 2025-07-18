@@ -200,7 +200,7 @@ const InputComponent = () => {
   };
 
   const handleProcessingError = (error) => {
-    let errorMessage = 'Service unavailable. Please try again later.';
+    let errorMessage = "This video doesn't have captions available. Please try a different video with subtitles.";
     if (
       error.message.includes('No transcript available') ||
       error.response?.data?.message?.includes('No transcript available')

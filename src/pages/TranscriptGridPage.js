@@ -467,13 +467,13 @@ const TranscriptGridPage = () => {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           {/* Left Panel - Video List */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-[420px] bg-gray-900 flex flex-col border-r border-[#2d2d2d]"
+            className="w-full md:w-[420px] bg-gray-900 flex flex-col md:border-r md:border-[#2d2d2d] h-1/2 md:h-auto"
           >
             {/* Search Bar */}
             <div className="p-4 border-b border-[#2d2d2d]">
@@ -742,7 +742,7 @@ const TranscriptGridPage = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.4 }}
-              className="w-[300px] bg-[#1f1f1f] border-l border-[#2d2d2d] p-4"
+              className="hidden md:block md:w-[300px] bg-[#1f1f1f] md:border-l md:border-[#2d2d2d] p-4"
             >
               <div className="space-y-4">
                 <a

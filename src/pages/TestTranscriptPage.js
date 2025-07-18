@@ -40,23 +40,23 @@ const TestTranscriptPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
+    <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8">
       <h1 className="text-2xl font-bold mb-4">Transcript API Test Page</h1>
       
       <div className="mb-6">
         <label className="block mb-2">YouTube Video ID:</label>
-        <div className="flex">
+        <div className="flex flex-col sm:flex-row">
           <input 
             type="text" 
             value={videoId} 
             onChange={(e) => setVideoId(e.target.value)} 
-            className="px-4 py-2 bg-gray-800 rounded-l text-white w-full"
+            className="px-4 py-2 bg-gray-800 rounded-t-md sm:rounded-l-md sm:rounded-t-none text-white w-full"
             placeholder="Enter YouTube Video ID (e.g., dQw4w9WgXcQ)"
           />
           <button 
             onClick={fetchTranscript} 
             disabled={loading || !videoId}
-            className="bg-blue-600 px-4 py-2 rounded-r font-medium disabled:bg-gray-600"
+            className="bg-blue-600 px-4 py-2 rounded-b-md sm:rounded-r-md sm:rounded-b-none font-medium disabled:bg-gray-600 mt-2 sm:mt-0"
           >
             {loading ? 'Loading...' : 'Test API'}
           </button>

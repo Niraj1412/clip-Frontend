@@ -433,7 +433,7 @@ const OutputPage = () => {
             </span>
           </h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-center gap-3">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -502,7 +502,7 @@ const OutputPage = () => {
       `}</style>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
         {/* Error State */}
         <AnimatePresence>
           {error && (
@@ -671,7 +671,7 @@ const OutputPage = () => {
                   </div>
                 </div>
                 <div className="bg-[#151515] border-t border-[#2d2d2d] px-6 py-4 flex-shrink-0">
-                  <div className="flex flex-wrap gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -703,7 +703,7 @@ const OutputPage = () => {
                             <div className="p-3 border-b border-[#2d2d2d]">
                               <h3 className="text-sm font-medium text-gray-300">Share via</h3>
                             </div>
-                            <div className="p-2 grid grid-cols-2 gap-2">
+                            <div className="p-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                               <motion.button
                                 whileHover={{ backgroundColor: 'rgba(108, 92, 231, 0.1)' }}
                                 className="flex items-center gap-3 p-3 rounded-lg"
@@ -737,7 +737,7 @@ const OutputPage = () => {
               </div>
 
               {/* Information Panel */}
-              <div className="lg:w-[350px] flex flex-col gap-4 min-h-0">
+              <div className="w-full lg:w-[350px] flex flex-col gap-4 min-h-0">
                 <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] shadow-lg overflow-hidden">
                   <div className="px-6 py-4 border-b border-[#2d2d2d]">
                     <h3 className="font-bold text-lg flex items-center gap-2">
@@ -864,24 +864,26 @@ const OutputPage = () => {
                   </div>
                   <h2 className="text-2xl font-bold text-white mb-3">No Video Generated</h2>
                   <p className="text-gray-400 max-w-md mb-6">Your clips need to be processed to generate a video. Please select clips to merge.</p>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate('/transcripts')}
-                    className="bg-[#6c5ce7] hover:bg-[#5849e0] px-6 py-3 rounded-lg font-medium text-white flex items-center gap-2 transition-colors mr-3"
-                  >
-                    <FontAwesomeIcon icon={faArrowLeft} />
-                    <span>Select Clips</span>
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate('/explore ,/')}
-                    className="bg-[#252525] hover:bg-[#303030] px-6 py-3 rounded-lg font-medium text-white flex items-center gap-2 transition-colors"
-                  >
-                    <FontAwesomeIcon icon={faArrowLeft} />
-                    <span>Back to Explore</span>
-                  </motion.button>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate('/transcripts')}
+                      className="bg-[#6c5ce7] hover:bg-[#5849e0] px-6 py-3 rounded-lg font-medium text-white flex items-center gap-2 transition-colors mr-3"
+                    >
+                      <FontAwesomeIcon icon={faArrowLeft} />
+                      <span>Select Clips</span>
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate('/explore ,/')}
+                      className="bg-[#252525] hover:bg-[#303030] px-6 py-3 rounded-lg font-medium text-white flex items-center gap-2 transition-colors"
+                    >
+                      <FontAwesomeIcon icon={faArrowLeft} />
+                      <span>Back to Explore</span>
+                    </motion.button>
+                  </div>
                 </div>
               </div>
             </motion.div>

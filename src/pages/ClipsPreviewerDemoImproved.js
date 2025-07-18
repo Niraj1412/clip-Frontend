@@ -434,21 +434,21 @@ const handleFinishAndSave = () => {
   return (
     <div className="h-screen bg-[#121212] text-white flex flex-col">
       {/* Simple Header Bar */}
-      <div className="flex justify-between items-center px-6 py-3 border-b border-[#2d2d2d] bg-[#1a1a1a]">
+      <div className="flex justify-between items-center px-4 md:px-6 py-3 border-b border-[#2d2d2d] bg-[#1a1a1a]">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#6c5ce7] flex items-center justify-center">
-            <FontAwesomeIcon icon={faScissors} className="text-white" />
+          <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[#6c5ce7] flex items-center justify-center">
+            <FontAwesomeIcon icon={faScissors} className="text-white text-sm md:text-base" />
           </div>
-          <h1 className="text-lg font-medium text-white">
+          <h1 className="text-base md:text-lg font-medium text-white">
             Clip Editor
-            <span className="ml-2 text-sm text-gray-400">
+            <span className="ml-1 md:ml-2 text-xs md:text-sm text-gray-400">
               ({selectedClips.length} selected / {processedClips.length || 0} total)
             </span>
           </h1>
         </div>
 
         {/* Help text */}
-        <div className="text-gray-400 text-sm flex items-center">
+        <div className="hidden md:flex text-gray-400 text-sm items-center">
           <FontAwesomeIcon icon={faInfoCircle} className="mr-2 text-[#6c5ce7]" />
           <span>Select and edit clips, then save to continue</span>
         </div>
@@ -619,13 +619,13 @@ const handleFinishAndSave = () => {
           </motion.div>
         </div>
       ) : (
-        <div className="flex-1 flex h-[calc(100vh-49px)] overflow-hidden">
+        <div className="flex-1 flex flex-col lg:flex-row h-full lg:h-[calc(100vh-49px)] overflow-y-auto lg:overflow-hidden">
           {/* Left Panel - Clip Selection */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-[420px] bg-gray-900 flex flex-col border-r border-[#2d2d2d]"
+            className="w-full lg:w-[420px] bg-gray-900 flex flex-col lg:border-r border-[#2d2d2d]"
           >
             {/* Clips List Header
             <div className="flex items-center px-4 py-2 border-b border-[#2d2d2d] bg-gray-900">
@@ -775,7 +775,7 @@ const handleFinishAndSave = () => {
                     transition={{ duration: 0.3 }}
                     className="w-full h-full flex items-center justify-center"
                   >
-                    <div className="w-full h-full flex items-center justify-center p-6">
+                    <div className="w-full h-full flex items-center justify-center p-4 md:p-6">
                       <TrimmingTool
                         videoId={currentClip.isYouTube ? currentClip.videoId : ''}
                         videoUrl={currentClip.isYouTube ? '' : currentClip.videoUrl} // Fix: Empty string for YouTube
@@ -797,7 +797,7 @@ const handleFinishAndSave = () => {
                     exit={{ opacity: 0 }}
                     className="flex flex-col items-center justify-center h-full w-full p-6"
                   >
-                    <div className="bg-gray-800/50 p-6 rounded-lg max-w-lg w-full text-center">
+                    <div className="bg-gray-800/50 p-4 md:p-6 rounded-lg max-w-sm md:max-w-lg w-full text-center">
                       <div className="w-12 h-12 rounded-full bg-[#6c5ce7]/20 flex items-center justify-center mx-auto mb-4">
                         <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7] text-xl" />
                       </div>
@@ -829,7 +829,7 @@ const handleFinishAndSave = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.4 }}
-              className="w-[300px] bg-[#1f1f1f] border-l border-[#2d2d2d] flex flex-col"
+              className="w-full lg:w-[300px] bg-[#1f1f1f] lg:border-l border-t lg:border-t-0 border-[#2d2d2d] flex flex-col"
             >
               <div className="p-4 border-b border-[#2d2d2d] bg-[#1f1f1f]">
                 <div className="flex items-center gap-2">

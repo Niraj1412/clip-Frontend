@@ -99,7 +99,7 @@ const VideoDetailsPage = () => {
 
     return (
         <motion.div 
-            className="min-h-screen pt-14 pb-6 px-6"
+            className="min-h-screen pt-14 pb-6 px-4 sm:px-6"
             initial="hidden"
             animate="visible"
             variants={containerVariants}

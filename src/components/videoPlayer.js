@@ -185,10 +185,10 @@ const VideoPlayer = ({ videoUrl, onTimeChange }) => {
   return (
     <div 
       ref={containerRef}
-      className="w-full max-w-[800px] mx-auto bg-[#1f1f1f] rounded-xl shadow-lg p-6 flex flex-col gap-5 transform transition-all duration-500 hover:shadow-2xl hover:shadow-[#6c5ce7]/10 relative group/container"
+      className="w-full max-w-[800px] mx-auto bg-[#1f1f1f] rounded-xl shadow-lg p-4 sm:p-6 flex flex-col gap-5 transform transition-all duration-500 hover:shadow-2xl hover:shadow-[#6c5ce7]/10 relative group/container"
     >
 
-      <div className="absolute -top-3 right-8 px-4 py-1.5 bg-[#6c5ce7] rounded-full text-white text-sm font-medium shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-[#6c5ce7]/50 z-10">
+      <div className="absolute -top-3 right-4 sm:right-8 px-4 py-1.5 bg-[#6c5ce7] rounded-full text-white text-sm font-medium shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-[#6c5ce7]/50 z-10">
         {isPlaying ? 'Playing' : 'Paused'}
       </div>
 
@@ -398,9 +398,9 @@ const VideoPlayer = ({ videoUrl, onTimeChange }) => {
       {/* Enhanced Controls Section */}
       <div className="flex flex-col gap-4">
         {/* Playback Controls with Enhanced Glass Effect */}
-        <div className="flex justify-center items-center gap-6 bg-gray-700/30 backdrop-blur-lg px-8 py-5 rounded-2xl mx-auto transition-all duration-300 hover:bg-gray-700/40 group/controls">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 bg-gray-700/30 backdrop-blur-lg px-4 py-3 sm:px-8 sm:py-5 rounded-2xl mx-auto transition-all duration-300 hover:bg-gray-700/40 group/controls">
           {/* Speed Control with Enhanced Styling */}
-          <div className="flex items-center gap-3 mr-6 bg-black/20 rounded-xl px-4 py-2">
+          <div className="flex items-center gap-3 bg-black/20 rounded-xl px-4 py-2">
             <button 
               className="w-8 h-8 text-white/80 text-sm flex items-center justify-center hover:bg-white/10 rounded-lg transition-all duration-300 hover:text-white"
               onClick={() => adjustSpeed(false)}
@@ -450,7 +450,7 @@ const VideoPlayer = ({ videoUrl, onTimeChange }) => {
 
           {/* Create Clip Button with Shimmer Effect */}
           <button 
-            className="group/button relative overflow-hidden px-6 py-3 rounded-xl bg-gradient-to-r from-[#6c5ce7] to-[#5849e0] text-white font-medium ml-6 hover:shadow-lg hover:shadow-[#6c5ce7]/20 transition-all duration-300"
+            className="group/button relative overflow-hidden px-6 py-3 rounded-xl bg-gradient-to-r from-[#6c5ce7] to-[#5849e0] text-white font-medium hover:shadow-lg hover:shadow-[#6c5ce7]/20 transition-all duration-300"
             disabled={!ready}
           >
             <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover/button:translate-x-full transition-transform duration-700 skew-x-12"></div>

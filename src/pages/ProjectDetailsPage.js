@@ -307,8 +307,10 @@ const ProjectDetailsPage = () => {
     <>
       <Navbar />
       <div className="flex h-screen overflow-hidden">
-        <Sidebar />
-        <main className="ml-[280px] flex-1 p-8 bg-[#121212] min-h-screen overflow-y-auto mt-14">
+        <div className="hidden lg:block"> {/* This div will hide sidebar on small screens */}
+          <Sidebar />
+        </div>
+        <main className="flex-1 lg:ml-[280px] p-4 sm:p-6 md:p-8 bg-[#121212] min-h-screen overflow-y-auto mt-14">
           {/* Background patterns */}
           <div className="absolute inset-0 overflow-hidden z-0">
             <motion.div 
@@ -324,7 +326,7 @@ const ProjectDetailsPage = () => {
           </div>
 
           <motion.div 
-            className="max-w-6xl mx-auto relative z-10"
+            className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"
             variants={containerVariants}
             initial="hidden"
             animate="visible"

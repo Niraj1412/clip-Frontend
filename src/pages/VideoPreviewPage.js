@@ -307,11 +307,11 @@ const VideoPreviewPage = () => {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Back button and title */}
-        <div className="bg-[#1a1a1a] border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+        <div className="bg-[#1a1a1a] border-b border-gray-800 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center">
             <button 
               onClick={() => navigate(-1)}
-              className="mr-4 w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
+              className="mr-3 sm:mr-4 w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
             >
               <FontAwesomeIcon icon={faArrowLeft} className="text-white" />
             </button>
@@ -361,7 +361,7 @@ const VideoPreviewPage = () => {
           ) : (
             <>
               {/* Video player */}
-              <div className="flex-1 bg-black flex items-center justify-center group relative">
+              <div className="flex-1 bg-black flex items-center justify-center group relative px-4 py-6 sm:p-0">
                 <video
                   ref={videoRef}
                   src={videoUrl}
@@ -458,8 +458,8 @@ const VideoPreviewPage = () => {
               </div>
               
               {/* Action bar */}
-              <div className="bg-[#1a1a1a] border-t border-gray-800 px-6 py-4">
-                <div className="flex items-center justify-between">
+              <div className="bg-[#1a1a1a] border-t border-gray-800 px-4 sm:px-6 py-3 sm:py-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
                   <div>
                     <h2 className="text-lg font-medium text-white">
                       {videoData?.title || 'Video'}
@@ -473,7 +473,7 @@ const VideoPreviewPage = () => {
                     </p>
                   </div>
                   
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mt-3 sm:mt-0">
                     {/* Share button */}
                     <button 
                       onClick={handleShareVideo}
@@ -505,7 +505,7 @@ const VideoPreviewPage = () => {
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#1c1c1c] rounded-xl border border-gray-700 p-6 w-full max-w-md"
+            className="bg-[#1c1c1c] rounded-xl border border-gray-700 p-6 w-full max-w-sm sm:max-w-md mx-4"
           >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-white">Share Video</h3>
@@ -568,7 +568,7 @@ const VideoPreviewPage = () => {
             {shareUrl && (
               <div className="mb-6">
                 <p className="text-sm text-gray-300 mb-3">Share on social media:</p>
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
                   <button 
                     onClick={() => shareOnSocial('twitter')}
                     className="w-10 h-10 rounded-full bg-[#1DA1F2] hover:bg-[#1a94df] text-white flex items-center justify-center transition-colors"

@@ -79,23 +79,23 @@ const PrivacyPage = () => {
           />
         </div>
         
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto sm:px-4 md:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="max-w-4xl mx-auto"
+            className="sm:max-w-full md:max-w-2xl lg:max-w-4xl mx-auto"
           >
             <div className="text-center mb-12">
               <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FontAwesomeIcon icon={faShield} className="text-2xl text-purple-400" />
               </div>
-              <h1 className="text-4xl font-bold text-white mb-4">Privacy Policy</h1>
+              <h1 className="sm:text-3xl text-4xl font-bold text-white mb-4">Privacy Policy</h1>
               <p className="text-gray-400">Last Updated: {lastUpdated}</p>
             </div>
             
             <motion.div 
-              className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-[#ffffff1a] mb-8"
+              className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-2xl sm:p-6 md:p-8 shadow-xl border border-[#ffffff1a] mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -116,13 +116,13 @@ const PrivacyPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
-                className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-xl p-6 border border-[#ffffff1a] hover:border-purple-500/30 transition-all duration-300 mb-6"
+                className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-xl sm:p-4 md:p-6 border border-[#ffffff1a] hover:border-purple-500/30 transition-all duration-300 mb-6"
               >
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-purple-900/30 rounded-lg flex items-center justify-center mr-4">
                     <FontAwesomeIcon icon={section.icon} className="text-lg text-purple-400" />
                   </div>
-                  <h2 className="text-2xl font-semibold text-white">{section.title}</h2>
+                  <h2 className="sm:text-xl text-2xl font-semibold text-white">{section.title}</h2>
                 </div>
                 <div 
                   className="text-gray-300 prose prose-invert max-w-none"
@@ -132,7 +132,7 @@ const PrivacyPage = () => {
             ))}
             
             <motion.div 
-              className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-xl p-6 border border-[#ffffff1a] hover:border-purple-500/30 transition-all duration-300 mb-6"
+              className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-xl sm:p-4 md:p-6 border border-[#ffffff1a] hover:border-purple-500/30 transition-all duration-300 mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
@@ -141,7 +141,7 @@ const PrivacyPage = () => {
                 <div className="w-10 h-10 bg-purple-900/30 rounded-lg flex items-center justify-center mr-4">
                   <FontAwesomeIcon icon={faCookie} className="text-lg text-purple-400" />
                 </div>
-                <h2 className="text-2xl font-semibold text-white">Cookie Policy</h2>
+                <h2 className="sm:text-xl text-2xl font-semibold text-white">Cookie Policy</h2>
               </div>
               <p className="text-gray-300 mb-3">
                 We use cookies and similar tracking technologies to track activity on our website and store certain information. 
@@ -154,7 +154,7 @@ const PrivacyPage = () => {
             </motion.div>
             
             <motion.div 
-              className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-xl p-6 border border-[#ffffff1a] hover:border-purple-500/30 transition-all duration-300 mb-6"
+              className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-xl sm:p-4 md:p-6 border border-[#ffffff1a] hover:border-purple-500/30 transition-all duration-300 mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.7 }}
@@ -163,7 +163,7 @@ const PrivacyPage = () => {
                 <div className="w-10 h-10 bg-purple-900/30 rounded-lg flex items-center justify-center mr-4">
                   <FontAwesomeIcon icon={faHistory} className="text-lg text-purple-400" />
                 </div>
-                <h2 className="text-2xl font-semibold text-white">Changes to This Privacy Policy</h2>
+                <h2 className="sm:text-xl text-2xl font-semibold text-white">Changes to This Privacy Policy</h2>
               </div>
               <p className="text-gray-300">
                 We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page
@@ -172,7 +172,7 @@ const PrivacyPage = () => {
             </motion.div>
             
             <motion.div 
-              className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-xl p-6 border border-[#ffffff1a] hover:border-purple-500/30 transition-all duration-300"
+              className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-xl sm:p-4 md:p-6 border border-[#ffffff1a] hover:border-purple-500/30 transition-all duration-300"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.8 }}
@@ -181,7 +181,7 @@ const PrivacyPage = () => {
                 <div className="w-10 h-10 bg-purple-900/30 rounded-lg flex items-center justify-center mr-4">
                   <FontAwesomeIcon icon={faEnvelope} className="text-lg text-purple-400" />
                 </div>
-                <h2 className="text-2xl font-semibold text-white">Contact Us</h2>
+                <h2 className="sm:text-xl text-2xl font-semibold text-white">Contact Us</h2>
               </div>
               <p className="text-gray-300">
                 If you have any questions about this Privacy Policy, please contact us at:

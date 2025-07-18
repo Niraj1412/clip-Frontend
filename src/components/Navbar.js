@@ -79,7 +79,7 @@ const Navbar = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="fixed top-0 left-0 w-full bg-[#1a1a1a]/80 backdrop-blur-xl flex items-center justify-between px-4 py-3 sm:px-6 z-50 font-roboto shadow-lg border-b border-gray-800/30"
+        className="fixed top-0 left-0 w-full bg-[#1a1a1a]/80 backdrop-blur-xl flex items-center justify-between px-3 py-2 sm:px-6 sm:py-3 z-50 font-roboto shadow-lg border-b border-gray-800/30"
         style={{ zIndex: 1000 }}>
         
         {/* Subtle gradient line at the top */}
@@ -116,7 +116,7 @@ const Navbar = () => {
               initial={{ opacity: 0, x: -5 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-white text-xl font-bold tracking-wide hover:text-transparent bg-clip-text bg-gradient-to-r from-[#6c5ce7] to-purple-400 transition-colors duration-300 flex items-center gap-2"
+              className="text-lg sm:text-xl font-bold tracking-wide hover:text-transparent bg-clip-text bg-gradient-to-r from-[#6c5ce7] to-purple-400 transition-colors duration-300 flex items-center gap-2"
             >
               CLIPSMART <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6c5ce7] to-purple-400">AI</span>
               <motion.div 
@@ -138,11 +138,11 @@ const Navbar = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2 bg-[#1A1A1A]/70 backdrop-blur-sm border border-gray-700/30 hover:border-[#6c5ce7]/40 rounded-lg px-3 py-2 text-gray-300 hover:text-white transition-all duration-300 shadow-md group"
+              className="flex items-center gap-1 sm:gap-2 bg-[#1A1A1A]/70 backdrop-blur-sm border border-gray-700/30 hover:border-[#6c5ce7]/40 rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 text-gray-300 hover:text-white transition-all duration-300 shadow-md group"
             >
-              <div className="w-7 h-7 rounded-full bg-gradient-to-r from-[#6c5ce7]/80 to-purple-500/80 flex items-center justify-center text-white shadow-inner overflow-hidden relative">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-r from-[#6c5ce7]/80 to-purple-500/80 flex items-center justify-center text-white shadow-inner overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <span className="relative z-10 text-sm font-medium">{getInitial(userData.name)}</span>
+                <span className="relative z-10 text-xs sm:text-sm font-medium">{getInitial(userData.name)}</span>
               </div>
               <span className="hidden sm:inline group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-[#6c5ce7] group-hover:to-purple-400 transition-all duration-300">
                 {userData.name}

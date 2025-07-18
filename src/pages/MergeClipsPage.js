@@ -2144,13 +2144,13 @@ const MergeClipsPage = () => {
       </AnimatePresence>
       
       {/* Main content - Better organized */}
-      <div className="flex-1 flex overflow-hidden h-[calc(100vh-65px)]">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden h-[calc(100vh-65px)]">
         {/* Left Panel - Clips List with improved design */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3 }}
-          className="w-[320px] bg-[#1c1c1c] flex flex-col border-r border-gray-800"
+          className="w-full lg:w-[320px] bg-[#1c1c1c] flex flex-col border-b lg:border-b-0 lg:border-r border-gray-800"
         >
           <div className="flex items-center px-4 py-3 border-b border-gray-800 bg-[#1a1a1a]">
             <h3 className="text-sm font-medium text-white">Selected Clips</h3>
@@ -2431,7 +2431,7 @@ const MergeClipsPage = () => {
                 {/* Video Player - Enhanced */}
                 <div className="flex-1 bg-[#080808] relative flex items-center justify-center overflow-hidden group">
                   {/* Video wrapper with constrained size */}
-                  <div className="w-[80%] max-w-2xl mx-auto">
+                  <div className="w-full sm:w-[90%] md:w-[85%] lg:w-[80%] max-w-2xl mx-auto">
                     <div className={`relative ${isFullscreen ? 'w-full h-full' : 'w-full'}`}>
                       <video
                         ref={videoRef}

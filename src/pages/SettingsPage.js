@@ -372,7 +372,7 @@ const SettingsPage = () => {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="ml-[280px] flex-1 p-6 bg-[#121212] min-h-screen">
+        <main className="ml-0 md:ml-[280px] flex-1 p-6 bg-[#121212] min-h-screen">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

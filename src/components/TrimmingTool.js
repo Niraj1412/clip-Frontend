@@ -799,9 +799,9 @@ const TrimmingTool = ({
               </div>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-2 bg-[#1e293b] p-2 rounded-lg shadow-inner items-center">
-            <div className="flex gap-2 items-center">
-              <div className="text-[#f9fafb] text-sm bg-[#0f172a] px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-[#6366f1]/20 shadow-inner whitespace-nowrap">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 bg-[#1e293b] p-2 rounded-lg shadow-inner items-center">
+            <div className="flex gap-1 md:gap-2 items-center justify-center md:justify-start">
+              <div className="text-[#f9fafb] text-xs sm:text-sm bg-[#0f172a] px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-[#6366f1]/20 shadow-inner whitespace-nowrap">
                 <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-xs" />
                 <span className="font-medium tabular-nums text-xs">{formatPreciseTime(currentTime)}</span>
                 <span className="opacity-50 mx-0.5 text-xs">/</span>
@@ -861,7 +861,7 @@ const TrimmingTool = ({
             </div>
           </div>
           <div className="flex flex-col gap-2 bg-[#1e293b] p-2 rounded-lg shadow-inner">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-2 md:gap-1">
               <div className="flex items-center gap-1 bg-[#0f172a] rounded-lg px-2 py-1 border border-[#6366f1]/20 shadow-inner">
                 <div className="text-[#9ca3af] text-xs">Start</div>
                 <button

@@ -529,9 +529,9 @@ const ClipsPreviewer = ({
                         : `bg-gradient-to-br from-${colors.surface}/90 to-${colors.surfaceLight}/70 hover:from-${colors.surface} hover:to-${colors.surfaceLight}/80 ring-1 ring-${colors.border}/30`
                     }`}>
                       {/* Card Content */}
-                      <div className="flex items-stretch">
+                      <div className="flex flex-col sm:flex-row items-center sm:items-stretch">
                         {/* Drag Handle */}
-                        <div className="w-8 flex items-center justify-center bg-black/30 cursor-grab active:cursor-grabbing">
+                        <div className="w-full sm:w-8 py-2 sm:py-0 flex items-center justify-center bg-black/30 cursor-grab active:cursor-grabbing">
                           <FontAwesomeIcon 
                             icon={faGripVertical} 
                             className={`text-${colors.textMuted} text-xs group-hover:text-${colors.textSecondary} transition-colors`}
@@ -539,7 +539,7 @@ const ClipsPreviewer = ({
                         </div>
                         
                         {/* Thumbnail with Improved Styling */}
-                        <div className="relative w-24 h-auto aspect-video flex-shrink-0 bg-black/40 overflow-hidden">
+                        <div className="relative w-full h-40 sm:w-24 sm:h-auto sm:aspect-video flex-shrink-0 bg-black/40 overflow-hidden">
                           <img 
                             src={clip.thumbnail || `https://via.placeholder.com/150/${colors.background.replace('#', '')}/${colors.primary.replace('#', '')}?text=Clip`} 
                             alt={clip.title || `Clip`}
@@ -564,7 +564,7 @@ const ClipsPreviewer = ({
                         </div>
                         
                         {/* Content with Improved Layout */}
-                        <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
+                        <div className="w-full flex-1 p-3 flex flex-col justify-between min-w-0">
                           {/* Title and Time */}
                           <div>
                             <div className="flex items-start justify-between">

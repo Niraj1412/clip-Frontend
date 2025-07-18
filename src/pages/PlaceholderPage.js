@@ -18,7 +18,7 @@ const PlaceholderPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-[#ffffff1a] max-w-2xl w-full"
+            className="bg-[#1a1a2e]/60 backdrop-blur-xl rounded-2xl p-4 md:p-8 shadow-xl border border-[#ffffff1a] max-w-sm md:max-w-2xl w-full"
           >
             <div className="flex items-center justify-center mb-6">
               <div className="w-20 h-20 bg-[#6c5ce7]/20 rounded-2xl flex items-center justify-center border border-[#6c5ce7]/30">
@@ -26,11 +26,11 @@ const PlaceholderPage = () => {
               </div>
             </div>
             
-            <h1 className="text-3xl font-bold text-center text-white mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-center text-white mb-4">
               {pageName} Page
             </h1>
             
-            <div className="bg-[#6c5ce7]/10 border border-[#6c5ce7]/20 rounded-xl p-4 mb-6">
+            <div className="bg-[#6c5ce7]/10 border border-[#6c5ce7]/20 rounded-xl p-3 sm:p-4 mb-6">
               <div className="flex items-start gap-3">
                 <FontAwesomeIcon icon={faExclamationTriangle} className="text-[#6c5ce7] text-lg mt-1" />
                 <p className="text-gray-300">

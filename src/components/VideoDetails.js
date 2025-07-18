@@ -27,7 +27,7 @@ const VideoDetails = ({ currentClip, showTranscript = false, onFinishAndSave }) 
 
   return (
     <motion.div 
-      className="w-full max-w-[400px] bg-[#1f1f1f] rounded-lg shadow-lg p-3 flex flex-col h-[calc(100vh-64px)] mt-[18px] overflow-hidden dark:bg-[#121212] dark:text-white"
+      className="w-full max-w-[400px] bg-[#1f1f1f] rounded-lg shadow-lg p-3 flex flex-col min-h-0 sm:h-[calc(100vh-64px)] mt-3 sm:mt-0 dark:bg-[#121212] dark:text-white"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
@@ -264,6 +264,13 @@ const VideoDetails = ({ currentClip, showTranscript = false, onFinishAndSave }) 
 
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: rgba(108, 92, 231, 0.5);
+        }
+
+        @media (max-width: 640px) {
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+          }
         }
         `}
       </style>

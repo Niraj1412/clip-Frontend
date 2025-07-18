@@ -59,7 +59,7 @@ const VideoClipCard = ({
       </div>
 
       {clips.length === 0 ? (
-        <div className="bg-gray-800/50 rounded-lg p-8 text-center">
+        <div className="bg-gray-800/50 rounded-lg p-4 md:p-8 text-center">
           <div className="mb-3 bg-gray-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
             <FontAwesomeIcon icon={faFilm} className="text-gray-500 text-2xl" />
           </div>
@@ -125,7 +125,7 @@ const VideoClipCard = ({
                       <FontAwesomeIcon icon={faEllipsisVertical} className="text-sm" />
                     </button>
                     
-                    <div className="absolute right-0 top-full mt-1 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-10 w-36 py-1 invisible group-hover/menu:visible opacity-0 group-hover/menu:opacity-100 transform group-hover/menu:translate-y-0 translate-y-2 transition-all duration-200">
+                    <div className="absolute right-0 top-full mt-1 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-10 w-auto min-w-[120px] md:w-36 py-1 invisible group-hover/menu:visible opacity-0 group-hover/menu:opacity-100 transform group-hover/menu:translate-y-0 translate-y-2 transition-all duration-200">
                       <button 
                         className="w-full px-3 py-1.5 text-left text-sm text-gray-300 hover:bg-gray-700 flex items-center gap-2"
                         onClick={() => onEditClip(clip)}

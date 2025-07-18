@@ -96,8 +96,8 @@ const ClipsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 py-10 px-4">
-      <div className="max-w-[1200px] mx-auto">
+    <div className="min-h-screen bg-gray-900 py-8 sm:py-10 px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto xl:max-w-7xl">
         <h1 className="text-3xl font-bold text-white mb-8">My Video Clips</h1>
         
         {showTrimEditor ? (
