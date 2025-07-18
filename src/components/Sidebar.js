@@ -17,9 +17,7 @@ import {
   faTachometerAlt,
   faPlus,
   faFilm,
-  faObjectGroup,
-  faBars, // Added for mobile menu
-  faTimes // Added for mobile menu close
+  faObjectGroup
 } from "@fortawesome/free-solid-svg-icons";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -32,7 +30,6 @@ const Sidebar = () => {
     name: "User",
     email: "user@example.com"
   });
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu
 
   useEffect(() => {
     // Get current user data from auth service
@@ -56,153 +53,139 @@ const Sidebar = () => {
   };
 
   return (
-    <>
-      {/* Mobile menu button */}
-      <div className="md:hidden fixed top-4 left-4 z-[1000]">
-        <motion.button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="text-white bg-[#1a1a2e] p-3 rounded-full shadow-lg"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+    <motion.div
+      className="fixed top-0 left-0 w-[280px] bg-[#121212] shadow-xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A] overflow-hidden"
+      style={{ height: 'calc(100vh - 3.5rem)', zIndex: 900 }}
+      initial={{ x: -100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
+      {/* Animated background pattern */}
+      <div className="absolute inset-0 overflow-hidden z-0">
+        <motion.div 
+          className="absolute -inset-[10%] opacity-[0.02] z-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.02 }}
+          transition={{ duration: 2 }}
+          style={{
+            backgroundImage: `radial-gradient(circle at 25px 25px, #6c5ce7 2%, transparent 0%), radial-gradient(circle at 75px 75px, #6c5ce7 2%, transparent 0%)`,
+            backgroundSize: '100px 100px',
+          }}
+        />
+        <motion.div 
+          className="absolute -inset-[10%] opacity-[0.01] z-0"
+          initial={{ rotate: 0, opacity: 0 }}
+          animate={{ rotate: 5, opacity: 0.01 }}
+          transition={{ duration: 30, repeat: Infinity, repeatType: "reverse", ease: "linear" }}
+          style={{
+            backgroundImage: `radial-gradient(#6c5ce7 1px, transparent 0)`,
+            backgroundSize: '40px 40px',
+          }}
+        />
+      </div>
+
+      <div className="flex flex-col items-center justify-center text-center mb-8 w-full mt-8 relative z-10">
+        <div className="bg-gradient-to-br from-[#6c5ce7] to-[#a29bfe] p-4 rounded-full flex items-center justify-center shadow-lg shadow-[#6c5ce7]/20 mb-4 hover:shadow-[#6c5ce7]/40 transition-all duration-300 cursor-pointer relative group">
+          <div className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold relative z-10"
+          >
+            {getInitial(userData.name)}
+          </motion.div>
+        </div>
+
+        <motion.h2 
+          className="text-lg font-semibold text-white mb-1"
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
         >
-          <FontAwesomeIcon icon={isMobileMenuOpen ? faTimes : faBars} className="text-xl" />
+          {userData.name}
+        </motion.h2>
+        
+        <motion.p 
+          className="text-sm text-gray-400/80 mb-3"
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.3 }}
+        >
+          {userData.email}
+        </motion.p>
+        
+        <motion.button
+          onClick={handleLogout}
+          className="text-xs flex items-center gap-1 text-gray-400 hover:text-[#6c5ce7] transition-all px-3 py-1 rounded-full border border-[#2A2A2A] hover:border-[#6c5ce7]/50 hover:bg-[#6c5ce7]/5"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.3 }}
+        >
+          <FontAwesomeIcon icon={faSignOutAlt} className="mr-1" />
+          Sign Out
         </motion.button>
       </div>
 
-      <motion.div
-        className={`fixed top-0 md:top-0 left-0 w-[280px] bg-[#121212] shadow-xl flex-col items-center py-6 px-4 text-white mt-0 md:mt-14 border-r border-[#2A2A2A] overflow-hidden z-900 ${isMobileMenuOpen ? 'flex' : 'hidden md:flex'}`}
-        style={{ height: '100vh', zIndex: 900 }}
-        initial={{ x: -280 }}
-        animate={{ x: isMobileMenuOpen ? 0 : -280 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-      >
-        {/* Animated background pattern */}
-        <div className="absolute inset-0 overflow-hidden z-0">
-          <motion.div 
-            className="absolute -inset-[10%] opacity-[0.02] z-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.02 }}
-            transition={{ duration: 2 }}
-            style={{
-              backgroundImage: `radial-gradient(circle at 25px 25px, #6c5ce7 2%, transparent 0%), radial-gradient(circle at 75px 75px, #6c5ce7 2%, transparent 0%)`,
-              backgroundSize: '100px 100px',
-            }}
+      <ul className="w-full space-y-4 relative z-10">
+        <AnimatePresence>
+          <SidebarItem 
+            to="/dashboard" 
+            icon={faPlus} 
+            text="Create" 
+            isActive={location.pathname === '/dashboard'} 
+            delay={0.1} 
           />
-          <motion.div 
-            className="absolute -inset-[10%] opacity-[0.01] z-0"
-            initial={{ rotate: 0, opacity: 0 }}
-            animate={{ rotate: 5, opacity: 0.01 }}
-            transition={{ duration: 30, repeat: Infinity, repeatType: "reverse", ease: "linear" }}
-            style={{
-              backgroundImage: `radial-gradient(#6c5ce7 1px, transparent 0)`,
-              backgroundSize: '40px 40px',
-            }}
+          
+          <SidebarItem 
+            to="/explore" 
+            icon={faCompass} 
+            text="Explore" 
+            isActive={location.pathname === '/explore'} 
+            delay={0.2} 
           />
-        </div>
-
-        <div className="flex flex-col items-center justify-center text-center mb-8 w-full mt-8 relative z-10">
-          <div className="bg-gradient-to-br from-[#6c5ce7] to-[#a29bfe] p-4 rounded-full flex items-center justify-center shadow-lg shadow-[#6c5ce7]/20 mb-4 hover:shadow-[#6c5ce7]/40 transition-all duration-300 cursor-pointer relative group">
-            <div className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold relative z-10"
-            >
-              {getInitial(userData.name)}
-            </motion.div>
-          </div>
-
-          <motion.h2 
-            className="text-lg font-semibold text-white mb-1"
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.3 }}
-          >
-            {userData.name}
-          </motion.h2>
           
-          <motion.p 
-            className="text-sm text-gray-400/80 mb-3"
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.3 }}
-          >
-            {userData.email}
-          </motion.p>
+          <SidebarItem 
+            to="/my-projects" 
+            icon={faNoteSticky} 
+            text="Projects" 
+            isActive={location.pathname === '/my-projects'} 
+            delay={0.3} 
+          />
+        </AnimatePresence>
+      </ul>
+
+      <div className="mt-auto w-full relative z-10">
+        <motion.ul 
+          className="w-full space-y-2 border-t border-[#2A2A2A] pt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
+          <BottomLink 
+            to="/about" 
+            icon={faInfoCircle} 
+            text="About" 
+            isActive={location.pathname === '/about'} 
+          />
           
-          <motion.button
-            onClick={handleLogout}
-            className="text-xs flex items-center gap-1 text-gray-400 hover:text-[#6c5ce7] transition-all px-3 py-1 rounded-full border border-[#2A2A2A] hover:border-[#6c5ce7]/50 hover:bg-[#6c5ce7]/5"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.3 }}
-          >
-            <FontAwesomeIcon icon={faSignOutAlt} className="mr-1" />
-            Sign Out
-          </motion.button>
-        </div>
-
-        <ul className="w-full space-y-4 relative z-10">
-          <AnimatePresence>
-            <SidebarItem 
-              to="/dashboard" 
-              icon={faPlus} 
-              text="Create" 
-              isActive={location.pathname === '/dashboard'} 
-              delay={0.1} 
-            />
-            
-            <SidebarItem 
-              to="/explore" 
-              icon={faCompass} 
-              text="Explore" 
-              isActive={location.pathname === '/explore'} 
-              delay={0.2} 
-            />
-            
-            <SidebarItem 
-              to="/my-projects" 
-              icon={faNoteSticky} 
-              text="Projects" 
-              isActive={location.pathname === '/my-projects'} 
-              delay={0.3} 
-            />
-          </AnimatePresence>
-        </ul>
-
-        <div className="mt-auto w-full relative z-10">
-          <motion.ul 
-            className="w-full space-y-2 border-t border-[#2A2A2A] pt-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-          >
-            <BottomLink 
-              to="/about" 
-              icon={faInfoCircle} 
-              text="About" 
-              isActive={location.pathname === '/about'} 
-            />
-            
-            <BottomLink 
-              to="/contact" 
-              icon={faEnvelope} 
-              text="Contact Us" 
-              isActive={location.pathname === '/contact'} 
-            />
-            
-            <BottomLink 
-              to="/privacy" 
-              icon={faShieldAlt} 
-              text="Privacy Policy" 
-              isActive={location.pathname === '/privacy'} 
-            />
-          </motion.ul>
-        </div>
-      </motion.div>
-    </>
+          <BottomLink 
+            to="/contact" 
+            icon={faEnvelope} 
+            text="Contact Us" 
+            isActive={location.pathname === '/contact'} 
+          />
+          
+          <BottomLink 
+            to="/privacy" 
+            icon={faShieldAlt} 
+            text="Privacy Policy" 
+            isActive={location.pathname === '/privacy'} 
+          />
+        </motion.ul>
+      </div>
+    </motion.div>
   );
 };
 
