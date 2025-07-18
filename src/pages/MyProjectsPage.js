@@ -244,10 +244,7 @@ const MyProjectsPage = () => {
     <>
       <Navbar setSidebarOpen={setIsSidebarOpen} />
       <div className="flex flex-col md:flex-row min-h-screen overflow-hidden">
-        {/* Sidebar: fixed width on desktop, hidden on mobile */}
-        <div className="hidden md:block w-[280px] flex-shrink-0">
-          <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-        </div>
+        <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         {/* Main content: flex-1, no margin, responsive padding */}
         <main className="flex-1 p-4 sm:p-6 md:p-8 bg-[#121212] min-h-screen overflow-y-auto mt-16">
           {/* Background patterns */}
