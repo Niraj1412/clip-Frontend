@@ -242,11 +242,13 @@ const MyProjectsPage = () => {
   return (
     <>
       <Navbar />
-      <div className="flex flex-col md:flex-row h-screen overflow-hidden">
-        <div className="hidden md:block">
+      <div className="flex flex-col md:flex-row min-h-screen overflow-hidden">
+        {/* Sidebar: fixed width on desktop, hidden on mobile */}
+        <div className="hidden md:block w-[280px] flex-shrink-0">
           <Sidebar />
         </div>
-        <main className="w-full md:ml-[280px] flex-1 p-4 md:p-6 bg-[#121212] min-h-screen overflow-y-auto mt-16">
+        {/* Main content: flex-1, no margin, responsive padding */}
+        <main className="flex-1 p-4 md:p-6 lg:p-8 bg-[#121212] min-h-screen overflow-y-auto mt-16">
           {/* Background patterns */}
           <div className="absolute inset-0 overflow-hidden z-0">
             <motion.div 
