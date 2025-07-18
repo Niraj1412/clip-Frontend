@@ -625,7 +625,7 @@ const ClipsPreviewerDemo = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-full lg:w-[420px] bg-gray-900 flex flex-col lg:border-r border-[#2d2d2d]"
+            className="w-full lg:w-[420px] bg-gray-900 flex flex-col lg:border-r border-[#2d2d2d] max-h-[50vh] lg:max-h-full"
           >
             {/* Clips List Header
             <div className="flex items-center px-4 py-2 border-b border-[#2d2d2d] bg-gray-900">
