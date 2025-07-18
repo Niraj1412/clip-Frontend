@@ -303,37 +303,37 @@ const ClipsPreviewerDemo = () => {
     return validIdPattern.test(id);
   };
 
-const handleFinishAndSave = () => {
-  if (processedClips.length === 0) {
-    showFeedback('No clips to save. Please create some clips first.', 'error');
-    return;
-  }
+  const handleFinishAndSave = () => {
+    if (processedClips.length === 0) {
+      showFeedback('No clips to save. Please create some clips first.', 'error');
+      return;
+    }
 
-  const clipsByVideo = processedClips.reduce((acc, clip) => {
-    if (!acc[clip.videoId]) acc[clip.videoId] = [];
-    acc[clip.videoId].push(clip);
-    return acc;
-  }, {});
+    const clipsByVideo = processedClips.reduce((acc, clip) => {
+      if (!acc[clip.videoId]) acc[clip.videoId] = [];
+      acc[clip.videoId].push(clip);
+      return acc;
+    }, {});
 
-  const updatedClipsData = Object.entries(clipsByVideo).map(([videoId, clips]) => {
-    const originalVideoData = selectedClipsData.find(data => data.videoId === videoId) || {};
-    return {
-      ...originalVideoData,
-      videoId,
-      segments: clips.map(clip => ({
-        startTime: clip.startTime,
-        endTime: clip.endTime,
-        duration: clip.duration,
-        text: clip.transcriptText
-      })),
-    };
-  });
+    const updatedClipsData = Object.entries(clipsByVideo).map(([videoId, clips]) => {
+      const originalVideoData = selectedClipsData.find(data => data.videoId === videoId) || {};
+      return {
+        ...originalVideoData,
+        videoId,
+        segments: clips.map(clip => ({
+          startTime: clip.startTime,
+          endTime: clip.endTime,
+          duration: clip.duration,
+          text: clip.transcriptText
+        })),
+      };
+    });
 
-  console.log('Updated clips data:', JSON.stringify(updatedClipsData, null, 2)); // Debugging log
-  setSelectedClipsData(updatedClipsData);
-  showFeedback('Clips saved successfully! Redirecting to merge page...', 'success');
-  setTimeout(() => navigate('/merge'), 1500);
-};
+    console.log('Updated clips data:', JSON.stringify(updatedClipsData, null, 2)); // Debugging log
+    setSelectedClipsData(updatedClipsData);
+    showFeedback('Clips saved successfully! Redirecting to merge page...', 'success');
+    setTimeout(() => navigate('/merge'), 1500);
+  };
 
   // Format time function
   const formatTimeRange = (startTime, endTime) => {
@@ -729,9 +729,8 @@ const handleFinishAndSave = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.2 }}
-            className="flex-1 flex flex-col overflow-hidden bg-[#121212] relative"
+            className="flex-1 flex flex-col overflow-hidden bg-[#121212] relative min-h-[400px]"
           >
-            {/* Mid Panel Header */}
             <div className="px-4 py-3 border-b border-[#2d2d2d] bg-[#1f1f1f] flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-lg bg-[#6c5ce7]/20 flex items-center justify-center">
@@ -741,8 +740,6 @@ const handleFinishAndSave = () => {
                   Edit Clip {currentClip ? currentClip.id.replace('clip_', '#') : ''}
                 </h2>
               </div>
-
-              {/* Navigation Buttons */}
               {currentClip && processedClips.length > 1 && (
                 <div className="flex gap-3">
                   <button
@@ -762,8 +759,6 @@ const handleFinishAndSave = () => {
                 </div>
               )}
             </div>
-
-            {/* Trimming Tool Content */}
             <div className="flex-1 overflow-hidden">
               <AnimatePresence mode="wait">
                 {currentClip ? (
@@ -778,7 +773,7 @@ const handleFinishAndSave = () => {
                     <div className="w-full h-full flex items-center justify-center p-4 md:p-6">
                       <TrimmingTool
                         videoId={currentClip.isYouTube ? currentClip.videoId : ''}
-                        videoUrl={currentClip.isYouTube ? '' : currentClip.videoUrl} // Fix: Empty string for YouTube
+                        videoUrl={currentClip.isYouTube ? '' : currentClip.videoUrl}
                         isYouTube={currentClip.isYouTube || false}
                         initialDuration={currentClip.originalVideoDuration}
                         initialStartTime={currentClip.startTime}
