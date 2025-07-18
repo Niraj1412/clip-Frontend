@@ -225,11 +225,11 @@ const SignInPage = () => {
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-[#0f0f1a] overflow-hidden">
-      <div className="fixed top-6 right-6 z-50">
+      <div className="fixed top-3 right-3 sm:top-6 sm:right-6 z-50">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`px-4 py-2 rounded-full flex items-center gap-2 text-sm backdrop-blur-md shadow-lg ${
+          className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2 text-xs sm:text-sm backdrop-blur-md shadow-lg ${
             serverStatus === 'checking' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
             serverStatus === 'online' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
             'bg-red-500/20 text-red-300 border border-red-500/30'
@@ -284,14 +284,14 @@ const SignInPage = () => {
       </div>
 
       <motion.div 
-        className="fixed top-6 left-6 z-50"
+        className="fixed top-3 left-3 sm:top-6 sm:left-6 z-50"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.2 }}
       >
         <Link 
           to="/"
-          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5"
+          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-white/5 text-xs sm:text-base"
         >
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Back to Home</span>
@@ -299,7 +299,7 @@ const SignInPage = () => {
       </motion.div>
 
       <motion.div 
-        className="relative w-full max-w-md mx-4 z-10"
+        className="relative w-full max-w-xs sm:max-w-md mx-2 sm:mx-4 z-10"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -308,18 +308,18 @@ const SignInPage = () => {
           className="bg-[#1a1a2e]/70 backdrop-blur-lg rounded-2xl shadow-xl border border-[#ffffff0f] overflow-hidden"
           variants={itemVariants}
         >
-          <div className="relative px-8 pt-10 pb-6 text-center">
+          <div className="relative px-4 pt-8 pb-4 sm:px-8 sm:pt-10 sm:pb-6 text-center">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe]"></div>
             <motion.div
-              className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-[#6c5ce7]/10 border border-[#6c5ce7]/20"
+              className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 mb-3 sm:mb-4 rounded-full bg-[#6c5ce7]/10 border border-[#6c5ce7]/20"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, type: "spring" }}
             >
-              <FontAwesomeIcon icon={faRightToBracket} className="text-[#a29bfe] text-2xl" />
+              <FontAwesomeIcon icon={faRightToBracket} className="text-[#a29bfe] text-xl sm:text-2xl" />
             </motion.div>
-            <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-gray-400 text-sm max-w-xs mx-auto">
+            <h1 className="text-xl sm:text-2xl font-bold text-white mb-1 sm:mb-2">Welcome Back</h1>
+            <p className="text-gray-400 text-xs sm:text-sm max-w-xs mx-auto">
               Sign in to your account to continue your video creation journey
             </p>
           </div>
@@ -327,13 +327,13 @@ const SignInPage = () => {
           <AnimatePresence>
             {success && (
               <motion.div 
-                className="bg-green-500/20 border border-green-500/30 text-green-300 px-6 py-3 mx-6 mb-6 rounded-lg flex items-start gap-3"
+                className="bg-green-500/20 border border-green-500/30 text-green-300 px-4 py-2 sm:px-6 sm:py-3 mx-4 sm:mx-6 mb-4 sm:mb-6 rounded-lg flex items-start gap-3"
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
               >
                 <FontAwesomeIcon icon={faCheck} className="mt-1" />
-                <p className="text-sm">{success}</p>
+                <p className="text-xs sm:text-sm">{success}</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -341,75 +341,75 @@ const SignInPage = () => {
           <AnimatePresence>
             {error && (
               <motion.div 
-                className="bg-red-500/20 border border-red-500/30 text-red-300 px-6 py-3 mx-6 mb-6 rounded-lg flex items-start gap-3"
+                className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-2 sm:px-6 sm:py-3 mx-4 sm:mx-6 mb-4 sm:mb-6 rounded-lg flex items-start gap-3"
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
               >
                 <FontAwesomeIcon icon={faExclamationCircle} className="mt-1" />
-                <p className="text-sm">{error}</p>
+                <p className="text-xs sm:text-sm">{error}</p>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <form onSubmit={handleSignIn} className="px-8 pb-8">
-            <div className="mb-5">
+          <form onSubmit={handleSignIn} className="px-4 pb-4 sm:px-8 sm:pb-8">
+            <div className="mb-4 sm:mb-5">
               <label 
                 htmlFor="email" 
-                className="block text-gray-300 text-sm font-medium mb-2 ml-1"
+                className="block text-gray-300 text-xs sm:text-sm font-medium mb-1 sm:mb-2 ml-1"
               >
                 Email Address
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FontAwesomeIcon icon={faEnvelope} className="text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 flex items-center pointer-events-none">
+                  <FontAwesomeIcon icon={faEnvelope} className="text-gray-400 text-xs sm:text-base" />
                 </div>
                 <input
                   type="email"
                   id="email"
-                  className={`w-full pl-10 pr-4 py-3 bg-[#ffffff0a] border ${formErrors.email ? 'border-red-500/50' : 'border-[#ffffff1a]'} rounded-lg focus:outline-none focus:border-[#6c5ce7] text-white text-base transition-colors`}
+                  className={`w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 bg-[#ffffff0a] border ${formErrors.email ? 'border-red-500/50' : 'border-[#ffffff1a]'} rounded-lg focus:outline-none focus:border-[#6c5ce7] text-white text-sm sm:text-base transition-colors`}
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               {formErrors.email && (
-                <p className="mt-1 text-sm text-red-400 flex items-center gap-1 ml-1">
+                <p className="mt-1 text-xs sm:text-sm text-red-400 flex items-center gap-1 ml-1">
                   <FontAwesomeIcon icon={faExclamationTriangle} className="text-xs" />
                   {formErrors.email}
                 </p>
               )}
             </div>
             
-            <div className="mb-5">
+            <div className="mb-4 sm:mb-5">
               <label 
                 htmlFor="password" 
-                className="block text-gray-300 text-sm font-medium mb-2 ml-1"
+                className="block text-gray-300 text-xs sm:text-sm font-medium mb-1 sm:mb-2 ml-1"
               >
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FontAwesomeIcon icon={faLock} className="text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 flex items-center pointer-events-none">
+                  <FontAwesomeIcon icon={faLock} className="text-gray-400 text-xs sm:text-base" />
                 </div>
                 <input
                   type="password"
                   id="password"
-                  className={`w-full pl-10 pr-4 py-3 bg-[#ffffff0a] border ${formErrors.password ? 'border-red-500/50' : 'border-[#ffffff1a]'} rounded-lg focus:outline-none focus:border-[#6c5ce7] text-white text-base transition-colors`}
+                  className={`w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 bg-[#ffffff0a] border ${formErrors.password ? 'border-red-500/50' : 'border-[#ffffff1a]'} rounded-lg focus:outline-none focus:border-[#6c5ce7] text-white text-sm sm:text-base transition-colors`}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
               {formErrors.password && (
-                <p className="mt-1 text-sm text-red-400 flex items-center gap-1 ml-1">
+                <p className="mt-1 text-xs sm:text-sm text-red-400 flex items-center gap-1 ml-1">
                   <FontAwesomeIcon icon={faExclamationTriangle} className="text-xs" />
                   {formErrors.password}
                 </p>
               )}
             </div>
             
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
               <div className="flex items-center">
                 <input
                   id="remember-me"
@@ -418,11 +418,11 @@ const SignInPage = () => {
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-300">
+                <label htmlFor="remember-me" className="ml-2 block text-xs sm:text-sm text-gray-300">
                   Remember me
                 </label>
               </div>
-              <div className="text-sm">
+              <div className="text-xs sm:text-sm">
                 <a 
                   href="/forgot-password" 
                   onClick={(e) => {
@@ -438,7 +438,7 @@ const SignInPage = () => {
             
             <motion.button
               type="submit"
-              className="w-full bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed relative overflow-hidden group"
+              className="w-full bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] text-white font-medium py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed relative overflow-hidden group text-sm sm:text-base"
               disabled={isLoading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -460,29 +460,29 @@ const SignInPage = () => {
               )}
             </motion.button>
             
-            <div className="mt-8 text-center">
-              <p className="text-gray-400 text-sm mb-4">Or sign in with</p>
-              <div className="flex justify-center space-x-4">
+            <div className="mt-6 sm:mt-8 text-center">
+              <p className="text-gray-400 text-xs sm:text-sm mb-3 sm:mb-4">Or sign in with</p>
+              <div className="flex justify-center space-x-2 sm:space-x-4">
                 <div id="google-signin-button" className="flex items-center justify-center"></div>
                 <motion.button
                   type="button"
                   onClick={() => handleSocialLogin('GitHub')}
-                  className="bg-[#ffffff0a] hover:bg-[#ffffff15] border border-[#ffffff1a] p-3 rounded-lg text-white transition-colors"
+                  className="bg-[#ffffff0a] hover:bg-[#ffffff15] border border-[#ffffff1a] p-2 sm:p-3 rounded-lg text-white transition-colors"
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   disabled={isLoading}
                 >
-                  <FontAwesomeIcon icon={faGithub} className="text-lg" />
+                  <FontAwesomeIcon icon={faGithub} className="text-base sm:text-lg" />
                 </motion.button>
                 <motion.button
                   type="button"
                   onClick={() => handleSocialLogin('Twitter')}
-                  className="bg-[#ffffff0a] hover:bg-[#ffffff15] border border-[#ffffff1a] p-3 rounded-lg text-white transition-colors"
+                  className="bg-[#ffffff0a] hover:bg-[#ffffff15] border border-[#ffffff1a] p-2 sm:p-3 rounded-lg text-white transition-colors"
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   disabled={isLoading}
                 >
-                  <FontAwesomeIcon icon={faTwitter} className="text-lg" />
+                  <FontAwesomeIcon icon={faTwitter} className="text-base sm:text-lg" />
                 </motion.button>
               </div>
             </div>
@@ -490,10 +490,10 @@ const SignInPage = () => {
         </motion.div>
         
         <motion.div 
-          className="mt-6 text-center"
+          className="mt-4 sm:mt-6 text-center"
           variants={itemVariants}
         >
-          <p className="text-gray-400">
+          <p className="text-gray-400 text-xs sm:text-sm">
             Don't have an account?{' '}
             <Link 
               to="/signup" 
@@ -508,28 +508,28 @@ const SignInPage = () => {
       <AnimatePresence>
         {showDemoModal && (
           <motion.div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="bg-[#1a1a2e] border border-[#ffffff1a] rounded-xl shadow-xl w-full max-w-md overflow-hidden"
+              className="bg-[#1a1a2e] border border-[#ffffff1a] rounded-xl shadow-xl w-full max-w-xs sm:max-w-md overflow-hidden"
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
             >
-              <div className="p-6">
-                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-6 rounded-full bg-[#6c5ce7]/20">
-                  <FontAwesomeIcon icon={faDatabase} className="text-[#a29bfe] text-2xl" />
+              <div className="p-4 sm:p-6">
+                <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 rounded-full bg-[#6c5ce7]/20">
+                  <FontAwesomeIcon icon={faDatabase} className="text-[#a29bfe] text-xl sm:text-2xl" />
                 </div>
-                <h3 className="text-xl font-bold text-white text-center mb-2">Server Connection Issue</h3>
-                <p className="text-gray-300 text-center mb-6">
+                <h3 className="text-lg sm:text-xl font-bold text-white text-center mb-1 sm:mb-2">Server Connection Issue</h3>
+                <p className="text-gray-300 text-xs sm:text-base text-center mb-4 sm:mb-6">
                   We couldn't connect to our servers. Would you like to use Demo Mode to explore the app without an account?
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <motion.button
-                    className="flex-1 py-3 px-4 bg-[#ffffff0a] hover:bg-[#ffffff15] rounded-lg text-white border border-[#ffffff1a] transition-colors"
+                    className="flex-1 py-2 sm:py-3 px-3 sm:px-4 bg-[#ffffff0a] hover:bg-[#ffffff15] rounded-lg text-white border border-[#ffffff1a] transition-colors text-xs sm:text-base"
                     onClick={() => setShowDemoModal(false)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -537,7 +537,7 @@ const SignInPage = () => {
                     Cancel
                   </motion.button>
                   <motion.button
-                    className="flex-1 py-3 px-4 bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] rounded-lg text-white font-medium transition-all"
+                    className="flex-1 py-2 sm:py-3 px-3 sm:px-4 bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] rounded-lg text-white font-medium transition-all text-xs sm:text-base"
                     onClick={handleDemoMode}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
