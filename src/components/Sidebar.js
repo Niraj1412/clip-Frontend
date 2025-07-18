@@ -1,40 +1,24 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
-  faSearch, 
-  faVideo, 
-  faAngleRight, 
-  faInfoCircle, 
-  faEnvelope, 
-  faShieldAlt, 
-  faNoteSticky, 
-  faUser, 
-  faSignOutAlt, 
-  faHome,
-  faCompass,
-  faClipboard,
-  faCog,
-  faTachometerAlt,
-  faPlus,
-  faFilm,
-  faObjectGroup,
-  faTimes // Added for close button
+  faSearch, faVideo, faAngleRight, faInfoCircle, faEnvelope, 
+  faShieldAlt, faNoteSticky, faUser, faSignOutAlt, faHome, 
+  faCompass, faClipboard, faCog, faTachometerAlt, faPlus, 
+  faFilm, faObjectGroup, faTimes 
 } from "@fortawesome/free-solid-svg-icons";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import authService from "../services/authService";
 
-const Sidebar = () => {
+const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
     name: "User",
     email: "user@example.com"
   });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for mobile toggle
 
   useEffect(() => {
-    // Fetch current user data from auth service
     const currentUser = authService.getCurrentUser();
     if (currentUser) {
       setUserData({
@@ -47,24 +31,22 @@ const Sidebar = () => {
   // Prevent body scrolling when sidebar is open on mobile
   useEffect(() => {
     if (isSidebarOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
-    // Cleanup on unmount or state change
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isSidebarOpen]);
 
   const handleLogout = () => {
     authService.logout();
-    navigate('/signin');
+    navigate("/signin");
   };
 
-  // Get first letter of name for avatar
   const getInitial = (name) => {
-    return name ? name.charAt(0).toUpperCase() : 'U';
+    return name ? name.charAt(0).toUpperCase() : "U";
   };
 
   return (
@@ -80,9 +62,9 @@ const Sidebar = () => {
         ></motion.div>
       )}
       <motion.div
-        className={`fixed top-0 w-[280px] bg-[#121212] shadow-xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A] overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'left-0' : '-left-[280px]'} lg:left-0 z-50`}
-        style={{ height: 'calc(100vh - 3.5rem)' }} // Height remains below header
-        initial={{ x: -100, opacity: 0 }} // Initial animation for mount
+        className={`fixed top-0 w-[280px] bg-[#121212] shadow-xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A] overflow-hidden transition-all duration-300 ${isSidebarOpen ? "left-0" : "-left-[280px]"} lg:left-0 z-50`}
+        style={{ height: "calc(100vh - 3.5rem)" }}
+        initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
@@ -98,7 +80,7 @@ const Sidebar = () => {
             <FontAwesomeIcon icon={faTimes} size="lg" />
           </motion.button>
         )}
-        {/* Animated background pattern */}
+        {/* Rest of the sidebar content remains unchanged */}
         <div className="absolute inset-0 overflow-hidden z-0">
           <motion.div 
             className="absolute -inset-[10%] opacity-[0.02] z-0"
@@ -107,7 +89,7 @@ const Sidebar = () => {
             transition={{ duration: 2 }}
             style={{
               backgroundImage: `radial-gradient(circle at 25px 25px, #6c5ce7 2%, transparent 0%), radial-gradient(circle at 75px 75px, #6c5ce7 2%, transparent 0%)`,
-              backgroundSize: '100px 100px',
+              backgroundSize: "100px 100px",
             }}
           />
           <motion.div 
@@ -117,7 +99,7 @@ const Sidebar = () => {
             transition={{ duration: 30, repeat: Infinity, repeatType: "reverse", ease: "linear" }}
             style={{
               backgroundImage: `radial-gradient(#6c5ce7 1px, transparent 0)`,
-              backgroundSize: '40px 40px',
+              backgroundSize: "40px 40px",
             }}
           />
         </div>
@@ -133,7 +115,6 @@ const Sidebar = () => {
               {getInitial(userData.name)}
             </motion.div>
           </div>
-
           <motion.h2 
             className="text-lg font-semibold text-white mb-1"
             initial={{ opacity: 0, y: 5 }}
@@ -142,7 +123,6 @@ const Sidebar = () => {
           >
             {userData.name}
           </motion.h2>
-          
           <motion.p 
             className="text-sm text-gray-400/80 mb-3"
             initial={{ opacity: 0, y: 5 }}
@@ -151,7 +131,6 @@ const Sidebar = () => {
           >
             {userData.email}
           </motion.p>
-          
           <motion.button
             onClick={handleLogout}
             className="text-xs flex items-center gap-1 text-gray-400 hover:text-[#6c5ce7] transition-all px-3 py-1 rounded-full border border-[#2A2A2A] hover:border-[#6c5ce7]/50 hover:bg-[#6c5ce7]/5"
@@ -172,23 +151,21 @@ const Sidebar = () => {
               to="/dashboard" 
               icon={faPlus} 
               text="Create" 
-              isActive={location.pathname === '/dashboard'} 
+              isActive={location.pathname === "/dashboard"} 
               delay={0.1} 
             />
-            
             <SidebarItem 
               to="/explore" 
               icon={faCompass} 
               text="Explore" 
-              isActive={location.pathname === '/explore'} 
+              isActive={location.pathname === "/explore"} 
               delay={0.2} 
             />
-            
             <SidebarItem 
               to="/my-projects" 
               icon={faNoteSticky} 
               text="Projects" 
-              isActive={location.pathname === '/my-projects'} 
+              isActive={location.pathname === "/my-projects"} 
               delay={0.3} 
             />
           </AnimatePresence>
@@ -205,21 +182,19 @@ const Sidebar = () => {
               to="/about" 
               icon={faInfoCircle} 
               text="About" 
-              isActive={location.pathname === '/about'} 
+              isActive={location.pathname === "/about"} 
             />
-            
             <BottomLink 
               to="/contact" 
               icon={faEnvelope} 
               text="Contact Us" 
-              isActive={location.pathname === '/contact'} 
+              isActive={location.pathname === "/contact"} 
             />
-            
             <BottomLink 
               to="/privacy" 
               icon={faShieldAlt} 
               text="Privacy Policy" 
-              isActive={location.pathname === '/privacy'} 
+              isActive={location.pathname === "/privacy"} 
             />
           </motion.ul>
         </div>
@@ -228,6 +203,7 @@ const Sidebar = () => {
   );
 };
 
+// SidebarItem and BottomLink components remain unchanged
 const SidebarItem = ({ to, icon, text, isActive, delay = 0 }) => {
   return (
     <motion.li 
@@ -241,18 +217,18 @@ const SidebarItem = ({ to, icon, text, isActive, delay = 0 }) => {
         to={to}
         className={`flex items-center justify-between px-5 py-3 rounded-xl transition-all w-full
                    ${isActive 
-                     ? 'bg-[#6c5ce7] text-white shadow-lg shadow-[#6c5ce7]/25' 
-                     : 'bg-[#1A1A1A] hover:bg-[#252525] border border-[#2A2A2A] hover:border-[#6c5ce7]/50'}`}
+                     ? "bg-[#6c5ce7] text-white shadow-lg shadow-[#6c5ce7]/25" 
+                     : "bg-[#1A1A1A] hover:bg-[#252525] border border-[#2A2A2A] hover:border-[#6c5ce7]/50"}`}
       >
         <div className="flex items-center space-x-3">
-          <FontAwesomeIcon icon={icon} className={`text-lg ${isActive ? 'text-white' : 'text-[#6c5ce7]'}`} />
+          <FontAwesomeIcon icon={icon} className={`text-lg ${isActive ? "text-white" : "text-[#6c5ce7]"}`} />
           <span className="text-md font-medium">{text}</span>
         </div>
         <motion.div
           animate={isActive ? { x: [0, 5, 0] } : { x: 0 }}
           transition={isActive ? { duration: 0.5, delay: 0.3 } : {}}
         >
-          <FontAwesomeIcon icon={faAngleRight} className={isActive ? 'text-white' : 'text-[#6c5ce7]'} />
+          <FontAwesomeIcon icon={faAngleRight} className={isActive ? "text-white" : "text-[#6c5ce7]"} />
         </motion.div>
       </Link>
     </motion.li>
@@ -266,8 +242,8 @@ const BottomLink = ({ to, icon, text, isActive }) => {
         to={to}
         className={`flex items-center py-2 px-3 text-sm rounded-lg transition-all
                    ${isActive 
-                     ? 'text-[#6c5ce7] font-medium bg-[#6c5ce7]/10'
-                     : 'text-gray-400/80 hover:text-[#6c5ce7] hover:bg-[#1A1A1A]'}`}
+                     ? "text-[#6c5ce7] font-medium bg-[#6c5ce7]/10"
+                     : "text-gray-400/80 hover:text-[#6c5ce7] hover:bg-[#1A1A1A]"}`}
       >
         <FontAwesomeIcon icon={icon} className="mr-2" />
         {text}
