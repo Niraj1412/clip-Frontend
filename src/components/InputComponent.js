@@ -680,24 +680,24 @@ const InputComponent = () => {
                       <FontAwesomeIcon icon={faLightbulb} className="text-yellow-500 text-xs" />
                       <span className="text-gray-400 text-sm">Quick Suggestions:</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {promptSuggestions.map((suggestion, index) => (
                         <button
                           key={index}
                           onClick={() => setPrompt(suggestion.text)}
-                          className="flex items-start gap-2 p-3 bg-gray-800/30 rounded-xl hover:bg-[#6c5ce7]/10 transition-all duration-300 text-left group border border-gray-700/50 hover:border-[#6c5ce7]/50"
+                          className="flex items-start gap-2 p-2 sm:p-3 bg-gray-800/30 rounded-xl hover:bg-[#6c5ce7]/10 transition-all duration-300 text-left group border border-gray-700/50 hover:border-[#6c5ce7]/50 w-full"
                         >
-                          <span className="w-6 h-6 rounded-lg bg-[#6c5ce7]/20 flex items-center justify-center shrink-0">
+                          <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-[#6c5ce7]/20 flex items-center justify-center shrink-0">
                             <FontAwesomeIcon
                               icon={suggestion.icon}
-                              className="text-[#6c5ce7] text-xs group-hover:scale-110 transition-transform"
+                              className="text-[#6c5ce7] text-[10px] sm:text-xs group-hover:scale-110 transition-transform"
                             />
                           </span>
-                          <div>
-                            <span className="block text-[10px] text-[#6c5ce7] mb-0.5 font-medium uppercase tracking-wide">
+                          <div className="flex-1 overflow-hidden">
+                            <span className="block text-[9px] sm:text-[10px] text-[#6c5ce7] mb-0.5 font-medium uppercase tracking-wide">
                               {suggestion.category}
                             </span>
-                            <span className="block text-xs text-gray-300 group-hover:text-white transition-colors leading-relaxed">
+                            <span className="block text-[10px] sm:text-xs text-gray-300 group-hover:text-white transition-colors leading-relaxed truncate sm:truncate-0">
                               {suggestion.text}
                             </span>
                           </div>
