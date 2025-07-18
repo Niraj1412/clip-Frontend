@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { 
-  faWandMagicSparkles, 
-  faTachometerAlt, 
-  faFilm, 
-  faPlus, 
+import {
+  faWandMagicSparkles,
+  faTachometerAlt,
+  faFilm,
+  faPlus,
   faUser,
   faChevronDown,
   faStar,
@@ -43,7 +43,7 @@ const Navbar = ({ setSidebarOpen }) => { // Add setSidebarOpen prop
         setShowUserMenu(false);
       }
     };
-    
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -79,7 +79,7 @@ const Navbar = ({ setSidebarOpen }) => { // Add setSidebarOpen prop
         style={{ zIndex: 1000 }}
       >
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-[#6c5ce7]/0 via-[#6c5ce7]/50 to-[#6c5ce7]/0"></div>
-        
+
         <div className="absolute left-1/3 top-1/2 transform -translate-y-1/2 text-[#6c5ce7]/20 text-xs animate-pulse">
           <FontAwesomeIcon icon={faMagic} />
         </div>
@@ -113,7 +113,7 @@ const Navbar = ({ setSidebarOpen }) => { // Add setSidebarOpen prop
               className="text-lg sm:text-xl font-bold tracking-wide hover:text-transparent bg-clip-text bg-gradient-to-r from-[#6c5ce7] to-purple-400 transition-colors duration-300 flex items-center gap-2"
             >
               CLIPSMART <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6c5ce7] to-purple-400">AI</span>
-              <motion.div 
+              <motion.div
                 initial={{ rotate: 0 }}
                 animate={{ rotate: [0, 15, 0, -15, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 5 }}
@@ -130,9 +130,9 @@ const Navbar = ({ setSidebarOpen }) => { // Add setSidebarOpen prop
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSidebarOpen(true)} // Open the sidebar
+            onClick={() => setSidebarOpen(prev => !prev)} // Toggle the state
             className="lg:hidden p-2 text-white"
-            aria-label="Open sidebar"
+            aria-label="Toggle sidebar"
           >
             <FontAwesomeIcon icon={faBars} size="lg" />
           </motion.button>
@@ -182,7 +182,7 @@ const Navbar = ({ setSidebarOpen }) => { // Add setSidebarOpen prop
                     </Link>
                   </div>
                   <div className="border-t border-gray-800/50 py-1 relative z-10">
-                    <button 
+                    <button
                       onClick={handleSignOut}
                       className="w-full text-left block px-4 py-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all"
                     >

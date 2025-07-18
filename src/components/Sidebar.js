@@ -58,21 +58,17 @@ const Sidebar = ({ isOpen, toggleSidebar }) => { // Renamed props to match HomeP
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 bg-black/50 lg:hidden z-40"
-          onClick={toggleSidebar} // Use toggleSidebar to close
+          onClick={toggleSidebar}
         ></motion.div>
       )}
       <motion.div
         className={`fixed top-0 w-[280px] bg-[#121212] shadow-xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A] overflow-hidden transition-all duration-300 ${isOpen ? "left-0" : "-left-[280px]"} lg:left-0 z-50`}
         style={{ height: "calc(100vh - 3.5rem)" }}
-        initial={{ x: -100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        {/* Close button for mobile */}
         {isOpen && (
           <motion.button
             className="absolute top-4 right-4 text-white lg:hidden"
-            onClick={toggleSidebar} // Use toggleSidebar to close
+            onClick={toggleSidebar}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
