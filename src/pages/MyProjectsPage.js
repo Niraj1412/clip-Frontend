@@ -242,9 +242,11 @@ const MyProjectsPage = () => {
   return (
     <>
       <Navbar />
-      <div className="flex h-screen overflow-hidden">
-        <Sidebar />
-        <main className="ml-[280px] flex-1 p-6 bg-[#121212] min-h-screen overflow-y-auto mt-16">
+      <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
+        <main className="w-full md:ml-[280px] flex-1 p-4 md:p-6 bg-[#121212] min-h-screen overflow-y-auto mt-16">
           {/* Background patterns */}
           <div className="absolute inset-0 overflow-hidden z-0">
             <motion.div 
@@ -267,14 +269,14 @@ const MyProjectsPage = () => {
           >
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
               <div>
-                <h1 className="text-3xl font-bold text-white mb-2">My Projects</h1>
-                <p className="text-gray-400">Manage and organize your video projects</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">My Projects</h1>
+                <p className="text-gray-400 text-sm md:text-base">Manage and organize your video projects</p>
               </div>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/dashboard')}
-                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-medium text-white flex items-center gap-2 shadow-lg shadow-purple-600/20"
+                className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-medium text-white flex items-center gap-2 shadow-lg shadow-purple-600/20"
               >
                 <FontAwesomeIcon icon={faPlus} />
                 Create New Project
@@ -285,7 +287,7 @@ const MyProjectsPage = () => {
 
             <StatsSection />
 
-            <div className="bg-[#1A1A1A]/60 backdrop-blur-xl rounded-xl p-6 border border-[#2A2A2A] mb-8">
+            <div className="bg-[#1A1A1A]/60 backdrop-blur-xl rounded-xl p-4 md:p-6 border border-[#2A2A2A] mb-8">
               <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="relative flex-1 w-full">
                   <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -297,11 +299,11 @@ const MyProjectsPage = () => {
                     className="w-full bg-[#252525] text-gray-200 border border-[#3A3A3A] rounded-lg pl-12 pr-4 py-2 focus:outline-none focus:border-purple-500"
                   />
                 </div>
-                <div className="flex gap-4 w-full md:w-auto">
+                <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                   <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    className="bg-[#252525] text-gray-200 border border-[#3A3A3A] rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500"
+                    className="w-full md:w-auto bg-[#252525] text-gray-200 border border-[#3A3A3A] rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500"
                   >
                     <option value="all">All Categories</option>
                     <option value="marketing">Marketing</option>
@@ -311,7 +313,7 @@ const MyProjectsPage = () => {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="bg-[#252525] text-gray-200 border border-[#3A3A3A] rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500"
+                    className="w-full md:w-auto bg-[#252525] text-gray-200 border border-[#3A3A3A] rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500"
                   >
                     <option value="date">Sort by Date</option>
                     <option value="views">Sort by Views</option>
@@ -332,7 +334,7 @@ const MyProjectsPage = () => {
 
             <AnimatePresence>
               {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3, 4, 5, 6].map((index) => (
                     <ProjectSkeleton key={index} />
                   ))}
@@ -341,18 +343,18 @@ const MyProjectsPage = () => {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-[#1A1A1A]/60 backdrop-blur-xl rounded-xl p-12 text-center border border-[#2A2A2A]"
+                  className="bg-[#1A1A1A]/60 backdrop-blur-xl rounded-xl p-8 md:p-12 text-center border border-[#2A2A2A]"
                 >
                   <FontAwesomeIcon icon={faFolderOpen} className="text-5xl text-gray-600 mb-4" />
-                  <h2 className="text-xl font-semibold text-white mb-3">No Projects Found</h2>
-                  <p className="text-gray-400 mb-8">
+                  <h2 className="text-lg md:text-xl font-semibold text-white mb-3">No Projects Found</h2>
+                  <p className="text-gray-400 mb-8 text-sm md:text-base">
                     {searchTerm ? 'No projects match your search criteria.' : 'Start creating your first video project by clicking the button below.'}
                   </p>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate('/dashboard')}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-medium text-white inline-flex items-center gap-2 shadow-lg shadow-purple-600/20"
+                    className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-medium text-white inline-flex items-center gap-2 shadow-lg shadow-purple-600/20"
                   >
                     <FontAwesomeIcon icon={faPlus} />
                     Create New Project
@@ -363,7 +365,7 @@ const MyProjectsPage = () => {
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
                   {filteredProjects.map((project) => (
                     <motion.div
@@ -407,11 +409,11 @@ const MyProjectsPage = () => {
                           </div>
                         </div>
                         
-                        <div className="p-5">
-                          <h3 className="text-white font-medium text-lg mb-3 truncate group-hover:text-purple-400 transition-colors">
+                        <div className="p-4 md:p-5">
+                          <h3 className="text-white font-medium text-base md:text-lg mb-3 truncate group-hover:text-purple-400 transition-colors">
                             {project.title}
                           </h3>
-                          <div className="flex justify-between text-sm text-gray-400">
+                          <div className="flex justify-between text-xs md:text-sm text-gray-400">
                             <div className="flex items-center gap-1.5">
                               <FontAwesomeIcon icon={faCalendarAlt} className="text-xs" />
                               <span>{formatDate(project.createdAt)}</span>

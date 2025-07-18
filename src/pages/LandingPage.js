@@ -1117,7 +1117,7 @@ const LandingPage = () => {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div 
-            className="fixed inset-0 z-40 bg-[#0a0a13]/95 backdrop-blur-md md:hidden flex flex-col"
+            className="fixed inset-0 z-40 bg-[#0a0a13]/95 backdrop-blur-md md:hidden flex flex-col px-4 pt-24 pb-8"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -1244,7 +1244,7 @@ const LandingPage = () => {
         <section 
           id="hero" 
           ref={heroRef} 
-          className="relative min-h-[90vh] flex items-center overflow-visible py-16"
+          className="relative min-h-[90vh] flex flex-col lg:flex-row items-center overflow-visible py-10 sm:py-16 px-2 sm:px-4"
           style={{
             scrollMarginTop: 'var(--scroll-padding)'
           }}
@@ -1259,10 +1259,10 @@ const LandingPage = () => {
             </motion.div>
           </div>
           
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-6 pb-12 relative z-20">
-            <div className="grid lg:grid-cols-2 gap-10 items-center">
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 w-full pt-6 pb-12 relative z-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
               {/* Hero Content with better spacing and alignment */}
-              <div className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left">
+              <div className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left px-2 sm:px-0">
                 <motion.span 
                   className="px-4 py-1.5 rounded-full text-sm font-medium bg-[#6c5ce7]/10 border border-[#6c5ce7]/30 inline-flex items-center gap-2 mb-4"
                   initial={{ opacity: 0, y: 20 }}
@@ -1274,7 +1274,7 @@ const LandingPage = () => {
                 </motion.span>
                 
                 <motion.h2 
-                  className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-6 overflow-visible"
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6 overflow-visible"
                   initial={{ opacity: 0, y: 20 }}
                   animate={isHeroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                   transition={{ duration: 0.5, delay: 0.1 }}
@@ -1315,7 +1315,7 @@ const LandingPage = () => {
                 </motion.h2>
                 
                 <motion.p 
-                  className="text-base sm:text-lg text-gray-300 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0"
+                  className="text-sm sm:text-base md:text-lg text-gray-300 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0"
                   initial={{ opacity: 0, y: 20 }}
                   animate={isHeroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
@@ -1371,19 +1371,19 @@ const LandingPage = () => {
             </motion.div>
 
                 <motion.div 
-                  className="mt-12 flex items-center gap-4 justify-center lg:justify-start"
+                  className="mt-8 flex items-center gap-2 justify-center lg:justify-start"
                   initial={{ opacity: 0 }}
                   animate={isHeroInView ? { opacity: 1 } : { opacity: 0 }}
                   transition={{ duration: 0.5, delay: 0.8 }}
                 >
-                  <div className="flex -space-x-3">
+                  <div className="flex -space-x-2 sm:-space-x-3">
                     {[...Array(4)].map((_, index) => (
-                      <div key={index} className="w-8 h-8 rounded-full border-2 border-[#0a0a13] overflow-hidden">
+                      <div key={index} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#0a0a13] overflow-hidden">
                         <div className={`w-full h-full bg-gradient-to-br from-[#6c5ce7] to-[#a29bfe] opacity-${90 - index * 20}`}></div>
                       </div>
                     ))}
                   </div>
-                  <div className="text-sm">
+                  <div className="text-xs sm:text-sm">
                     <span className="text-white font-medium">500+</span>
                     <span className="text-gray-400"> users already creating amazing videos</span>
                   </div>
@@ -1392,7 +1392,7 @@ const LandingPage = () => {
               
               {/* Hero Video Preview with improved responsive design */}
               <motion.div
-                className="relative aspect-video max-w-xl mx-auto w-full rounded-2xl overflow-hidden shadow-2xl shadow-[#6c5ce7]/10"
+                className="relative aspect-video max-w-full sm:max-w-xl mx-auto w-full rounded-2xl overflow-hidden shadow-2xl shadow-[#6c5ce7]/10"
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={isHeroInView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
@@ -1498,8 +1498,8 @@ const LandingPage = () => {
         </section>
 
         {/* Features Section */}
-        <section id="features" ref={featuresRef} className="py-20" style={{ scrollMarginTop: 'var(--scroll-padding)' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="features" ref={featuresRef} className="py-14 sm:py-20 px-2 sm:px-0" style={{ scrollMarginTop: 'var(--scroll-padding)' }}>
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div className="text-center mb-12">
               <motion.h2 
                 className="text-3xl font-bold mb-4"
@@ -1521,7 +1521,7 @@ const LandingPage = () => {
               </motion.p>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               <FeatureCard 
                 icon={faVideo} 
                 title="AI Video Generation" 
@@ -1581,8 +1581,8 @@ const LandingPage = () => {
         </section>
 
         {/* How It Works Section */}
-        <section id="how-it-works" ref={howItWorksRef} className="py-20 bg-[#0a0a13]/50 scroll-mt-24" style={{ scrollMarginTop: 'var(--scroll-padding)' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="how-it-works" ref={howItWorksRef} className="py-14 sm:py-20 bg-[#0a0a13]/50 scroll-mt-24 px-2 sm:px-0" style={{ scrollMarginTop: 'var(--scroll-padding)' }}>
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div className="text-center mb-12">
               <motion.h2 
                 className="text-3xl font-bold mb-4"
@@ -1604,7 +1604,7 @@ const LandingPage = () => {
               </motion.p>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-6 relative">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
               {/* Connecting line between steps */}
               <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-[#6c5ce7]/30 to-[#a29bfe]/30 hidden md:block"></div>
               
@@ -1684,8 +1684,8 @@ const LandingPage = () => {
         </section>
         
         {/* Pricing Section with improved header and layout */}
-        <section id="pricing" ref={pricingRef} className="py-20 relative z-10" style={{ scrollMarginTop: 'var(--scroll-padding)' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="pricing" ref={pricingRef} className="py-14 sm:py-20 relative z-10 px-2 sm:px-0" style={{ scrollMarginTop: 'var(--scroll-padding)' }}>
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <motion.h2 
                 className="text-3xl md:text-4xl font-bold mb-4"
@@ -1799,8 +1799,8 @@ const LandingPage = () => {
         </section>
         
         {/* Testimonials Section */}
-        <section id="testimonials" ref={testimonialsRef} className="py-20 bg-[#0a0a13]/50" style={{ scrollMarginTop: 'var(--scroll-padding)' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="testimonials" ref={testimonialsRef} className="py-14 sm:py-20 bg-[#0a0a13]/50 px-2 sm:px-0" style={{ scrollMarginTop: 'var(--scroll-padding)' }}>
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div className="text-center mb-12">
               <motion.h2 
                 className="text-3xl font-bold mb-4"
@@ -1822,7 +1822,7 @@ const LandingPage = () => {
               </motion.p>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <TestimonialCard 
                 name="Alex Johnson"
                 role="Content Creator"
@@ -1851,8 +1851,8 @@ const LandingPage = () => {
         </section>
         
         {/* FAQ Section with improved styling and spacing */}
-        <section id="faq" ref={faqRef} className="py-20" style={{ scrollMarginTop: 'var(--scroll-padding)' }}>
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="faq" ref={faqRef} className="py-14 sm:py-20 px-2 sm:px-0" style={{ scrollMarginTop: 'var(--scroll-padding)' }}>
+          <div className="max-w-5xl mx-auto px-2 sm:px-4 lg:px-8">
             <div className="text-center mb-12">
               <motion.h2 
                 className="text-3xl font-bold mb-4"
@@ -1915,14 +1915,14 @@ const LandingPage = () => {
         </section>
         
         {/* CTA Section */}
-        <section className="py-24 bg-gradient-to-br from-[#1a1a2e] to-[#0a0a13] relative overflow-hidden">
+        <section className="py-16 sm:py-24 bg-gradient-to-br from-[#1a1a2e] to-[#0a0a13] relative overflow-hidden px-2 sm:px-0">
           <div className="absolute inset-0">
             <div className="absolute inset-0 bg-[#6c5ce7]/5 backdrop-blur-3xl"></div>
             <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#6c5ce7]/10 rounded-full filter blur-3xl"></div>
             <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#a29bfe]/10 rounded-full filter blur-3xl"></div>
           </div>
           
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <div className="max-w-4xl mx-auto px-2 sm:px-6 lg:px-8 relative z-10 text-center">
             <motion.h2 
               className="text-4xl sm:text-5xl font-bold mb-8"
               initial={{ opacity: 0, y: 20 }}
@@ -1973,9 +1973,9 @@ const LandingPage = () => {
         </section>
         
         {/* Enhanced Footer with better organization and styling */}
-        <footer className="pt-16 pb-8 bg-[#0a0a13]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        <footer className="pt-10 sm:pt-16 pb-8 bg-[#0a0a13] px-2 sm:px-0">
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {/* Company Info */}
               <div>
                 <div className="flex items-center mb-4">
@@ -2150,7 +2150,7 @@ const LandingPage = () => {
       {/* Scroll to top button */}
       <motion.button
         onClick={scrollToTop}
-        className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] text-white flex items-center justify-center shadow-lg shadow-purple-500/20 z-50"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] text-white flex items-center justify-center shadow-lg shadow-purple-500/20 z-50"
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ 
           opacity: showScrollTop ? 1 : 0,

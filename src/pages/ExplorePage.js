@@ -28,6 +28,7 @@ const ExplorePage = () => {
     projects: true
   });
   const [error, setError] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // NEW: sidebar toggle for mobile
 
   // Animation variants
   const containerVariants = {
@@ -294,10 +295,19 @@ const ExplorePage = () => {
 
   return (
     <>
-      <Navbar />
+      {/* Pass sidebar toggle to Navbar for mobile */}
+      <Navbar onSidebarToggle={() => setSidebarOpen((open) => !open)} />
       <div className="flex h-screen overflow-hidden">
-        <Sidebar />
-        <main className="ml-[280px] mt-12 flex-1 bg-[#0a0a0a] overflow-y-auto h-full text-white relative">
+        {/* Sidebar: hidden on mobile, visible on md+ */}
+        <div className={`fixed md:static z-30 transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:block`} style={{ width: 280 }}>
+          <Sidebar onClose={() => setSidebarOpen(false)} />
+        </div>
+        {/* Overlay for sidebar on mobile */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 bg-black/40 z-20 md:hidden" onClick={() => setSidebarOpen(false)}></div>
+        )}
+        {/* Main content: no left margin on mobile, margin on md+ */}
+        <main className="flex-1 bg-[#0a0a0a] overflow-y-auto h-full text-white relative md:ml-[280px] ml-0 pt-16 md:pt-12" style={{ minHeight: '100vh' }}>
           {/* Enhanced Background Elements */}
           <ParticleBackground />
           <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
@@ -307,7 +317,7 @@ const ExplorePage = () => {
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM3YzY2ZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0di00aC0ydjRoLTR2Mmg0djRoMnYtNGg0di0ySDZ6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRoLTR6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRINnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20 bg-fixed"></div>
           </div>
           
-          <div className="max-w-[1600px] mx-auto px-6 py-8 relative z-10">
+          <div className="max-w-[1600px] mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-8 relative z-10">
             {/* Custom scrollbar styles */}
             <style jsx>{`
               main::-webkit-scrollbar {
@@ -374,7 +384,7 @@ const ExplorePage = () => {
             
             {/* Welcome section - Enhanced with more impressive visuals */}
             <motion.section 
-              className="mb-8 relative"
+              className="mb-6 md:mb-8 relative"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
@@ -395,15 +405,15 @@ const ExplorePage = () => {
                   <div className="absolute top-0 right-0 w-64 h-64 bg-[#7c66ff]/5 rounded-full filter blur-[80px] animate-float"></div>
                   <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/5 rounded-full filter blur-[50px] animate-float" style={{ animationDelay: "-3s" }}></div>
                   
-                  <div className="p-6 md:p-8 relative z-10">
+                  <div className="p-4 md:p-6 lg:p-8 relative z-10">
                     <motion.div 
-                      className="flex flex-col md:flex-row md:items-center justify-between gap-6"
+                      className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.7, delay: 0.3 }}
                     >
-                      <div className="max-w-2xl">
-                        <h1 className="text-3xl md:text-4xl font-bold mb-3">
+                      <div className="max-w-full md:max-w-2xl">
+                        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-3">
                           <motion.span 
                             className="bg-clip-text text-transparent bg-gradient-to-r from-white via-[#7c66ff]/90 to-white animate-gradient"
                             initial={{ opacity: 0, y: -20 }}
@@ -414,7 +424,7 @@ const ExplorePage = () => {
                           </motion.span>
                         </h1>
                         <motion.p 
-                          className="text-gray-300 text-base leading-relaxed"
+                          className="text-gray-300 text-sm md:text-base leading-relaxed"
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.5, delay: 0.2 }}
@@ -447,7 +457,7 @@ const ExplorePage = () => {
                 </div>
                 
                 {/* Stats section */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-6 bg-[#151515]/60 backdrop-blur-sm border-t border-[#2A2A2A]/50">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 lg:gap-6 p-4 md:p-6 bg-[#151515]/60 backdrop-blur-sm border-t border-[#2A2A2A]/50">
                   <StatCard 
                     icon={faFolder} 
                     title="Total Projects" 
@@ -472,7 +482,7 @@ const ExplorePage = () => {
             
             {/* Create Section - Enhanced with better UI */}
             <motion.section 
-              className="mb-8"
+              className="mb-6 md:mb-8"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
@@ -480,7 +490,7 @@ const ExplorePage = () => {
               <SectionTitle title="Create" />
               
               <motion.div 
-                className="grid grid-cols-1 sm:grid-cols-3 gap-5"
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-5"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
@@ -510,7 +520,7 @@ const ExplorePage = () => {
             
             {/* My Projects Section - Enhanced with more visuals */}
             <motion.section 
-              className="mb-6"
+              className="mb-4 md:mb-6"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
@@ -522,7 +532,7 @@ const ExplorePage = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="text-sm bg-[#1A1A1A] text-white px-4 py-2 rounded-lg border border-[#2A2A2A] flex items-center gap-2 hover:bg-[#252525] transition-colors duration-300"
+                    className="text-sm bg-[#1A1A1A] text-white px-3 md:px-4 py-2 rounded-lg border border-[#2A2A2A] flex items-center gap-2 hover:bg-[#252525] transition-colors duration-300"
                     onClick={() => navigate('/dashboard')}
                   >
                     <FontAwesomeIcon icon={faPlus} className="text-[#7c66ff]" />
@@ -533,8 +543,7 @@ const ExplorePage = () => {
               
               <AnimatePresence>
                 {loading.projects ? (
-                  // Show loading skeletons when loading
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
                     {Array(4).fill(0).map((_, index) => (
                       <motion.div
                         key={`skeleton-${index}`}
@@ -547,14 +556,13 @@ const ExplorePage = () => {
                     ))}
                   </div>
                 ) : projects.length === 0 ? (
-                  // Enhanced empty state with gradients and animations
                   <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="relative group"
                   >
                     <div className="absolute -inset-1 bg-gradient-to-br from-[#7c66ff]/20 to-indigo-600/20 rounded-xl blur-lg opacity-30 transition-opacity duration-300"></div>
-                    <div className="bg-[#151515]/80 backdrop-blur-sm rounded-xl p-10 text-center border border-gray-800/40 shadow-xl relative z-10">
+                    <div className="bg-[#151515]/80 backdrop-blur-sm rounded-xl p-6 md:p-10 text-center border border-gray-800/40 shadow-xl relative z-10">
                       <div className="w-20 h-20 mx-auto mb-5 relative">
                         <div className="absolute -inset-1 bg-gradient-to-r from-[#7c66ff]/30 to-indigo-600/30 rounded-full blur-md opacity-40"></div>
                         <div className="relative w-full h-full rounded-full bg-[#1a1a1a] flex items-center justify-center border border-gray-800/50">
@@ -566,12 +574,12 @@ const ExplorePage = () => {
                       <motion.div
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="relative inline-block group"
+                        className="relative inline-block group mt-4"
                       >
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-[#7c66ff] to-indigo-600 rounded-xl blur opacity-70 group-hover:opacity-100 transition-all duration-500"></div>
                         <button 
                           onClick={() => navigate('/dashboard')}
-                          className="relative bg-gradient-to-r from-[#7c66ff] to-indigo-600 px-6 py-3 text-white rounded-xl font-medium text-base flex items-center gap-3 shadow-xl shadow-[#7c66ff]/20"
+                          className="relative bg-gradient-to-r from-[#7c66ff] to-indigo-600 px-4 md:px-6 py-2 md:py-3 text-white rounded-xl font-medium text-base flex items-center gap-3 shadow-xl shadow-[#7c66ff]/20"
                         >
                           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                           <FontAwesomeIcon icon={faPlus} className="text-sm" />
@@ -581,9 +589,8 @@ const ExplorePage = () => {
                     </div>
                   </motion.div>
                 ) : (
-                  // Enhanced Projects grid with glass effects and responsive design
                   <motion.div 
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5"
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
