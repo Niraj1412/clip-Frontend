@@ -26,6 +26,7 @@ const ExplorePage = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState({ projects: true });
   const [error, setError] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Animation variants
   const containerVariants = {
@@ -271,9 +272,9 @@ const ExplorePage = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar setSidebarOpen={setIsSidebarOpen} />
       <div className="flex min-h-screen overflow-hidden">
-        <Sidebar />
+        <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="lg:ml-[280px] mt-12 flex-1 bg-[#0a0a0a] overflow-y-auto text-white relative">
           <ParticleBackground />
           <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">

@@ -7,7 +7,7 @@ import Sidebar from '../components/Sidebar';
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
-  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: '',
     email: '',
@@ -369,9 +369,9 @@ const SettingsPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar setSidebarOpen={setIsSidebarOpen} />
       <div className="flex">
-        <Sidebar />
+        <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="ml-0 md:ml-[280px] flex-1 p-6 bg-[#121212] min-h-screen">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

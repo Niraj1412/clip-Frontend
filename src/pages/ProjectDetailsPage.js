@@ -51,6 +51,7 @@ const ProjectDetailsPage = () => {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const videoRef = useRef(null);
   const videoContainerRef = useRef(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userInfo, setUserInfo] = useState({
     name: null,
     email: null,
@@ -248,9 +249,9 @@ const ProjectDetailsPage = () => {
   if (loading) {
     return (
       <>
-        <Navbar />
+        <Navbar setSidebarOpen={setIsSidebarOpen} />
         <div className="flex h-screen overflow-hidden">
-          <Sidebar />
+          <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
           <main className="ml-[280px] flex-1 p-8 bg-[#121212] min-h-screen">
             <div className="max-w-6xl mx-auto">
               <div className="animate-pulse space-y-6">

@@ -9,6 +9,7 @@ const FeedbackPage = () => {
   const [feedback, setFeedback] = useState('');
   const [rating, setRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
 
   const handleSubmit = (e) => {
@@ -30,9 +31,9 @@ const FeedbackPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar setSidebarOpen={setIsSidebarOpen} />
       <div className="flex">
-        <Sidebar />
+        <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="ml-0 md:ml-[280px] flex-1 p-6 bg-[#121212] min-h-screen">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
