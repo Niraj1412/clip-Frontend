@@ -134,9 +134,8 @@ const ClipsPreviewerDemo = () => {
   useEffect(() => {
     const fetchClips = async () => {
       try {
-        // Guard clause: Check if selectedClipsData is valid
         if (!selectedClipsData || selectedClipsData.length === 0) {
-          throw new Error('No transcript data available. Please upload a video first.');
+          throw new Error('No transcript data available');
         }
 
         setLoading(true);
@@ -201,7 +200,6 @@ const ClipsPreviewerDemo = () => {
       }
     };
 
-    // Trigger fetch only if no clips are processed and data exists
     if (processedClips.length === 0 && selectedClipsData) {
       fetchClips();
     }
