@@ -467,13 +467,13 @@ const TranscriptGridPage = () => {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden pb-16 md:pb-0">
           {/* Left Panel - Video List */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-full md:w-[420px] bg-gray-900 flex flex-col md:border-r md:border-[#2d2d2d] h-1/2 md:h-auto"
+            className="w-full md:w-[420px] bg-gray-900 flex flex-col md:border-r md:border-[#2d2d2d]"
           >
             {/* Search Bar */}
             <div className="p-4 border-b border-[#2d2d2d]">
@@ -549,31 +549,31 @@ const TranscriptGridPage = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: index * 0.05 }}
-                  className={`p-3 cursor-pointer transition-all duration-200 border-b border-[#2d2d2d]
-                            ${selectedVideo === videoId ? 'bg-[#2d2d2d]' : 'hover:bg-[#252525]'}
-                            ${loading[videoId] ? 'opacity-70' : ''}`}
+                  className={`p-2 sm:p-3 cursor-pointer transition-all duration-200 border-b border-[#2d2d2d]
+                ${selectedVideo === videoId ? 'bg-[#2d2d2d]' : 'hover:bg-[#252525]'}
+                ${loading[videoId] ? 'opacity-70' : ''}`}
                   onClick={() => selectVideo(videoId)}
                 >
                   {videoDetails[videoId] ? (
-                    <div className="flex gap-3">
-                      <div className="flex items-start gap-3">
+                    <div className="flex gap-2 sm:gap-3">
+                      <div className="flex items-start gap-2 sm:gap-3">
                         <button
                           onClick={(e) => toggleVideoSelection(e, videoId)}
-                          className={`w-5 h-5 rounded flex items-center justify-center transition-colors
-                                    ${selectedVideos.has(videoId)
+                          className={`w-4 h-4 sm:w-5 sm:h-5 rounded flex items-center justify-center transition-colors
+                      ${selectedVideos.has(videoId)
                               ? 'bg-[#6c5ce7] text-white'
                               : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700'}`}
                         >
                           <FontAwesomeIcon
                             icon={selectedVideos.has(videoId) ? faSquareCheck : faSquare}
-                            className={`text-sm ${selectedVideos.has(videoId) ? 'scale-110' : ''}`}
+                            className={`text-xs sm:text-sm ${selectedVideos.has(videoId) ? 'scale-110' : ''}`}
                           />
                         </button>
                         <a
                           href={`https://www.youtube.com/watch?v=${videoId}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="relative group w-32 h-20 flex-shrink-0"
+                          className="relative group w-24 sm:w-32 h-16 sm:h-20 flex-shrink-0"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <img
@@ -586,34 +586,34 @@ const TranscriptGridPage = () => {
                             className="w-full h-full object-cover rounded-lg"
                           />
                           <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 
-                                        flex items-center justify-center transition-colors rounded-lg">
+                          flex items-center justify-center transition-colors rounded-lg">
                             <FontAwesomeIcon icon={faPlay} className="text-white/90" />
                           </div>
-                          <span className="absolute bottom-1 right-1 text-[10px] bg-black/60 
-                                         text-white px-1.5 py-0.5 rounded">
+                          <span className="absolute bottom-1 right-1 text-[8px] sm:text-[10px] bg-black/60 
+                           text-white px-1 sm:px-1.5 py-0.5 rounded">
                             {formatDuration(videoDetails[videoId].duration)}
                           </span>
                         </a>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-medium text-gray-200 line-clamp-2 mb-1.5 leading-snug">
+                        <h3 className="text-xs sm:text-sm font-medium text-gray-200 line-clamp-2 mb-1 leading-snug">
                           {videoDetails[videoId].title}
                         </h3>
-                        <div className="flex items-center gap-3 text-xs text-gray-400">
+                        <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-400">
                           <span className="flex items-center gap-1">
-                            <FontAwesomeIcon icon={faCalendar} className="text-[10px]" />
+                            <FontAwesomeIcon icon={faCalendar} className="text-[8px] sm:text-[10px]" />
                             {formatDate(videoDetails[videoId].publishedAt)}
                           </span>
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="animate-pulse flex gap-3">
-                      <div className="w-5 h-5 bg-gray-700/50 rounded" />
-                      <div className="w-32 h-20 bg-[#252525] rounded-lg" />
+                    <div className="animate-pulse flex gap-2 sm:gap-3">
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 bg-gray-700/50 rounded" />
+                      <div className="w-24 sm:w-32 h-16 sm:h-20 bg-[#252525] rounded-lg" />
                       <div className="flex-1">
-                        <div className="h-4 bg-[#252525] rounded w-full mb-2" />
-                        <div className="h-3 bg-[#252525] rounded w-2/3" />
+                        <div className="h-3 sm:h-4 bg-[#252525] rounded w-full mb-1 sm:mb-2" />
+                        <div className="h-2 sm:h-3 bg-[#252525] rounded w-2/3" />
                       </div>
                     </div>
                   )}
