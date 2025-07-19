@@ -433,7 +433,7 @@ const OutputPage = () => {
             </span>
           </h1>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-3">
+        <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-3">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
