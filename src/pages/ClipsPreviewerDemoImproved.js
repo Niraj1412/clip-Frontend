@@ -67,6 +67,20 @@ const ClipsPreviewerDemo = () => {
   ];
 
 
+  // Load selectedClipsData from localStorage on component mount
+  useEffect(() => {
+    const savedData = localStorage.getItem('selectedClipsData');
+    if (savedData) {
+      setSelectedClipsData(JSON.parse(savedData));
+    }
+  }, []);
+
+  // Save selectedClipsData to localStorage whenever it changes
+  useEffect(() => {
+    if (selectedClipsData) {
+      localStorage.setItem('selectedClipsData', JSON.stringify(selectedClipsData));
+    }
+  }, [selectedClipsData]);
 
   // Simulate loading progress for better UX
   useEffect(() => {
@@ -120,8 +134,9 @@ const ClipsPreviewerDemo = () => {
   useEffect(() => {
     const fetchClips = async () => {
       try {
+        // Guard clause: Check if selectedClipsData is valid
         if (!selectedClipsData || selectedClipsData.length === 0) {
-          throw new Error('No transcript data available');
+          throw new Error('No transcript data available. Please upload a video first.');
         }
 
         setLoading(true);
@@ -186,6 +201,7 @@ const ClipsPreviewerDemo = () => {
       }
     };
 
+    // Trigger fetch only if no clips are processed and data exists
     if (processedClips.length === 0 && selectedClipsData) {
       fetchClips();
     }
@@ -729,7 +745,7 @@ const ClipsPreviewerDemo = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.2 }}
-            className="flex-1 flex flex-col overflow-hidden bg-[#121212] relative min-h-[400px]"
+            className="flex-1 flex flex-col bg-[#121212] relative"
           >
             <div className="px-4 py-3 border-b border-[#2d2d2d] bg-[#1f1f1f] flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -759,60 +775,24 @@ const ClipsPreviewerDemo = () => {
                 </div>
               )}
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-6">
               <AnimatePresence mode="wait">
                 {currentClip ? (
-                  <motion.div
-                    key="trimming-tool"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full h-full flex items-center justify-center"
-                  >
-                    <div className="w-full h-full flex items-center justify-center p-4 md:p-6">
-                      <TrimmingTool
-                        videoId={currentClip.isYouTube ? currentClip.videoId : ''}
-                        videoUrl={currentClip.isYouTube ? '' : currentClip.videoUrl}
-                        isYouTube={currentClip.isYouTube || false}
-                        initialDuration={currentClip.originalVideoDuration}
-                        initialStartTime={currentClip.startTime}
-                        initialEndTime={currentClip.endTime}
-                        transcriptText={currentClip.transcriptText}
-                        onTimingChange={handleTimingChange}
-                        onSaveTrim={handleSaveTrim}
-                      />
-                    </div>
-                  </motion.div>
+                  <TrimmingTool
+                    videoId={currentClip.isYouTube ? currentClip.videoId : ''}
+                    videoUrl={currentClip.isYouTube ? '' : currentClip.videoUrl}
+                    isYouTube={currentClip.isYouTube || false}
+                    initialDuration={currentClip.originalVideoDuration}
+                    initialStartTime={currentClip.startTime}
+                    initialEndTime={currentClip.endTime}
+                    transcriptText={currentClip.transcriptText}
+                    onTimingChange={handleTimingChange}
+                    onSaveTrim={handleSaveTrim}
+                  />
                 ) : (
-                  <motion.div
-                    key="empty-state"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex flex-col items-center justify-center h-full w-full p-6"
-                  >
-                    <div className="bg-gray-800/50 p-4 md:p-6 rounded-lg max-w-sm md:max-w-lg w-full text-center">
-                      <div className="w-12 h-12 rounded-full bg-[#6c5ce7]/20 flex items-center justify-center mx-auto mb-4">
-                        <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7] text-xl" />
-                      </div>
-                      <h2 className="text-lg font-bold text-white mb-2">
-                        Trim Your Clips
-                      </h2>
-                      <p className="text-gray-300 text-sm leading-relaxed mb-4">
-                        Select a clip from the left panel to adjust its starting and ending points.
-                      </p>
-                      <div className="text-left p-3 bg-[#1a1a1a] rounded-lg text-xs text-gray-400">
-                        <p className="mb-1"><strong>How to use the trimmer:</strong></p>
-                        <ol className="list-decimal pl-4 space-y-1">
-                          <li>Click a clip from the left panel</li>
-                          <li>Drag the start and end markers to adjust timing</li>
-                          <li>Preview your clip with the play button</li>
-                          <li>Save your changes when you're happy with the result</li>
-                        </ol>
-                      </div>
-                    </div>
-                  </motion.div>
+                  <div className="flex flex-col items-center justify-center h-full text-gray-500 text-sm">
+                    Select a clip to start trimming
+                  </div>
                 )}
               </AnimatePresence>
             </div>
