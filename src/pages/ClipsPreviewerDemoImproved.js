@@ -66,21 +66,7 @@ const ClipsPreviewerDemo = () => {
     { title: "Almost ready", subtitle: "Your clips are being prepared for editing" }
   ];
 
-
-  // Load selectedClipsData from localStorage on component mount
-  useEffect(() => {
-    const savedData = localStorage.getItem('selectedClipsData');
-    if (savedData) {
-      setSelectedClipsData(JSON.parse(savedData));
-    }
-  }, []);
-
-  // Save selectedClipsData to localStorage whenever it changes
-  useEffect(() => {
-    if (selectedClipsData) {
-      localStorage.setItem('selectedClipsData', JSON.stringify(selectedClipsData));
-    }
-  }, [selectedClipsData]);
+  
 
   // Simulate loading progress for better UX
   useEffect(() => {
