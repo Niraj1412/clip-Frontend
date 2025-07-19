@@ -201,48 +201,7 @@ const VideoDetails = ({ currentClip, showTranscript = false, onFinishAndSave }) 
       </AnimatePresence>
       
       {/* Action Buttons - Fixed at the bottom with vertical layout */}
-      <div className="mt-auto pt-3 border-t border-gray-700/50 flex flex-col gap-3">
-        {/* Divider with text */}
-        <div className="relative flex items-center justify-center my-1">
-          <div className="flex-grow border-t border-gray-700/30"></div>
-          <span className="mx-2 text-[10px] text-gray-400">FINAL STEP</span>
-          <div className="flex-grow border-t border-gray-700/30"></div>
-        </div>
-        
-        {/* Second button - Finish (larger and more prominent) */}
-        <motion.button 
-          className="w-full relative flex items-center justify-center gap-2 bg-gradient-to-br from-[#6c5ce7] to-[#5b4dd1] hover:from-[#5849e0] hover:to-[#4a3dba] text-white rounded-lg py-4 px-4 transition-all duration-300 shadow-lg hover:shadow-xl"
-          onClick={onFinishAndSave}
-          whileHover={{ scale: 1.03, y: -2 }}
-          whileTap={{ scale: 0.97 }}
-          initial={{ opacity: 0.9 }}
-          animate={{ 
-            opacity: 1,
-            boxShadow: ["0 4px 6px -1px rgba(108, 92, 231, 0.2), 0 2px 4px -1px rgba(108, 92, 231, 0.1)", 
-                        "0 10px 15px -3px rgba(108, 92, 231, 0.3), 0 4px 6px -2px rgba(108, 92, 231, 0.1)",
-                        "0 4px 6px -1px rgba(108, 92, 231, 0.2), 0 2px 4px -1px rgba(108, 92, 231, 0.1)"]
-          }}
-          transition={{
-            boxShadow: {
-              repeat: Infinity,
-              repeatType: "reverse",
-              duration: 2
-            }
-          }}
-        >
-          <FontAwesomeIcon icon={faCheckCircle} className="text-base" />
-          <span className="text-base font-medium">FINISH & SAVE</span>
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow-md">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          </div>
-          <div className="absolute inset-0 rounded-lg border border-white/20 pointer-events-none"></div>
-          <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
-        </motion.button>
-        
-        <div className="text-[10px] text-gray-400 text-center mt-1">
-          Click to finalize your editing and save all changes
-        </div>
-      </div>
+
 
       <style>
         {`
