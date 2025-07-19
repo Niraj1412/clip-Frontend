@@ -799,7 +799,7 @@ const TrimmingTool = ({
               </div>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-2 bg-[#1e293b] p-2 rounded-lg shadow-inner items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-[#1e293b] p-2 rounded-lg shadow-inner items-center">
             <div className="flex gap-2 items-center">
               <div className="text-[#f9fafb] text-sm bg-[#0f172a] px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-[#6366f1]/20 shadow-inner whitespace-nowrap">
                 <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-xs" />
@@ -813,7 +813,7 @@ const TrimmingTool = ({
             </div>
             <div className="flex items-center justify-center gap-2">
               <button
-                className="w-8 h-8 rounded-full bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
+                className="w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
                 onClick={skipToStart}
                 disabled={!ready}
               >
@@ -836,7 +836,7 @@ const TrimmingTool = ({
             </div>
             <div className="flex justify-end items-center gap-2">
               <button
-                className="w-8 h-8 rounded-full bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
+                className="w-10 h-10 sm:w-8 sm:h-8 rounded-full bg bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
                 onClick={toggleMute}
               >
                 <FontAwesomeIcon
@@ -852,10 +852,10 @@ const TrimmingTool = ({
               </button>
               <button
                 onClick={saveTrim}
-                className="bg-gradient-to-r from-[#6366f1] to-[#4f46e5] hover:from-[#4f46e5] hover:to-[#4338ca] text-white px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 shadow-md text-xs font-medium"
+                className="bg-gradient-to-r from-[#6366f1] to-[#4f46e5] hover:from-[#4f46e5] hover:to-[#4338ca] text-white px-4 py-2 sm:px-2.5 sm:py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 shadow-md text-sm sm:text-xs font-medium"
                 disabled={!ready}
               >
-                <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                <FontAwesomeIcon icon={faCheck} className="text-sm sm:text-xs" />
                 <span>Save</span>
               </button>
             </div>
@@ -907,7 +907,7 @@ const TrimmingTool = ({
                 </button>
               </div>
             </div>
-            <div ref={timelineRef} className="w-full px-1 py-2 select-none relative">
+            <div ref={timelineRef} className="w-full px-1 py-2 select-none relative touch-pan-y">
               <div className="relative w-full h-12 flex items-center">
                 <div
                   className="w-full h-2.5 bg-gradient-to-r from-[#1f2937] via-[#2d3748] to-[#1f2937] rounded-full relative cursor-pointer group/timeline shadow-inner"
