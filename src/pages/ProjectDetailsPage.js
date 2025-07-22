@@ -50,6 +50,7 @@ const ProjectDetailsPage = () => {
   const [activeClip, setActiveClip] = useState(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const videoRef = useRef(null);
+  const modalVideoRef = useRef(null); // Added ref for modal video
   const videoContainerRef = useRef(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userInfo, setUserInfo] = useState({
@@ -137,10 +138,7 @@ const ProjectDetailsPage = () => {
       });
 
       if (response.data?.success) {
-        // Close modal first
         setShowDeleteModal(false);
-        
-        // Navigate with success message
         navigate('/my-projects', { 
           replace: true,
           state: { 
@@ -157,8 +155,7 @@ const ProjectDetailsPage = () => {
       console.error('Error deleting project:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Failed to delete project. Please try again.';
       setError(errorMessage);
-      // Keep the modal open on error
-      setTimeout(() => setError(null), 5000); // Clear error after 5 seconds
+      setTimeout(() => setError(null), 5000);
     } finally {
       setDeleteLoading(false);
     }
@@ -214,11 +211,6 @@ const ProjectDetailsPage = () => {
   const handleClipClick = (clip) => {
     setActiveClip(clip);
     setShowVideoModal(true);
-    if (videoRef.current) {
-      videoRef.current.currentTime = clip.startTime;
-      videoRef.current.play();
-      setIsPlaying(true);
-    }
   };
 
   const formatProgress = (time) => {
@@ -226,6 +218,46 @@ const ProjectDetailsPage = () => {
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
+
+  // Control modal video playback
+  useEffect(() => {
+    if (showVideoModal && activeClip && modalVideoRef.current) {
+      const video = modalVideoRef.current;
+
+      const handleLoadedMetadata = () => {
+        video.currentTime = activeClip.startTime;
+        video.play();
+      };
+
+      if (video.readyState >= 1) {
+        handleLoadedMetadata();
+      } else {
+        video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      }
+
+      const handleTimeUpdate = () => {
+        if (video.currentTime >= activeClip.endTime) {
+          video.pause();
+        }
+      };
+
+      video.addEventListener('timeupdate', handleTimeUpdate);
+
+      return () => {
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        video.removeEventListener('timeupdate', handleTimeUpdate);
+        video.pause();
+      };
+    }
+  }, [showVideoModal, activeClip]);
+
+  // Pause main video when modal is open
+  useEffect(() => {
+    if (showVideoModal && videoRef.current) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }
+  }, [showVideoModal]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -308,11 +340,10 @@ const ProjectDetailsPage = () => {
     <>
       <Navbar />
       <div className="flex h-screen overflow-hidden">
-        <div className="hidden lg:block"> {/* This div will hide sidebar on small screens */}
+        <div className="hidden lg:block">
           <Sidebar />
         </div>
         <main className="flex-1 lg:ml-[280px] p-4 sm:p-6 md:p-8 bg-[#121212] min-h-screen overflow-y-auto mt-14">
-          {/* Background patterns */}
           <div className="absolute inset-0 overflow-hidden z-0">
             <motion.div 
               className="absolute -inset-[10%] opacity-[0.03] z-0"
@@ -332,7 +363,6 @@ const ProjectDetailsPage = () => {
             initial="hidden"
             animate="visible"
           >
-            {/* Navigation */}
             <motion.nav 
               className="mb-8"
               variants={itemVariants}
@@ -347,9 +377,7 @@ const ProjectDetailsPage = () => {
             </motion.nav>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Content */}
               <motion.div className="lg:col-span-2 space-y-6" variants={itemVariants}>
-                {/* Preview Section */}
                 <section className="bg-[#1A1A1A] rounded-xl overflow-hidden border border-[#2A2A2A] shadow-lg hover:border-purple-500/30 transition-all duration-300">
                   <div className="relative aspect-video bg-[#252525] group" ref={videoContainerRef}>
                     {project?.s3Url ? (
@@ -439,7 +467,6 @@ const ProjectDetailsPage = () => {
                   </div>
                 </section>
 
-                {/* Description Section */}
                 {project?.description && (
                   <motion.section 
                     className="bg-[#1A1A1A] rounded-xl p-6 border border-[#2A2A2A] shadow-lg hover:border-purple-500/30 transition-all duration-300"
@@ -455,7 +482,6 @@ const ProjectDetailsPage = () => {
                   </motion.section>
                 )}
 
-                {/* Source Clips Section */}
                 {project?.sourceClips && project.sourceClips.length > 0 && (
                   <motion.section 
                     className="bg-[#1A1A1A] rounded-xl p-4 border border-[#2A2A2A] shadow-lg hover:border-purple-500/30 transition-all duration-300"
@@ -507,9 +533,7 @@ const ProjectDetailsPage = () => {
                 )}
               </motion.div>
 
-              {/* Sidebar Content */}
               <motion.div className="space-y-6" variants={itemVariants}>
-                {/* Project Info Card */}
                 <section className="bg-[#1A1A1A] rounded-xl p-6 border border-[#2A2A2A] shadow-lg hover:border-purple-500/30 transition-all duration-300">
                   <h2 className="text-white font-medium mb-4">Project Information</h2>
                   <div className="space-y-4">
@@ -532,7 +556,6 @@ const ProjectDetailsPage = () => {
                   </div>
                 </section>
 
-                {/* Stats Card */}
                 <section className="bg-[#1A1A1A] rounded-xl p-6 border border-[#2A2A2A] shadow-lg hover:border-purple-500/30 transition-all duration-300">
                   <h2 className="flex items-center gap-2 text-white font-medium mb-4">
                     <FontAwesomeIcon icon={faChartLine} className="text-purple-400" />
@@ -554,7 +577,6 @@ const ProjectDetailsPage = () => {
                   </div>
                 </section>
 
-                {/* Actions Card */}
                 <section className="bg-[#1A1A1A] rounded-xl p-6 border border-[#2A2A2A] shadow-lg hover:border-purple-500/30 transition-all duration-300">
                   <h2 className="text-white font-medium mb-4">Project Actions</h2>
                   <div className="space-y-3">
@@ -573,7 +595,6 @@ const ProjectDetailsPage = () => {
                   </div>
                 </section>
 
-                {/* Source Link Card */}
                 {project?.s3Url && (
                   <section className="bg-[#1A1A1A] rounded-xl p-6 border border-[#2A2A2A] shadow-lg hover:border-purple-500/30 transition-all duration-300">
                     <h2 className="flex items-center gap-2 text-white font-medium mb-4">
@@ -611,7 +632,6 @@ const ProjectDetailsPage = () => {
         </main>
       </div>
 
-      {/* Video Modal for Clips */}
       <AnimatePresence>
         {showVideoModal && activeClip && (
           <motion.div
@@ -633,10 +653,10 @@ const ProjectDetailsPage = () => {
               </div>
               <div className="aspect-video relative">
                 <video
+                  ref={modalVideoRef}
                   className="w-full h-full"
                   src={project.s3Url}
                   controls
-                  autoPlay
                   playsInline
                 />
               </div>
@@ -645,7 +665,6 @@ const ProjectDetailsPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Delete Confirmation Modal */}
       <AnimatePresence>
         {showDeleteModal && (
           <motion.div
@@ -723,4 +742,4 @@ const ProjectDetailsPage = () => {
   );
 };
 
-export default ProjectDetailsPage; 
+export default ProjectDetailsPage;
