@@ -248,15 +248,15 @@ const TranscriptGridPage = () => {
         throw new Error('Transcript data not found in response');
       }
 
-      const processedTranscript = (Array.isArray(transcriptData) ? transcriptData : transcriptData.segments || [])
-        .map(segment => ({
-          text: segment.text || '',
-          startTime: Number(segment.startTime || 0),
-          endTime: Number(segment.endTime || 0),
-          duration: Number(segment.duration || 0),
-          speaker: segment.speaker || null,
-          confidence: segment.confidence || null
-        }));
+       const processedTranscript = (Array.isArray(transcriptData) ? transcriptData : transcriptData.segments || [])
+      .map(segment => ({
+        text: segment.text || '',
+        startTime: Number(segment.startTime || segment.start || 0),
+        endTime: Number(segment.endTime || segment.end || 0),
+        duration: Number(segment.duration || 0),
+        speaker: segment.speaker || null,
+        confidence: segment.confidence || null
+      }));
 
       if (processedTranscript.length === 0) {
         throw new Error('Transcript is empty or unavailable');
