@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { PYTHON_API } from '../config';
@@ -36,8 +38,8 @@ const TranscriptGridPage = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [selectedVideos, setSelectedVideos] = useState(new Set());
   const { setSelectedClipsData } = useClipsData();
-  const [retryCounts, setRetryCounts] = useState({}); // Track retries per video
-  const [maxRetries] = useState(3); // Maximum number of retry attempts
+  const [retryCounts, setRetryCounts] = useState({});
+  const [maxRetries] = useState(3);
   const API_BASE_URL = 'https://new-ai-clip-1.onrender.com/api/v1';
 
   useEffect(() => {
@@ -54,14 +56,9 @@ const TranscriptGridPage = () => {
         setSelectedVideo(firstVideoId);
         setSelectedVideos(new Set(videoIds));
 
-        // Only fetch if we don't already have the data
+        const details = await fetchVideoDetails(firstVideoId);
         if (!transcripts[firstVideoId]) {
-          await fetchTranscript(firstVideoId);
-        }
-
-        // Similarly for video details
-        if (!videoDetails[firstVideoId]) {
-          await fetchVideoDetails(firstVideoId);
+          await fetchTranscript(firstVideoId, details);
         }
       } catch (error) {
         console.error("Initialization error:", error);
@@ -70,7 +67,25 @@ const TranscriptGridPage = () => {
       }
     };
     initializeFirstVideo();
-  }, [videoIds]); // Only depend on videoIds to prevent unnecessary re-runs
+  }, [videoIds]);
+
+  useEffect(() => {
+    const loadVideoData = async () => {
+      if (selectedVideo && !transcripts[selectedVideo] && !loading[selectedVideo]) {
+        setLoading(prev => ({ ...prev, [selectedVideo]: true }));
+        try {
+          const details = await fetchVideoDetails(selectedVideo);
+          await fetchTranscript(selectedVideo, details);
+        } catch (error) {
+          console.error("Error loading video data:", error);
+          setErrors(prev => ({ ...prev, [selectedVideo]: error.message }));
+        } finally {
+          setLoading(prev => ({ ...prev, [selectedVideo]: false }));
+        }
+      }
+    };
+    loadVideoData();
+  }, [selectedVideo]);
 
   const checkImageExists = async (url) => {
     try {
@@ -81,24 +96,20 @@ const TranscriptGridPage = () => {
     }
   };
 
-
   const fetchVideoDetails = async (videoId) => {
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
     try {
-      // First check if we have a valid MongoDB ID format
       const isMongoId = /^[a-f0-9]{24}$/.test(videoId);
       let details = {};
       let isYouTube = false;
 
       if (isMongoId) {
-        // Try to get video details from our database first
         try {
           const response = await axios.get(`${API_BASE_URL}/video/${videoId}/details`, { headers });
           details = response.data.data || response.data;
 
-          // If we have a YouTube ID associated, fetch those details too
           if (details.youtubeId) {
             try {
               const youtubeResponse = await axios.get(
@@ -113,7 +124,6 @@ const TranscriptGridPage = () => {
             }
           }
         } catch (dbError) {
-          // If database lookup fails, try YouTube as fallback
           if (dbError.response?.status === 404) {
             try {
               const youtubeResponse = await axios.post(
@@ -131,7 +141,6 @@ const TranscriptGridPage = () => {
           }
         }
       } else {
-        // If not MongoDB ID, assume it's a YouTube ID
         try {
           const response = await axios.post(
             `${API_BASE_URL}/youtube/details/${videoId}`,
@@ -145,7 +154,6 @@ const TranscriptGridPage = () => {
         }
       }
 
-      // Parse duration from ISO format or seconds
       let durationInSeconds;
       if (isYouTube && details.duration && typeof details.duration === 'string' && details.duration.startsWith('PT')) {
         durationInSeconds = parseISODuration(details.duration);
@@ -153,7 +161,6 @@ const TranscriptGridPage = () => {
         durationInSeconds = Number(details.duration) || 0;
       }
 
-      // Determine thumbnail URL
       let thumbnailUrl;
       if (isYouTube) {
         thumbnailUrl = `https://img.youtube.com/vi/${details.youtubeId || videoId}/maxresdefault.jpg`;
@@ -164,51 +171,59 @@ const TranscriptGridPage = () => {
         thumbnailUrl = details.thumbnailUrl || `${API_BASE_URL}/thumbnails/${videoId}.jpg`;
       }
 
-      // Set the video details
+      const videoData = {
+        title: details.title || (isYouTube ? 'YouTube Video' : 'Uploaded Video'),
+        description: details.description || '',
+        duration: durationInSeconds,
+        durationISO: details.duration || 'PT0M0S',
+        publishedAt: details.publishedAt || details.createdAt || new Date().toISOString(),
+        thumbnail: thumbnailUrl,
+        isYouTubeVideo: isYouTube,
+        isCustomVideo: !isYouTube,
+        status: details.status || 'processed',
+        videoUrl: details.videoUrl || null
+      };
+
       setVideoDetails(prev => ({
         ...prev,
-        [videoId]: {
-          title: details.title || (isYouTube ? 'YouTube Video' : 'Uploaded Video'),
-          description: details.description || '',
-          duration: durationInSeconds,
-          durationISO: details.duration || 'PT0M0S',
-          publishedAt: details.publishedAt || details.createdAt || new Date().toISOString(),
-          thumbnail: thumbnailUrl,
-          isYouTubeVideo: isYouTube,
-          isCustomVideo: !isYouTube,
-          status: details.status || 'processed',
-          videoUrl: details.videoUrl || null
-        }
+        [videoId]: videoData
       }));
 
+      return videoData;
     } catch (error) {
       console.error("Error fetching video details:", error);
 
-      // Set fallback details with appropriate thumbnail
       const fallbackThumbnail = /^[a-f0-9]{24}$/.test(videoId)
         ? `${API_BASE_URL}/thumbnails/${videoId}`
         : `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
+      const fallbackData = {
+        title: 'Video Details Unavailable',
+        description: '',
+        duration: 0,
+        durationISO: 'PT0M0S',
+        publishedAt: new Date().toISOString(),
+        thumbnail: fallbackThumbnail,
+        isYouTubeVideo: false,
+        isCustomVideo: true,
+        status: 'error',
+        videoUrl: null,
+        error: error.message
+      };
+
       setVideoDetails(prev => ({
         ...prev,
-        [videoId]: {
-          title: 'Video Details Unavailable',
-          description: '',
-          duration: 0,
-          durationISO: 'PT0M0S',
-          publishedAt: new Date().toISOString(),
-          thumbnail: fallbackThumbnail,
-          isYouTubeVideo: false,
-          isCustomVideo: true,
-          status: 'error',
-          videoUrl: null,
-          error: error.message
-        }
+        [videoId]: fallbackData
       }));
+
+      return fallbackData;
     }
   };
 
   const fetchTranscript = async (videoId, videoDetails, attempt = 1) => {
+    if (!videoDetails) {
+      throw new Error('Video details are required to fetch the transcript');
+    }
     if (transcripts[videoId]) return;
 
     const token = localStorage.getItem('token');
@@ -278,6 +293,8 @@ const TranscriptGridPage = () => {
       setLoading(prev => ({ ...prev, [videoId]: false }));
     }
   };
+
+
 
 
   // Updated formatTimeRange function
