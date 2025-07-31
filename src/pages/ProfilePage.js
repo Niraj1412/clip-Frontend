@@ -415,73 +415,90 @@ const ProfilePage = () => {
   return (
     <>
       <Navbar />
-      {/* Enhanced background elements with dynamic gradients */}
+      {/* Enhanced background elements with dynamic gradients - Mobile optimized */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-20 left-1/4 w-[40rem] h-[40rem] bg-[#7c66ff]/8 rounded-full filter blur-[120px] animate-pulse-slow opacity-50"></div>
-        <div className="absolute bottom-40 right-1/4 w-[45rem] h-[45rem] bg-indigo-500/8 rounded-full filter blur-[150px] animate-pulse-slower opacity-40"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-radial from-[#7c66ff]/5 to-transparent opacity-30"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM3YzY2ZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0di00aC0ydjRoLTR2Mmg0djRoMnYtNGg0di0ySDZ6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRoLTR6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRINnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-40 bg-fixed"></div>
+        {/* Desktop background elements */}
+        <div className="hidden lg:block absolute top-20 left-1/4 w-[40rem] h-[40rem] bg-[#7c66ff]/8 rounded-full filter blur-[120px] animate-pulse-slow opacity-50"></div>
+        <div className="hidden lg:block absolute bottom-40 right-1/4 w-[45rem] h-[45rem] bg-indigo-500/8 rounded-full filter blur-[150px] animate-pulse-slower opacity-40"></div>
+        
+        {/* Tablet background elements */}
+        <div className="hidden md:block lg:hidden absolute top-10 left-1/6 w-[25rem] h-[25rem] bg-[#7c66ff]/6 rounded-full filter blur-[80px] animate-pulse-slow opacity-40"></div>
+        <div className="hidden md:block lg:hidden absolute bottom-20 right-1/6 w-[30rem] h-[30rem] bg-indigo-500/6 rounded-full filter blur-[100px] animate-pulse-slower opacity-30"></div>
+        
+        {/* Mobile background elements - Much subtler */}
+        <div className="block md:hidden absolute top-5 left-1/8 w-[15rem] h-[15rem] bg-[#7c66ff]/4 rounded-full filter blur-[60px] animate-pulse-slow opacity-25"></div>
+        <div className="block md:hidden absolute bottom-10 right-1/8 w-[18rem] h-[18rem] bg-indigo-500/4 rounded-full filter blur-[70px] animate-pulse-slower opacity-20"></div>
+        
+        {/* Reduced gradient overlay for all devices */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-radial from-[#7c66ff]/3 to-transparent opacity-20 lg:opacity-30"></div>
+        
+        {/* Pattern overlay - hidden on mobile for performance */}
+        <div className="hidden md:block absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM3YzY2ZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0di00aC0ydjRoLTR2Mmg0djRoMnYtNGg0di0ySDZ6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRoLTR6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRINnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20 lg:opacity-40 bg-fixed"></div>
       </div>
       
-      <main className="mt-16 p-4 md:p-10 bg-gradient-to-br from-[#0a0a0a] to-[#141414] text-white min-h-screen">
-        <div className="max-w-[1440px] mx-auto pb-8 md:pb-12">
+      <main className="mt-12 md:mt-16 p-3 sm:p-4 md:p-6 lg:p-10 bg-gradient-to-br from-[#0a0a0a] to-[#141414] text-white min-h-screen">
+        <div className="max-w-[1440px] mx-auto pb-6 sm:pb-8 md:pb-12">
           {/* Redesigned Profile Header Section */}
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-16 relative"
+            className="mb-8 sm:mb-12 lg:mb-16 relative"
           >
 
-            <div className="absolute -inset-4 bg-gradient-to-r from-[#7c66ff]/10 via-indigo-500/5 to-[#7c66ff]/10 rounded-3xl blur-xl opacity-70 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-xy"></div>
+            {/* Responsive background gradient blur - Hidden on mobile to prevent overwhelming */}
+            <div className="hidden md:block absolute -inset-4 bg-gradient-to-r from-[#7c66ff]/10 via-indigo-500/5 to-[#7c66ff]/10 rounded-3xl blur-xl opacity-70 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-xy"></div>
 
-            <div className="relative bg-[#151515]/80 backdrop-blur-sm border border-[#7c66ff]/20 rounded-2xl p-6 md:p-8 overflow-hidden shadow-xl">
-              {/* Decorative elements */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#7c66ff]/5 rounded-full filter blur-[80px]"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/5 rounded-full filter blur-[50px]"></div>
+            <div className="relative bg-[#151515]/90 md:bg-[#151515]/80 backdrop-blur-sm border border-[#7c66ff]/20 rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 overflow-hidden shadow-xl">
+              {/* Decorative elements - Reduced for mobile */}
+              <div className="hidden lg:block absolute top-0 right-0 w-64 h-64 bg-[#7c66ff]/5 rounded-full filter blur-[80px]"></div>
+              <div className="hidden lg:block absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/5 rounded-full filter blur-[50px]"></div>
+              {/* Smaller decorative elements for tablet */}
+              <div className="hidden md:block lg:hidden absolute top-0 right-0 w-32 h-32 bg-[#7c66ff]/4 rounded-full filter blur-[40px]"></div>
+              <div className="hidden md:block lg:hidden absolute bottom-0 left-0 w-20 h-20 bg-indigo-500/4 rounded-full filter blur-[30px]"></div>
               
-              <div className="flex flex-col md:flex-row md:items-center gap-8 relative z-10">
-                <div className="relative group">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 md:gap-8 relative z-10">
+                <div className="relative group mx-auto sm:mx-0">
                   <div className="absolute -inset-1 bg-gradient-to-r from-[#7c66ff] to-indigo-600 rounded-full blur opacity-70 group-hover:opacity-100 transition duration-700 group-hover:duration-200 animate-gradient-xy"></div>
-                  <div className="relative w-24 h-24 md:w-36 md:h-36 bg-black rounded-full flex items-center justify-center ring-[6px] ring-[#151515]">
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-black rounded-full flex items-center justify-center ring-[4px] sm:ring-[6px] ring-[#151515]">
                     <div className="w-full h-full rounded-full bg-gradient-to-br from-[#7c66ff] to-indigo-600 p-1">
                       <div className="w-full h-full rounded-full flex items-center justify-center bg-[#151515] overflow-hidden">
-                        <FontAwesomeIcon icon={faUser} className="text-[#7c66ff] text-3xl md:text-5xl transform group-hover:scale-110 transition-transform duration-300" />
+                        <FontAwesomeIcon icon={faUser} className="text-[#7c66ff] text-2xl sm:text-3xl md:text-4xl lg:text-5xl transform group-hover:scale-110 transition-transform duration-300" />
                       </div>
                     </div>
-                    <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-[#151515] z-10 animate-pulse"></div>
+                    <div className="absolute bottom-0.5 right-0.5 sm:bottom-1 sm:right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-2 border-[#151515] z-10 animate-pulse"></div>
                   </div>
                 </div>
                 
-                <div className="flex-1">
-                  <div className="flex flex-col gap-3">
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="flex flex-col gap-2 sm:gap-3">
                     <div>
-                      <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
                         <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-[#7c66ff]/90 to-white">
                           {user?.name || 'User Profile'}
                         </span>
                       </h1>
-                      <p className="text-gray-400 mt-1 md:mt-2 text-sm md:text-lg">Manage your creative video projects</p>
+                      <p className="text-gray-400 mt-1 sm:mt-1 md:mt-2 text-xs sm:text-sm md:text-base lg:text-lg">Manage your creative video projects</p>
                     </div>
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-4 mt-5 md:mt-8">
-                    <div className="flex items-center gap-2">
-                      <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#7c66ff]/10 flex items-center justify-center">
-                        <FontAwesomeIcon icon={faEnvelope} className="text-[#7c66ff] text-sm md:text-base" />
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4 mt-4 sm:mt-5 md:mt-8">
+                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-[#7c66ff]/10 flex items-center justify-center">
+                        <FontAwesomeIcon icon={faEnvelope} className="text-[#7c66ff] text-xs sm:text-sm md:text-base" />
                       </div>
-                      <span className="text-gray-300 text-sm md:text-base">{user?.email || 'email@example.com'}</span>
+                      <span className="text-gray-300 text-xs sm:text-sm md:text-base truncate max-w-[200px] sm:max-w-none">{user?.email || 'email@example.com'}</span>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-[#7c66ff]/10 flex items-center justify-center">
-                        <FontAwesomeIcon icon={faCalendarAlt} className="text-[#7c66ff]" />
+                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-[#7c66ff]/10 flex items-center justify-center">
+                        <FontAwesomeIcon icon={faCalendarAlt} className="text-[#7c66ff] text-xs sm:text-sm md:text-base" />
                       </div>
-                      <span className="text-gray-300 text-base">Joined {user?.createdAt ? formatDate(user.createdAt) : 'N/A'}</span>
+                      <span className="text-gray-300 text-xs sm:text-sm md:text-base">Joined {user?.createdAt ? formatDate(user.createdAt) : 'N/A'}</span>
                     </div>
                     
-                    <div className="flex items-center gap-2 ml-auto">
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-[#7c66ff]/20 to-indigo-500/20 text-[#7c66ff] border border-[#7c66ff]/20 shadow-lg shadow-[#7c66ff]/5">
+                    <div className="flex items-center gap-2 justify-center sm:justify-start sm:ml-auto">
+                      <span className="px-2.5 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-medium bg-gradient-to-r from-[#7c66ff]/20 to-indigo-500/20 text-[#7c66ff] border border-[#7c66ff]/20 shadow-lg shadow-[#7c66ff]/5">
                         User
                       </span>
                     </div>
@@ -492,40 +509,40 @@ const ProfilePage = () => {
           </motion.div>
 
           {/* Projects Section - Enhanced with better spacing and organization */}
-          <div className="mb-10 lg:mb-0">
-            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-12">
+          <div className="mb-6 sm:mb-8 lg:mb-0">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 sm:mb-8 lg:mb-12">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
-                className="mb-8 lg:mb-0"
+                className="mb-6 lg:mb-0"
               >
-                <div className="flex items-center">
-                  <div className="relative mr-5">
+                <div className="flex flex-col sm:flex-row sm:items-center text-center sm:text-left">
+                  <div className="relative mx-auto sm:mx-0 sm:mr-4 lg:mr-5 mb-3 sm:mb-0">
                     <div className="absolute -inset-1 bg-gradient-to-r from-[#7c66ff]/60 to-indigo-500/60 rounded-full blur opacity-60"></div>
-                    <div className="relative bg-gradient-to-br from-[#7c66ff] to-indigo-600 w-14 h-14 rounded-full flex items-center justify-center shadow-xl">
-                      <FontAwesomeIcon icon={faVideo} className="text-white text-xl" />
+                    <div className="relative bg-gradient-to-br from-[#7c66ff] to-indigo-600 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-xl">
+                      <FontAwesomeIcon icon={faVideo} className="text-white text-lg sm:text-xl" />
                     </div>
                   </div>
                   <div>
-                    <h2 className="text-2xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-[#7c66ff]/90 to-white">Your Projects</h2>
-                    <p className="text-gray-400 mt-2 md:mt-3 md:text-lg">Create, manage and edit your professional video projects</p>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-[#7c66ff]/90 to-white">Your Projects</h2>
+                    <p className="text-gray-400 mt-1 sm:mt-2 md:mt-3 text-sm sm:text-base md:text-lg">Create, manage and edit your professional video projects</p>
                   </div>
                 </div>
               </motion.div>
               
-              {/* Filter tabs - optimized for better spacing */}
+              {/* Filter tabs - Mobile optimized */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
-                className="bg-[#151515]/60 backdrop-blur-sm p-2 rounded-2xl border border-gray-800/30 shadow-xl relative"
+                className="bg-[#151515]/80 md:bg-[#151515]/60 backdrop-blur-sm p-1.5 sm:p-2 rounded-xl md:rounded-2xl border border-gray-800/30 shadow-xl relative mx-auto lg:mx-0"
               >
-                <div className="absolute -inset-px bg-gradient-to-r from-[#7c66ff]/10 via-transparent to-[#7c66ff]/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                <div className="flex flex-wrap justify-center gap-1 relative z-10">
+                <div className="absolute -inset-px bg-gradient-to-r from-[#7c66ff]/10 via-transparent to-[#7c66ff]/10 rounded-xl md:rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                <div className="flex justify-center gap-1 relative z-10">
                   <button 
                     onClick={() => setActiveTab('all')}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 ${
                       activeTab === 'all' 
                         ? 'bg-gradient-to-r from-[#7c66ff] to-indigo-600 text-white shadow-lg shadow-[#7c66ff]/20' 
                         : 'bg-transparent text-gray-400 hover:bg-[#232323] hover:text-gray-300'
@@ -535,7 +552,7 @@ const ProfilePage = () => {
                   </button>
                   <button 
                     onClick={() => setActiveTab('recent')}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 ${
                       activeTab === 'recent' 
                         ? 'bg-gradient-to-r from-[#7c66ff] to-indigo-600 text-white shadow-lg shadow-[#7c66ff]/20' 
                         : 'bg-transparent text-gray-400 hover:bg-[#232323] hover:text-gray-300'
@@ -547,8 +564,8 @@ const ProfilePage = () => {
               </motion.div>
             </div>
             
-            {/* Projects Grid - Enhanced with optimized grid columns for better use of space */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+            {/* Projects Grid - Enhanced with responsive grid columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
               {getFilteredProjects().length > 0 ? (
                 getFilteredProjects().map((project, index) => (
                   <motion.div
@@ -556,13 +573,13 @@ const ProfilePage = () => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
-                    whileHover={{ y: -10, transition: { duration: 0.2 } }}
+                    whileHover={{ y: -5, transition: { duration: 0.2 } }}
                     className="relative group"
                   >
-                    <div className="absolute -inset-2 bg-gradient-to-br from-[#7c66ff]/20 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-                    <div className="bg-[#151515]/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-800/40 shadow-xl hover:border-[#7c66ff]/30 transition-all duration-500 h-full relative z-10">
+                    <div className="hidden sm:block absolute -inset-2 bg-gradient-to-br from-[#7c66ff]/20 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+                    <div className="bg-[#151515]/90 sm:bg-[#151515]/80 backdrop-blur-sm rounded-xl sm:rounded-2xl overflow-hidden border border-gray-800/40 shadow-xl hover:border-[#7c66ff]/30 transition-all duration-500 h-full relative z-10">
                       {/* Thumbnail with enhanced hover effects */}
-                      <div className="relative h-52 overflow-hidden bg-[#0a0a0a]">
+                      <div className="relative h-40 sm:h-44 md:h-48 lg:h-52 overflow-hidden bg-[#0a0a0a]">
                         {project.thumbnailUrl ? (
                           <img 
                             src={project.thumbnailUrl} 
@@ -578,52 +595,52 @@ const ProfilePage = () => {
                         {/* Dark gradient overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-[#151515] to-transparent opacity-70"></div>
                         
-                        {/* Hover overlay with actions */}
-                        <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-sm z-10">
+                        {/* Hover overlay with actions - Mobile responsive */}
+                        <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 sm:gap-3 backdrop-blur-sm z-10">
                           <motion.button
-                            whileHover={{ scale: 1.15 }}
+                            whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleViewProject(project)}
-                            className="w-10 h-10 rounded-full bg-gradient-to-br from-[#7c66ff] to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-[#7c66ff]/30 relative"
+                            className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-[#7c66ff] to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-[#7c66ff]/30 relative"
                           >
                             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
-                            <FontAwesomeIcon icon={faPlay} className="text-base relative z-10 ml-0.5" />
+                            <FontAwesomeIcon icon={faPlay} className="text-xs sm:text-sm md:text-base relative z-10 ml-0.5" />
                           </motion.button>
                           
                           <motion.button
-                            whileHover={{ scale: 1.15 }}
+                            whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDownloadProject(project._id);
                             }}
-                            className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white shadow-lg hover:bg-white/20 transition-all border border-white/10"
+                            className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white shadow-lg hover:bg-white/20 transition-all border border-white/10"
                           >
-                            <FontAwesomeIcon icon={faDownload} className="text-sm" />
+                            <FontAwesomeIcon icon={faDownload} className="text-xs sm:text-sm" />
                           </motion.button>
                           
                           <motion.button
-                            whileHover={{ scale: 1.15 }}
+                            whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleShareProject(project);
                             }}
-                            className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white shadow-lg hover:bg-white/20 transition-all border border-white/10"
+                            className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white shadow-lg hover:bg-white/20 transition-all border border-white/10"
                           >
-                            <FontAwesomeIcon icon={faShare} className="text-sm" />
+                            <FontAwesomeIcon icon={faShare} className="text-xs sm:text-sm" />
                           </motion.button>
                           
                           <motion.button
-                            whileHover={{ scale: 1.15 }}
+                            whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={(e) => {
                               e.stopPropagation();
                               confirmDeleteProject(project._id);
                             }}
-                            className="w-9 h-9 rounded-full bg-red-500/80 flex items-center justify-center text-white shadow-lg hover:bg-red-600/90 transition-all"
+                            className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-red-500/80 flex items-center justify-center text-white shadow-lg hover:bg-red-600/90 transition-all"
                           >
-                            <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                            <FontAwesomeIcon icon={faTrash} className="text-xs sm:text-sm" />
                           </motion.button>
                         </div>
                         
@@ -643,27 +660,27 @@ const ProfilePage = () => {
                       </div>
                       
                       {/* Project Info */}
-                      <div className="p-4 md:p-6">
-                        <h3 className="font-bold text-lg md:text-xl mb-2 truncate bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300 group-hover:from-white group-hover:to-[#7c66ff] transition-all duration-300">{project.title}</h3>
-                        <p className="text-gray-400 text-xs md:text-sm mb-4 line-clamp-2 min-h-[32px] md:min-h-[40px]">
+                      <div className="p-3 sm:p-4 md:p-5 lg:p-6">
+                        <h3 className="font-bold text-base sm:text-lg md:text-xl mb-2 truncate bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300 group-hover:from-white group-hover:to-[#7c66ff] transition-all duration-300">{project.title}</h3>
+                        <p className="text-gray-400 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
                           {project.description || 'No description provided'}
                         </p>
                         
                         {/* Stats */}
                         <div className="flex items-center justify-between text-xs">
-                          <div className="flex flex-wrap gap-1 md:gap-2">
-                            <span className="inline-flex items-center bg-[#1a1a1a]/80 backdrop-blur-sm px-2.5 py-1 rounded-full border border-gray-800/40">
-                              <FontAwesomeIcon icon={faEye} className="mr-1 text-[#7c66ff] text-xs" />
+                          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-1 sm:gap-2">
+                            <span className="inline-flex items-center bg-[#1a1a1a]/80 backdrop-blur-sm px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-gray-800/40 text-xs">
+                              <FontAwesomeIcon icon={faEye} className="mr-1 text-[#7c66ff] text-[10px] sm:text-xs" />
                               {project.viewCount || 0}
                             </span>
-                            <span className="inline-flex items-center bg-[#1a1a1a]/80 backdrop-blur-sm px-2.5 py-1 rounded-full border border-gray-800/40">
-                              <FontAwesomeIcon icon={faCalendarAlt} className="mr-1 text-[#7c66ff] text-xs" />
-                              {formatDate(project.createdAt)}
+                            <span className="inline-flex items-center bg-[#1a1a1a]/80 backdrop-blur-sm px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-gray-800/40 text-xs">
+                              <FontAwesomeIcon icon={faCalendarAlt} className="mr-1 text-[#7c66ff] text-[10px] sm:text-xs" />
+                              <span className="truncate">{formatDate(project.createdAt)}</span>
                             </span>
                           </div>
                           
                           <motion.div 
-                            whileHover={{ x: 3 }} 
+                            whileHover={{ x: 2 }} 
                             className="group-hover:opacity-100 opacity-70 transition-opacity"
                           >
                             <Link 
@@ -671,7 +688,7 @@ const ProfilePage = () => {
                               className="flex items-center text-[#7c66ff] hover:text-white transition-colors text-xs"
                             >
                               View
-                              <FontAwesomeIcon icon={faArrowRight} className="ml-1 text-[9px]" />
+                              <FontAwesomeIcon icon={faArrowRight} className="ml-1 text-[8px] sm:text-[9px]" />
                             </Link>
                           </motion.div>
                         </div>
@@ -724,13 +741,13 @@ const ProfilePage = () => {
         </div>
       </main>
       
-      {/* Enhanced Delete Confirmation Modal with more professional styling */}
+      {/* Enhanced Delete Confirmation Modal with mobile responsiveness */}
       {showDeleteModal && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
         >
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}></div>
           
@@ -739,31 +756,31 @@ const ProfilePage = () => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-[#151515] w-full max-w-md rounded-2xl overflow-hidden z-10 border border-gray-800/50 shadow-2xl relative"
+            className="bg-[#151515] w-full max-w-md rounded-xl sm:rounded-2xl overflow-hidden z-10 border border-gray-800/50 shadow-2xl relative"
           >
-            <div className="bg-gradient-to-r from-red-500/10 to-red-600/10 p-5 relative">
-              <div className="absolute top-0 right-0 p-3">
+            <div className="bg-gradient-to-r from-red-500/10 to-red-600/10 p-4 sm:p-5 relative">
+              <div className="absolute top-0 right-0 p-2 sm:p-3">
                 <button 
                   onClick={() => setShowDeleteModal(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base"
                 >
                   <FontAwesomeIcon icon={faXmark} />
                 </button>
               </div>
               
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center border border-red-500/30">
-                  <FontAwesomeIcon icon={faTrash} className="text-red-500 text-base" />
+              <div className="flex items-center gap-3 sm:gap-4 pr-8">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-red-500/20 flex items-center justify-center border border-red-500/30">
+                  <FontAwesomeIcon icon={faTrash} className="text-red-500 text-sm sm:text-base" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Delete Project</h3>
+                  <h3 className="text-base sm:text-lg font-bold text-white">Delete Project</h3>
                   <p className="text-gray-400 text-xs">This action cannot be undone</p>
                 </div>
               </div>
             </div>
             
-            <div className="p-5">
-              <p className="text-gray-300 mb-5 text-sm">
+            <div className="p-4 sm:p-5">
+              <p className="text-gray-300 mb-4 sm:mb-5 text-xs sm:text-sm leading-relaxed">
                 Are you sure you want to delete 
                 <span className="text-white font-semibold mx-1">
                   "{projectToDelete ? (
@@ -773,10 +790,10 @@ const ProfilePage = () => {
                 All associated data will be permanently removed.
               </p>
               
-              <div className="flex gap-3 justify-end">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="px-4 py-2 bg-gray-800/80 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm"
+                  className="px-4 py-2 bg-gray-800/80 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-xs sm:text-sm order-2 sm:order-1"
                 >
                   Cancel
                 </button>
@@ -784,11 +801,11 @@ const ProfilePage = () => {
                 <button
                   onClick={handleDeleteProject}
                   disabled={deleteLoading}
-                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all flex items-center justify-center min-w-[90px] text-sm"
+                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all flex items-center justify-center min-w-[90px] text-xs sm:text-sm order-1 sm:order-2"
                 >
                   {deleteLoading ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-1.5"></div>
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-1.5"></div>
                       <span>Deleting...</span>
                     </>
                   ) : (
@@ -804,13 +821,13 @@ const ProfilePage = () => {
         </motion.div>
       )}
 
-      {/* Success/Error notification toast */}
+      {/* Success/Error notification toast - Mobile responsive */}
       {notification && (
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
-          className={`fixed bottom-3 right-3 px-5 py-2.5 rounded-lg shadow-2xl z-50 flex items-center gap-2 ${
+          className={`fixed bottom-3 right-3 left-3 sm:left-auto sm:right-3 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg shadow-2xl z-50 flex items-center gap-2 ${
             notification.type === 'success' 
               ? 'bg-green-500/90 text-white' 
               : 'bg-red-500/90 text-white'
@@ -818,9 +835,9 @@ const ProfilePage = () => {
         >
           <FontAwesomeIcon 
             icon={notification.type === 'success' ? faCheck : faExclamationTriangle} 
-            className="text-white"
+            className="text-white text-sm"
           />
-          <span className="text-sm">{notification.message}</span>
+          <span className="text-xs sm:text-sm truncate">{notification.message}</span>
         </motion.div>
       )}
 
