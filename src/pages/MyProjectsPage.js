@@ -141,13 +141,13 @@ const MyProjectsPage = () => {
 
   // Loading skeleton for projects
   const ProjectSkeleton = () => (
-    <div className="bg-[#1A1A1A] rounded-xl overflow-hidden border border-[#2A2A2A] animate-pulse">
+    <div className="bg-[#1A1A1A] rounded-lg sm:rounded-xl overflow-hidden border border-[#2A2A2A] animate-pulse">
       <div className="aspect-video bg-[#252525]"></div>
-      <div className="p-5">
-        <div className="h-5 bg-[#252525] rounded mb-4 w-3/4"></div>
-        <div className="flex justify-between">
-          <div className="h-4 bg-[#252525] rounded w-1/4"></div>
-          <div className="h-4 bg-[#252525] rounded w-1/6"></div>
+      <div className="p-3 sm:p-4 md:p-5">
+        <div className="h-4 sm:h-5 bg-[#252525] rounded mb-3 sm:mb-4 w-3/4"></div>
+        <div className="flex flex-col xs:flex-row xs:justify-between gap-2 xs:gap-0">
+          <div className="h-3 sm:h-4 bg-[#252525] rounded w-1/3 xs:w-1/4"></div>
+          <div className="h-3 sm:h-4 bg-[#252525] rounded w-1/4 xs:w-1/6"></div>
         </div>
       </div>
     </div>
@@ -155,33 +155,33 @@ const MyProjectsPage = () => {
 
   // Stats Section
   const StatsSection = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
       <motion.div
         whileHover={{ scale: 1.02 }}
-        className="bg-gradient-to-br from-purple-600/20 to-indigo-600/20 rounded-xl p-6 border border-purple-500/20"
+        className="bg-gradient-to-br from-purple-600/20 to-indigo-600/20 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-purple-500/20"
       >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
-            <FontAwesomeIcon icon={faFilm} className="text-2xl text-purple-400" />
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
+            <FontAwesomeIcon icon={faFilm} className="text-lg sm:text-2xl text-purple-400" />
           </div>
           <div>
-            <h3 className="text-gray-400 text-sm">Total Projects</h3>
-            <p className="text-2xl font-bold text-white">{projects.length}</p>
+            <h3 className="text-gray-400 text-xs sm:text-sm">Total Projects</h3>
+            <p className="text-xl sm:text-2xl font-bold text-white">{projects.length}</p>
           </div>
         </div>
       </motion.div>
 
       <motion.div
         whileHover={{ scale: 1.02 }}
-        className="bg-gradient-to-br from-emerald-600/20 to-teal-600/20 rounded-xl p-6 border border-emerald-500/20"
+        className="bg-gradient-to-br from-emerald-600/20 to-teal-600/20 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-emerald-500/20"
       >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-emerald-900/30 rounded-lg flex items-center justify-center">
-            <FontAwesomeIcon icon={faChartLine} className="text-2xl text-emerald-400" />
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-900/30 rounded-lg flex items-center justify-center">
+            <FontAwesomeIcon icon={faChartLine} className="text-lg sm:text-2xl text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-gray-400 text-sm">Avg. Duration</h3>
-            <p className="text-2xl font-bold text-white">
+            <h3 className="text-gray-400 text-xs sm:text-sm">Avg. Duration</h3>
+            <p className="text-xl sm:text-2xl font-bold text-white">
               {formatTime(projects.reduce((sum, project) => sum + (project.duration || 0), 0) / Math.max(projects.length, 1))}
             </p>
           </div>
@@ -207,20 +207,20 @@ const MyProjectsPage = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-[#1A1A1A]/80 backdrop-blur-xl rounded-xl p-6 border border-purple-500/30 mb-8 shadow-lg"
+        className="bg-[#1A1A1A]/80 backdrop-blur-xl rounded-lg sm:rounded-xl p-4 sm:p-6 border border-purple-500/30 mb-6 sm:mb-8 shadow-lg"
       >
-        <h3 className="text-xl font-semibold text-white mb-4">Processing Your Latest Project</h3>
-        <div className="space-y-4">
+        <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Processing Your Latest Project</h3>
+        <div className="space-y-3 sm:space-y-4">
           {stages.map((stage, index) => (
             <div key={stage.id} className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center mr-2 sm:mr-3 ${
                 index < currentStageIndex ? 'bg-green-500/20 text-green-400' : 
                 index === currentStageIndex ? 'bg-purple-500/20 text-purple-400 animate-pulse' : 
                 'bg-gray-500/20 text-gray-500'
               }`}>
-                <FontAwesomeIcon icon={stage.icon} className={index === currentStageIndex ? 'animate-spin' : ''} />
+                <FontAwesomeIcon icon={stage.icon} className={`text-sm sm:text-base ${index === currentStageIndex ? 'animate-spin' : ''}`} />
               </div>
-              <span className={`${
+              <span className={`text-sm sm:text-base flex-1 ${
                 index < currentStageIndex ? 'text-green-400' : 
                 index === currentStageIndex ? 'text-white' : 
                 'text-gray-500'
@@ -228,12 +228,12 @@ const MyProjectsPage = () => {
                 {stage.label}
               </span>
               {index < currentStageIndex && (
-                <FontAwesomeIcon icon={faCheck} className="ml-2 text-green-400" />
+                <FontAwesomeIcon icon={faCheck} className="ml-1 sm:ml-2 text-green-400 text-sm" />
               )}
             </div>
           ))}
         </div>
-        <p className="text-gray-400 mt-4 text-sm">
+        <p className="text-gray-400 mt-3 sm:mt-4 text-xs sm:text-sm leading-relaxed">
           This process may take a few minutes. You can continue to browse while we work on your content.
         </p>
       </motion.div>
@@ -243,10 +243,10 @@ const MyProjectsPage = () => {
   return (
     <>
       <Navbar setSidebarOpen={setIsSidebarOpen} />
-      <div className="flex flex-col md:flex-row min-h-screen overflow-hidden">
+      <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-        {/* Main content: flex-1, no margin, responsive padding */}
-        <main className="flex-1 p-4 sm:p-6 md:p-8 bg-[#121212] min-h-screen overflow-y-auto mt-16 md:ml-[270px]">
+        {/* Main content: responsive margin and padding for better tablet/mobile experience */}
+        <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 bg-[#121212] min-h-screen overflow-y-auto mt-12 sm:mt-14 md:mt-16 lg:ml-[270px]">
           {/* Background patterns */}
           <div className="absolute inset-0 overflow-hidden z-0">
             <motion.div 
@@ -267,18 +267,18 @@ const MyProjectsPage = () => {
             transition={{ duration: 0.5 }}
             className="relative z-10"
           >
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">My Projects</h1>
-                <p className="text-gray-400 text-sm md:text-base">Manage and organize your video projects</p>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
+              <div className="text-center sm:text-left">
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2">My Projects</h1>
+                <p className="text-gray-400 text-xs sm:text-sm md:text-base">Manage and organize your video projects</p>
               </div>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/dashboard')}
-                className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-medium text-white flex items-center justify-center md:justify-start gap-2 shadow-lg shadow-purple-600/20"
+                className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg sm:rounded-xl font-medium text-white flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 text-sm sm:text-base"
               >
-                <FontAwesomeIcon icon={faPlus} />
+                <FontAwesomeIcon icon={faPlus} className="text-sm" />
                 Create New Project
               </motion.button>
             </div>
@@ -287,23 +287,26 @@ const MyProjectsPage = () => {
 
             <StatsSection />
 
-            <div className="bg-[#1A1A1A]/60 backdrop-blur-xl rounded-xl p-4 sm:p-6 border border-[#2A2A2A] mb-8">
-              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div className="relative flex-1 w-full">
-                  <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <div className="bg-[#1A1A1A]/60 backdrop-blur-xl rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 border border-[#2A2A2A] mb-6 sm:mb-8">
+              <div className="flex flex-col gap-3 sm:gap-4">
+                {/* Search Bar */}
+                <div className="relative w-full">
+                  <FontAwesomeIcon icon={faSearch} className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                   <input
                     type="text"
                     placeholder="Search projects..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-[#252525] text-gray-200 border border-[#3A3A3A] rounded-lg pl-12 pr-4 py-2 focus:outline-none focus:border-purple-500"
+                    className="w-full bg-[#252525] text-gray-200 border border-[#3A3A3A] rounded-lg pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-2.5 focus:outline-none focus:border-purple-500 text-sm sm:text-base"
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                
+                {/* Filter Controls */}
+                <div className="flex flex-col xs:flex-row gap-2 sm:gap-3">
                   <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    className="w-full md:w-auto bg-[#252525] text-gray-200 border border-[#3A3A3A] rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500"
+                    className="flex-1 bg-[#252525] text-gray-200 border border-[#3A3A3A] rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 focus:outline-none focus:border-purple-500 text-sm sm:text-base"
                   >
                     <option value="all">All Categories</option>
                     <option value="marketing">Marketing</option>
@@ -313,7 +316,7 @@ const MyProjectsPage = () => {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full md:w-auto bg-[#252525] text-gray-200 border border-[#3A3A3A] rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500"
+                    className="flex-1 bg-[#252525] text-gray-200 border border-[#3A3A3A] rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 focus:outline-none focus:border-purple-500 text-sm sm:text-base"
                   >
                     <option value="date">Sort by Date</option>
                     <option value="views">Sort by Views</option>
@@ -326,7 +329,7 @@ const MyProjectsPage = () => {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-red-900/30 border border-red-500/30 text-red-400 rounded-xl p-4 mb-6"
+                className="bg-red-900/30 border border-red-500/30 text-red-400 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 text-sm sm:text-base"
               >
                 {error}
               </motion.div>
@@ -334,8 +337,8 @@ const MyProjectsPage = () => {
 
             <AnimatePresence>
               {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3, 4, 5, 6].map((index) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((index) => (
                     <ProjectSkeleton key={index} />
                   ))}
                 </div>
@@ -343,20 +346,20 @@ const MyProjectsPage = () => {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-[#1A1A1A]/60 backdrop-blur-xl rounded-xl p-8 sm:p-10 md:p-12 text-center border border-[#2A2A2A]"
+                  className="bg-[#1A1A1A]/60 backdrop-blur-xl rounded-lg sm:rounded-xl p-6 sm:p-8 md:p-10 lg:p-12 text-center border border-[#2A2A2A]"
                 >
-                  <FontAwesomeIcon icon={faFolderOpen} className="text-5xl text-gray-600 mb-4" />
-                  <h2 className="text-lg md:text-xl font-semibold text-white mb-3">No Projects Found</h2>
-                  <p className="text-gray-400 mb-8 text-sm md:text-base">
+                  <FontAwesomeIcon icon={faFolderOpen} className="text-3xl sm:text-4xl md:text-5xl text-gray-600 mb-3 sm:mb-4" />
+                  <h2 className="text-base sm:text-lg md:text-xl font-semibold text-white mb-2 sm:mb-3">No Projects Found</h2>
+                  <p className="text-gray-400 mb-6 sm:mb-8 text-xs sm:text-sm md:text-base max-w-md mx-auto">
                     {searchTerm ? 'No projects match your search criteria.' : 'Start creating your first video project by clicking the button below.'}
                   </p>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate('/dashboard')}
-                    className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-medium text-white inline-flex items-center gap-2 shadow-lg shadow-purple-600/20"
+                    className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg sm:rounded-xl font-medium text-white inline-flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 text-sm sm:text-base"
                   >
-                    <FontAwesomeIcon icon={faPlus} />
+                    <FontAwesomeIcon icon={faPlus} className="text-sm" />
                     Create New Project
                   </motion.button>
                 </motion.div>
@@ -365,13 +368,13 @@ const MyProjectsPage = () => {
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6"
                 >
                   {filteredProjects.map((project) => (
                     <motion.div
                       key={project._id || project.id}
                       variants={itemVariants}
-                      whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                      whileHover={{ y: -5, transition: { duration: 0.2 } }}
                       className="group cursor-pointer"
                       onClick={() => {
                         const projectId = project._id || project.id;
@@ -383,7 +386,7 @@ const MyProjectsPage = () => {
                         navigate(`/project/${cleanId}`);
                       }}
                     >
-                      <div className="bg-[#1A1A1A]/60 backdrop-blur-xl rounded-xl overflow-hidden border border-[#2A2A2A] hover:border-purple-500/30 transition-all duration-300 shadow-lg hover:shadow-purple-600/10">
+                      <div className="bg-[#1A1A1A]/60 backdrop-blur-xl rounded-lg sm:rounded-xl overflow-hidden border border-[#2A2A2A] hover:border-purple-500/30 transition-all duration-300 shadow-lg hover:shadow-purple-600/10">
                         <div className="relative aspect-video bg-[#252525] overflow-hidden">
                           {project.thumbnailUrl ? (
                             <img 
@@ -393,34 +396,40 @@ const MyProjectsPage = () => {
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-[#252525]">
-                              <FontAwesomeIcon icon={faVideo} className="text-gray-600 text-3xl" />
+                              <FontAwesomeIcon icon={faVideo} className="text-gray-600 text-2xl sm:text-3xl" />
                             </div>
                           )}
                           
-                          <div className="absolute bottom-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1.5">
-                            <FontAwesomeIcon icon={faClock} className="text-xs" />
-                            {formatTime(project.duration || 0)}
+                          <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 bg-black/80 text-white text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md flex items-center gap-1">
+                            <FontAwesomeIcon icon={faClock} className="text-[10px] sm:text-xs" />
+                            <span className="text-xs">{formatTime(project.duration || 0)}</span>
                           </div>
                           
-                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <div className="bg-purple-600 w-14 h-14 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-lg">
-                              <FontAwesomeIcon icon={faPlay} className="text-white text-xl ml-1" />
+                          {/* Desktop hover overlay */}
+                          <div className="hidden sm:flex absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity items-center justify-center">
+                            <div className="bg-purple-600 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-lg">
+                              <FontAwesomeIcon icon={faPlay} className="text-white text-lg sm:text-xl ml-0.5 sm:ml-1" />
                             </div>
+                          </div>
+                          
+                          {/* Mobile tap indicator */}
+                          <div className="sm:hidden absolute top-2 right-2 w-8 h-8 bg-purple-600/80 rounded-full flex items-center justify-center">
+                            <FontAwesomeIcon icon={faPlay} className="text-white text-sm ml-0.5" />
                           </div>
                         </div>
                         
-                        <div className="p-4 md:p-5">
-                          <h3 className="text-white font-medium text-base md:text-lg mb-3 truncate group-hover:text-purple-400 transition-colors">
+                        <div className="p-3 sm:p-4 md:p-5">
+                          <h3 className="text-white font-medium text-sm sm:text-base md:text-lg mb-2 sm:mb-3 truncate group-hover:text-purple-400 transition-colors">
                             {project.title}
                           </h3>
-                          <div className="flex justify-between text-xs md:text-sm text-gray-400">
-                            <div className="flex items-center gap-1.5">
-                              <FontAwesomeIcon icon={faCalendarAlt} className="text-xs" />
-                              <span>{formatDate(project.createdAt)}</span>
+                          <div className="flex flex-col xs:flex-row xs:justify-between gap-1 xs:gap-0 text-xs sm:text-sm text-gray-400">
+                            <div className="flex items-center gap-1 xs:gap-1.5">
+                              <FontAwesomeIcon icon={faCalendarAlt} className="text-[10px] sm:text-xs" />
+                              <span className="truncate">{formatDate(project.createdAt)}</span>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                              <FontAwesomeIcon icon={faEye} className="text-xs" />
-                              <span>{project.viewCount || 0}</span>
+                            <div className="flex items-center gap-1 xs:gap-1.5">
+                              <FontAwesomeIcon icon={faEye} className="text-[10px] sm:text-xs" />
+                              <span>{project.viewCount || 0} views</span>
                             </div>
                           </div>
                         </div>
