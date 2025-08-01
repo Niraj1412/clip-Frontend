@@ -281,7 +281,7 @@ const ProjectDetailsPage = () => {
   if (loading) {
     return (
       <>
-        <Navbar setSidebarOpen={setIsSidebarOpen} />
+        <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
         <div className="flex h-screen overflow-hidden">
           <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
           <main className="ml-[280px] flex-1 p-8 bg-[#121212] min-h-screen">
@@ -308,9 +308,9 @@ const ProjectDetailsPage = () => {
   if (error) {
     return (
       <>
-        <Navbar />
+        <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
         <div className="flex h-screen overflow-hidden">
-          <Sidebar />
+          <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
           <main className="ml-[280px] flex-1 p-8 bg-[#121212] min-h-screen">
             <div className="max-w-6xl mx-auto">
               <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-8 text-center">
@@ -338,10 +338,10 @@ const ProjectDetailsPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
       <div className="flex h-screen overflow-hidden">
         <div className="hidden lg:block">
-          <Sidebar />
+          <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         </div>
         <main className="flex-1 lg:ml-[280px] p-4 sm:p-6 md:p-8 bg-[#121212] min-h-screen overflow-y-auto mt-14">
           <div className="absolute inset-0 overflow-hidden z-0">

@@ -369,7 +369,7 @@ const SettingsPage = () => {
 
   return (
     <>
-      <Navbar setSidebarOpen={setIsSidebarOpen} />
+      <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
       <div className="flex">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="ml-0 md:ml-[280px] flex-1 p-6 bg-[#121212] min-h-screen">

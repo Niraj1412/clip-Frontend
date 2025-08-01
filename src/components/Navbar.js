@@ -10,14 +10,15 @@ import {
   faStar,
   faMagic,
   faUserCircle,
-  faBars // Added for hamburger menu
+  faBars,
+  faXmark // Added for close icon
 } from "@fortawesome/free-solid-svg-icons";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../images/clipsmartAI-Icon1.webp";
 import authService from "../services/authService";
 
-const Navbar = ({ setSidebarOpen }) => { // Add setSidebarOpen prop
+const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
   const location = useLocation();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -126,15 +127,53 @@ const Navbar = ({ setSidebarOpen }) => { // Add setSidebarOpen prop
 
         {/* Right Side Actions */}
         <div className="flex items-center space-x-4">
-          {/* Hamburger Menu for Mobile */}
+          {/* Enhanced Mobile Menu Toggle */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSidebarOpen(prev => !prev)} // Toggle the state
-            className="lg:hidden p-2 text-white"
-            aria-label="Toggle sidebar"
+            onClick={() => setSidebarOpen(prev => !prev)}
+            className="lg:hidden relative p-2.5 bg-[#1A1A1A]/70 backdrop-blur-sm border border-gray-700/30 hover:border-[#6c5ce7]/40 rounded-lg shadow-md transition-all duration-300 group"
+            aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
           >
-            <FontAwesomeIcon icon={faBars} size="lg" />
+            {/* Background glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#6c5ce7]/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            {/* Icon container with animation */}
+            <div className="relative w-5 h-5 flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                {isSidebarOpen ? (
+                  <motion.div
+                    key="close"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    className="absolute"
+                  >
+                    <FontAwesomeIcon 
+                      icon={faXmark} 
+                      className="text-white group-hover:text-[#6c5ce7] transition-colors duration-300" 
+                      size="lg" 
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{ rotate: 90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -90, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    className="absolute"
+                  >
+                    <FontAwesomeIcon 
+                      icon={faBars} 
+                      className="text-white group-hover:text-[#6c5ce7] transition-colors duration-300" 
+                      size="lg" 
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </motion.button>
 
           {/* User Profile */}
@@ -195,6 +234,27 @@ const Navbar = ({ setSidebarOpen }) => { // Add setSidebarOpen prop
           </div>
         </div>
       </motion.nav>
+      
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            style={{ top: '80px' }} // Start below navbar
+          >
+            {/* Optional: Add some visual effects */}
+            <div className="absolute inset-0">
+              <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-[#6c5ce7]/10 rounded-full filter blur-[80px] animate-pulse"></div>
+              <div className="absolute bottom-1/3 right-1/3 w-24 h-24 bg-purple-500/10 rounded-full filter blur-[60px] animate-pulse"></div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

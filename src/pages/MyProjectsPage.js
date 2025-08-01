@@ -242,7 +242,7 @@ const MyProjectsPage = () => {
 
   return (
     <>
-      <Navbar setSidebarOpen={setIsSidebarOpen} />
+      <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
       <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         {/* Main content: responsive margin and padding for better tablet/mobile experience */}

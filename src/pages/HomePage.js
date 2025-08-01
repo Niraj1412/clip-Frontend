@@ -26,7 +26,7 @@ const HomePage = () => {
 
   return (
     <>
-      <Navbar setSidebarOpen={setIsSidebarOpen} /> {/* Pass setSidebarOpen to Navbar */}
+      <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} /> {/* Pass both props to Navbar */}
       <div className="flex">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="ml-0 md:ml-[280px] mt-7 flex-1 p-6">
