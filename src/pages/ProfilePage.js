@@ -497,7 +497,7 @@ const ProfilePage = () => {
         <div
           className="fixed inset-0 z-50 lg:hidden"
           style={{ 
-            background: 'rgba(255,0,0,0.1)', // Temporary red tint to see it
+            background: 'rgba(0,0,0,0.1)', // Subtle dark overlay
             cursor: 'pointer',
             zIndex: 999
           }}
@@ -519,7 +519,7 @@ const ProfilePage = () => {
             >
               <div className="bg-yellow-500/90 text-black px-4 py-2 rounded font-bold">
                 CLICK ANYWHERE TO CLOSE<br/>
-                (You should see red tint)
+                (Dark overlay active)
               </div>
             </div>
           )}
