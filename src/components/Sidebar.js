@@ -17,6 +17,21 @@ const Sidebar = ({ isOpen, toggleSidebar }) => { // Renamed props to match HomeP
     name: "User",
     email: "user@example.com"
   });
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Check if we're on desktop
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024); // lg breakpoint
+    };
+    
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    
+    return () => {
+      window.removeEventListener('resize', checkDesktop);
+    };
+  }, []);
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -30,7 +45,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => { // Renamed props to match HomeP
 
   // Prevent body scrolling when sidebar is open on mobile
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !isDesktop) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -38,7 +53,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => { // Renamed props to match HomeP
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [isOpen, isDesktop]);
 
   const handleLogout = () => {
     authService.logout();
@@ -52,19 +67,15 @@ const Sidebar = ({ isOpen, toggleSidebar }) => { // Renamed props to match HomeP
   return (
     <>
       {/* Overlay is now handled by Navbar component */}
-      <motion.div
-        initial={false}
-        animate={{
-          x: isOpen ? 0 : -280,
+      <div
+        className={`fixed top-0 w-[280px] bg-[#121212]/95 backdrop-blur-xl shadow-2xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A]/50 overflow-hidden lg:shadow-none transition-transform duration-300 ease-in-out ${
+          isDesktop ? 'translate-x-0' : (isOpen ? 'translate-x-0' : '-translate-x-full')
+        }`}
+        style={{ 
+          zIndex: 500, 
+          height: "calc(100vh - 3.5rem)",
+          left: 0
         }}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-          duration: 0.4
-        }}
-        className="fixed top-0 left-0 w-[280px] bg-[#121212]/95 backdrop-blur-xl shadow-2xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A]/50 overflow-hidden lg:translate-x-0"
-        style={{ zIndex: 500, height: "calc(100vh - 3.5rem)" }}
       >
         {/* Rest of the sidebar content remains unchanged */}
         <div className="absolute inset-0 overflow-hidden z-0">
@@ -184,7 +195,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => { // Renamed props to match HomeP
             />
           </motion.ul>
         </div>
-      </motion.div>
+      </div>
     </>
   );
 };
