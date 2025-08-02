@@ -279,7 +279,7 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
               setSidebarOpen(false);
             }}
             style={{ 
-              zIndex: 600,
+              zIndex: 500,
               WebkitBackdropFilter: "blur(8px)",
               backdropFilter: "blur(8px)"
             }}

@@ -477,6 +477,21 @@ const ProfilePage = () => {
   return (
     <>
       <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
+      
+      {/* Debug info - remove after testing */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ position: 'fixed', top: '50px', right: '10px', zIndex: 999, background: 'blue', color: 'white', padding: '5px', fontSize: '12px' }}>
+          Profile Sidebar: {isSidebarOpen ? 'OPEN' : 'CLOSED'}
+          <br />
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            style={{ background: 'green', color: 'white', padding: '2px 5px', marginTop: '2px', fontSize: '10px' }}
+          >
+            Test Toggle
+          </button>
+        </div>
+      )}
+      
       <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       {/* Enhanced background elements with dynamic gradients - Mobile optimized */}
