@@ -264,7 +264,7 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
         </div>
       </motion.nav>
       
-      {/* Enhanced Mobile Sidebar Overlay */}
+      {/* Simplified Mobile Sidebar Overlay - Only visual blur */}
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div
@@ -272,69 +272,19 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 bg-black/70 lg:hidden cursor-pointer"
-            onClick={(e) => {
-              console.log('Overlay clicked!', e); // Debug log
-              setSidebarOpen(false);
-            }}
+            className="fixed inset-0 bg-black/70 lg:hidden pointer-events-none"
             style={{ 
-              zIndex: 900,
+              zIndex: 100,
               WebkitBackdropFilter: "blur(8px)",
               backdropFilter: "blur(8px)"
             }}
           >
-            {/* Decorative elements - prevent click propagation */}
-            <div 
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                backgroundImage: `
-                  linear-gradient(rgba(108, 92, 231, 0.08) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(108, 92, 231, 0.08) 1px, transparent 1px)
-                `,
-                backgroundSize: '50px 50px'
-              }}
-            />
-            
-            {/* Gradient orbs - prevent click propagation */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-gradient-to-r from-[#6c5ce7]/10 to-purple-500/10 rounded-full filter blur-[100px] animate-pulse"></div>
-              <div className="absolute bottom-1/3 right-1/3 w-32 h-32 bg-gradient-to-r from-indigo-500/10 to-blue-500/10 rounded-full filter blur-[80px] animate-pulse"></div>
-            </div>
-            
-            {/* Close instruction - prevent click propagation */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-              transition={{ delay: 0.2, duration: 0.3 }}
-              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 pointer-events-none"
-            >
+            {/* Just visual elements - no click handling */}
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
               <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
                 <p className="text-white/90 text-sm font-medium">Tap anywhere to close</p>
               </div>
-            </motion.div>
-            
-            {/* Debug indicator - visible overlay click area */}
-            {process.env.NODE_ENV === 'development' && (
-              <>
-                <div 
-                  className="absolute top-1/2 left-3/4 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                  style={{ zIndex: 1 }}
-                >
-                  <div className="bg-red-500/80 text-white px-2 py-1 rounded text-xs">
-                    NAVBAR OVERLAY (z-900)
-                  </div>
-                </div>
-                {/* Visual grid to show clickable area */}
-                <div 
-                  className="absolute inset-0 pointer-events-none opacity-20"
-                  style={{
-                    backgroundImage: 'repeating-linear-gradient(0deg, red, red 2px, transparent 2px, transparent 20px), repeating-linear-gradient(90deg, red, red 2px, transparent 2px, transparent 20px)',
-                    zIndex: 1
-                  }}
-                />
-              </>
-            )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

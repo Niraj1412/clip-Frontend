@@ -66,19 +66,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => { // Renamed props to match HomeP
 
   return (
     <>
-      {/* Debug info - remove after testing */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{ position: 'fixed', top: '100px', right: '10px', zIndex: 999, background: 'red', color: 'white', padding: '5px', fontSize: '12px' }}>
-          Sidebar: {isOpen ? 'OPEN' : 'CLOSED'} | Desktop: {isDesktop ? 'YES' : 'NO'}
-        </div>
-      )}
+
       
       {/* Overlay is now handled by Navbar component */}
       <div
         data-sidebar
         className="fixed top-0 w-[280px] bg-[#121212]/95 backdrop-blur-xl shadow-2xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A]/50 overflow-hidden lg:shadow-none transition-transform duration-300 ease-in-out"
         style={{ 
-          zIndex: 950, 
+          zIndex: 1000, 
           height: "calc(100vh - 3.5rem)",
           left: 0,
           transform: isDesktop ? 'translateX(0)' : (isOpen ? 'translateX(0)' : 'translateX(-100%)')
