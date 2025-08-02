@@ -129,51 +129,80 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
         <div className="flex items-center space-x-4">
           {/* Enhanced Mobile Menu Toggle */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setSidebarOpen(prev => !prev)}
-            className="lg:hidden relative p-2.5 bg-[#1A1A1A]/70 backdrop-blur-sm border border-gray-700/30 hover:border-[#6c5ce7]/40 rounded-lg shadow-md transition-all duration-300 group"
+            className={`lg:hidden relative p-3 rounded-xl shadow-lg transition-all duration-300 group overflow-hidden ${
+              isSidebarOpen 
+                ? 'bg-gradient-to-r from-red-500/80 to-red-600/80 border border-red-400/30' 
+                : 'bg-gradient-to-r from-[#1A1A1A]/90 to-[#2A2A2A]/90 border border-gray-600/30 hover:border-[#6c5ce7]/50'
+            }`}
             aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
           >
-            {/* Background glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#6c5ce7]/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            {/* Animated background gradient */}
+            <div className={`absolute inset-0 transition-all duration-300 ${
+              isSidebarOpen 
+                ? 'bg-gradient-to-r from-red-500/20 to-red-600/20 opacity-100' 
+                : 'bg-gradient-to-r from-[#6c5ce7]/0 to-purple-500/0 group-hover:from-[#6c5ce7]/20 group-hover:to-purple-500/20 opacity-0 group-hover:opacity-100'
+            }`}></div>
             
-            {/* Icon container with animation */}
+            {/* Ripple effect on click */}
+            <div className="absolute inset-0 bg-white/10 rounded-xl opacity-0 group-active:opacity-100 transition-opacity duration-150"></div>
+            
+            {/* Icon container with enhanced animation */}
             <div className="relative w-5 h-5 flex items-center justify-center">
               <AnimatePresence mode="wait">
                 {isSidebarOpen ? (
                   <motion.div
                     key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    initial={{ rotate: -180, scale: 0.5, opacity: 0 }}
+                    animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                    exit={{ rotate: 180, scale: 0.5, opacity: 0 }}
+                    transition={{ 
+                      duration: 0.3, 
+                      ease: [0.25, 0.1, 0.25, 1],
+                      scale: { duration: 0.2 }
+                    }}
                     className="absolute"
                   >
                     <FontAwesomeIcon 
                       icon={faXmark} 
-                      className="text-white group-hover:text-[#6c5ce7] transition-colors duration-300" 
+                      className="text-white drop-shadow-sm" 
                       size="lg" 
                     />
                   </motion.div>
                 ) : (
                   <motion.div
                     key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    initial={{ rotate: 180, scale: 0.5, opacity: 0 }}
+                    animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                    exit={{ rotate: -180, scale: 0.5, opacity: 0 }}
+                    transition={{ 
+                      duration: 0.3, 
+                      ease: [0.25, 0.1, 0.25, 1],
+                      scale: { duration: 0.2 }
+                    }}
                     className="absolute"
                   >
                     <FontAwesomeIcon 
                       icon={faBars} 
-                      className="text-white group-hover:text-[#6c5ce7] transition-colors duration-300" 
+                      className="text-white group-hover:text-[#6c5ce7] transition-colors duration-300 drop-shadow-sm" 
                       size="lg" 
                     />
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
+            
+            {/* Active state indicator */}
+            {isSidebarOpen && (
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                className="absolute -top-1 -right-1 w-3 h-3 bg-red-400 rounded-full shadow-lg"
+              />
+            )}
           </motion.button>
 
           {/* User Profile */}
@@ -235,24 +264,77 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
         </div>
       </motion.nav>
       
-      {/* Mobile Sidebar Overlay */}
+      {/* Enhanced Mobile Sidebar Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-            style={{ top: '80px' }} // Start below navbar
-          >
-            {/* Optional: Add some visual effects */}
-            <div className="absolute inset-0">
-              <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-[#6c5ce7]/10 rounded-full filter blur-[80px] animate-pulse"></div>
-              <div className="absolute bottom-1/3 right-1/3 w-24 h-24 bg-purple-500/10 rounded-full filter blur-[60px] animate-pulse"></div>
-            </div>
-          </motion.div>
+          <>
+            {/* Main overlay with backdrop blur */}
+            <motion.div
+              initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+              animate={{ opacity: 1, backdropFilter: "blur(12px)" }}
+              exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+              transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+              className="fixed inset-0 bg-black/60 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+              style={{ 
+                zIndex: 40,
+                WebkitBackdropFilter: "blur(12px)",
+                backdropFilter: "blur(12px)"
+              }}
+            >
+              {/* Animated gradient orbs */}
+              <motion.div 
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ delay: 0.1, duration: 0.6, ease: "easeOut" }}
+                className="absolute inset-0"
+              >
+                <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-gradient-to-r from-[#6c5ce7]/15 to-purple-500/15 rounded-full filter blur-[100px] animate-pulse"></div>
+                <div className="absolute bottom-1/3 right-1/3 w-32 h-32 bg-gradient-to-r from-indigo-500/15 to-blue-500/15 rounded-full filter blur-[80px] animate-pulse"></div>
+                <div className="absolute top-1/2 right-1/4 w-24 h-24 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full filter blur-[60px] animate-pulse"></div>
+              </motion.div>
+
+              {/* Subtle grid pattern */}
+              <div 
+                className="absolute inset-0 opacity-[0.03]"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(108, 92, 231, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(108, 92, 231, 0.1) 1px, transparent 1px)
+                  `,
+                  backgroundSize: '50px 50px'
+                }}
+              />
+              
+              {/* Close instruction */}
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
+                className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+              >
+                <div className="bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
+                  <p className="text-white/80 text-sm font-medium">Tap anywhere to close</p>
+                </div>
+              </motion.div>
+            </motion.div>
+
+            {/* Additional blur layer for stronger effect */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/20 lg:hidden pointer-events-none"
+              style={{ 
+                zIndex: 35,
+                WebkitBackdropFilter: "saturate(150%) blur(6px)",
+                backdropFilter: "saturate(150%) blur(6px)"
+              }}
+            />
+          </>
         )}
       </AnimatePresence>
     </>

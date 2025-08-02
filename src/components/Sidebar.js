@@ -51,19 +51,20 @@ const Sidebar = ({ isOpen, toggleSidebar }) => { // Renamed props to match HomeP
 
   return (
     <>
-      {/* Overlay for mobile when sidebar is open */}
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 lg:hidden z-40"
-          onClick={toggleSidebar}
-        ></motion.div>
-      )}
+      {/* Overlay is now handled by Navbar component */}
       <motion.div
-        className={`fixed top-0 w-[280px] bg-[#121212] shadow-xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A] overflow-hidden transition-all duration-300 ${isOpen ? "left-0" : "-left-[280px]"} lg:left-0 z-50`}
-        style={{ height: "calc(100vh - 3.5rem)" }}
+        initial={false}
+        animate={{
+          x: isOpen ? 0 : -280,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 30,
+          duration: 0.4
+        }}
+        className="fixed top-0 left-0 w-[280px] bg-[#121212]/95 backdrop-blur-xl shadow-2xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A]/50 overflow-hidden lg:translate-x-0"
+        style={{ zIndex: 500, height: "calc(100vh - 3.5rem)" }}
       >
         {/* Rest of the sidebar content remains unchanged */}
         <div className="absolute inset-0 overflow-hidden z-0">
