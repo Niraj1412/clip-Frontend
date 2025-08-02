@@ -47,6 +47,47 @@ const ProfilePage = () => {
   const [notification, setNotification] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  
+  // Backup click handler to ensure sidebar can always be closed
+  useEffect(() => {
+    const handleDocumentClick = (e) => {
+      // Only handle clicks when sidebar is open on mobile
+      if (isSidebarOpen && window.innerWidth < 1024) {
+        // Check if the click is outside the sidebar and navbar
+        const sidebar = document.querySelector('[data-sidebar]');
+        const navbar = document.querySelector('nav');
+        const target = e.target;
+        
+        if (sidebar && navbar && 
+            !sidebar.contains(target) && 
+            !navbar.contains(target)) {
+          setIsSidebarOpen(false);
+        }
+      }
+    };
+
+    if (isSidebarOpen) {
+      document.addEventListener('click', handleDocumentClick, true);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleDocumentClick, true);
+    };
+  }, [isSidebarOpen]);
+
+  // Escape key handler to close sidebar
+  useEffect(() => {
+    const handleEscapeKey = (e) => {
+      if (e.key === 'Escape' && isSidebarOpen) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isSidebarOpen]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -174,7 +215,7 @@ const ProfilePage = () => {
     };
   }, [notification]);
 
-  /* Ensure proper scrolling behavior */
+  /* Ensure proper scrolling behavior and cleanup blur effects */
   useEffect(() => {
     // Remove any overflow restrictions from body and html
     document.body.style.overflow = 'auto';
@@ -190,6 +231,23 @@ const ProfilePage = () => {
       document.documentElement.style.height = '';
     };
   }, []);
+
+  /* Clean up blur effects when sidebar state changes */
+  useEffect(() => {
+    if (!isSidebarOpen) {
+      // Force clear any stuck blur effects
+      const blurElements = document.querySelectorAll('[style*="backdrop-filter"], [style*="filter"]');
+      blurElements.forEach(element => {
+        if (element.style.backdropFilter && element.style.backdropFilter.includes('blur')) {
+          // Don't clear blur on elements that should keep it (like sidebar background)
+          if (!element.classList.contains('backdrop-blur-xl')) {
+            element.style.backdropFilter = '';
+            element.style.WebkitBackdropFilter = '';
+          }
+        }
+      });
+    }
+  }, [isSidebarOpen]);
 
   const showNotification = (type, message) => {
     setNotification({ type, message });

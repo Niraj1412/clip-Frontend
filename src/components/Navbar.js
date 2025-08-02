@@ -267,74 +267,54 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
       {/* Enhanced Mobile Sidebar Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
-          <>
-            {/* Main overlay with backdrop blur */}
-            <motion.div
-              initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-              animate={{ opacity: 1, backdropFilter: "blur(12px)" }}
-              exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-              transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-              className="fixed inset-0 bg-black/60 lg:hidden"
-              onClick={() => setSidebarOpen(false)}
-              style={{ 
-                zIndex: 40,
-                WebkitBackdropFilter: "blur(12px)",
-                backdropFilter: "blur(12px)"
-              }}
-            >
-              {/* Animated gradient orbs */}
-              <motion.div 
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ delay: 0.1, duration: 0.6, ease: "easeOut" }}
-                className="absolute inset-0"
-              >
-                <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-gradient-to-r from-[#6c5ce7]/15 to-purple-500/15 rounded-full filter blur-[100px] animate-pulse"></div>
-                <div className="absolute bottom-1/3 right-1/3 w-32 h-32 bg-gradient-to-r from-indigo-500/15 to-blue-500/15 rounded-full filter blur-[80px] animate-pulse"></div>
-                <div className="absolute top-1/2 right-1/4 w-24 h-24 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full filter blur-[60px] animate-pulse"></div>
-              </motion.div>
-
-              {/* Subtle grid pattern */}
-              <div 
-                className="absolute inset-0 opacity-[0.03]"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(rgba(108, 92, 231, 0.1) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(108, 92, 231, 0.1) 1px, transparent 1px)
-                  `,
-                  backgroundSize: '50px 50px'
-                }}
-              />
-              
-              {/* Close instruction */}
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 20, opacity: 0 }}
-                transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
-                className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-              >
-                <div className="bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
-                  <p className="text-white/80 text-sm font-medium">Tap anywhere to close</p>
-                </div>
-              </motion.div>
-            </motion.div>
-
-            {/* Additional blur layer for stronger effect */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/20 lg:hidden pointer-events-none"
-              style={{ 
-                zIndex: 35,
-                WebkitBackdropFilter: "saturate(150%) blur(6px)",
-                backdropFilter: "saturate(150%) blur(6px)"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed inset-0 bg-black/70 lg:hidden"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setSidebarOpen(false);
+            }}
+            style={{ 
+              zIndex: 600,
+              WebkitBackdropFilter: "blur(8px)",
+              backdropFilter: "blur(8px)"
+            }}
+          >
+            {/* Decorative elements - prevent click propagation */}
+            <div 
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backgroundImage: `
+                  linear-gradient(rgba(108, 92, 231, 0.08) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(108, 92, 231, 0.08) 1px, transparent 1px)
+                `,
+                backgroundSize: '50px 50px'
               }}
             />
-          </>
+            
+            {/* Gradient orbs - prevent click propagation */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-gradient-to-r from-[#6c5ce7]/10 to-purple-500/10 rounded-full filter blur-[100px] animate-pulse"></div>
+              <div className="absolute bottom-1/3 right-1/3 w-32 h-32 bg-gradient-to-r from-indigo-500/10 to-blue-500/10 rounded-full filter blur-[80px] animate-pulse"></div>
+            </div>
+            
+            {/* Close instruction - prevent click propagation */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 20, opacity: 0 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 pointer-events-none"
+            >
+              <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
+                <p className="text-white/90 text-sm font-medium">Tap anywhere to close</p>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>
