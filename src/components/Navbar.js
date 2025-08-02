@@ -278,7 +278,7 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
               setSidebarOpen(false);
             }}
             style={{ 
-              zIndex: 500,
+              zIndex: 900,
               WebkitBackdropFilter: "blur(8px)",
               backdropFilter: "blur(8px)"
             }}
@@ -316,14 +316,24 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
             
             {/* Debug indicator - visible overlay click area */}
             {process.env.NODE_ENV === 'development' && (
-              <div 
-                className="absolute top-1/2 left-3/4 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                style={{ zIndex: 1 }}
-              >
-                <div className="bg-red-500/80 text-white px-2 py-1 rounded text-xs">
-                  OVERLAY CLICK AREA
+              <>
+                <div 
+                  className="absolute top-1/2 left-3/4 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                  style={{ zIndex: 1 }}
+                >
+                  <div className="bg-red-500/80 text-white px-2 py-1 rounded text-xs">
+                    NAVBAR OVERLAY (z-900)
+                  </div>
                 </div>
-              </div>
+                {/* Visual grid to show clickable area */}
+                <div 
+                  className="absolute inset-0 pointer-events-none opacity-20"
+                  style={{
+                    backgroundImage: 'repeating-linear-gradient(0deg, red, red 2px, transparent 2px, transparent 20px), repeating-linear-gradient(90deg, red, red 2px, transparent 2px, transparent 20px)',
+                    zIndex: 1
+                  }}
+                />
+              </>
             )}
           </motion.div>
         )}

@@ -46,18 +46,39 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('all'); // all, recent, popular
   const [notification, setNotification] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
+
+  // Check if mobile for pointer events
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
   
   // Simplified click handler as backup
   useEffect(() => {
     const handleDocumentClick = (e) => {
+      console.log('Document click detected', e.target);
       // Only handle clicks when sidebar is open on mobile
-      if (isSidebarOpen && window.innerWidth < 1024) {
+      if (isSidebarOpen && isMobile) {
         // Check if the click is outside the sidebar
         const sidebar = document.querySelector('[data-sidebar]');
         const target = e.target;
         
+        console.log('Sidebar element:', sidebar);
+        console.log('Click target:', target);
+        console.log('Contains check:', sidebar?.contains(target));
+        
         if (sidebar && !sidebar.contains(target)) {
+          console.log('Closing sidebar via document click');
           // Delay the close to avoid conflicts with other handlers
           setTimeout(() => {
             setIsSidebarOpen(false);
@@ -68,12 +89,14 @@ const ProfilePage = () => {
 
     if (isSidebarOpen) {
       document.addEventListener('click', handleDocumentClick);
+      console.log('Document click listener added');
     }
 
     return () => {
       document.removeEventListener('click', handleDocumentClick);
+      console.log('Document click listener removed');
     };
-  }, [isSidebarOpen]);
+  }, [isSidebarOpen, isMobile]);
 
   // Escape key handler to close sidebar
   useEffect(() => {
@@ -480,8 +503,10 @@ const ProfilePage = () => {
       
       {/* Debug info - remove after testing */}
       {process.env.NODE_ENV === 'development' && (
-        <div style={{ position: 'fixed', top: '50px', right: '10px', zIndex: 999, background: 'blue', color: 'white', padding: '5px', fontSize: '12px' }}>
-          Profile Sidebar: {isSidebarOpen ? 'OPEN' : 'CLOSED'}
+        <div style={{ position: 'fixed', top: '50px', right: '10px', zIndex: 999, background: 'blue', color: 'white', padding: '5px', fontSize: '12px', maxWidth: '200px' }}>
+          <div>Profile Sidebar: {isSidebarOpen ? 'OPEN' : 'CLOSED'}</div>
+          <div>Mobile: {isMobile ? 'YES' : 'NO'}</div>
+          <div>Main Pointer: {isSidebarOpen && isMobile ? 'NONE' : 'AUTO'}</div>
           <br />
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -496,11 +521,43 @@ const ProfilePage = () => {
           >
             Force Close
           </button>
+          <br />
+          <button 
+            onClick={() => console.log('Test click from debug')}
+            style={{ background: 'orange', color: 'white', padding: '2px 5px', marginTop: '2px', fontSize: '10px' }}
+          >
+            Test Click
+          </button>
         </div>
       )}
       
       <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      {/* Direct overlay as backup - ProfilePage level */}
+      {isSidebarOpen && isMobile && (
+        <div
+          className="fixed inset-0 bg-transparent lg:hidden cursor-pointer"
+          onClick={() => {
+            console.log('ProfilePage overlay clicked!');
+            setIsSidebarOpen(false);
+          }}
+          style={{ 
+            zIndex: 800,
+            touchAction: 'none'
+          }}
+        >
+          {process.env.NODE_ENV === 'development' && (
+            <div 
+              className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            >
+              <div className="bg-green-500/80 text-white px-2 py-1 rounded text-xs">
+                PROFILE OVERLAY (z-800)
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Enhanced background elements with dynamic gradients - Mobile optimized */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         {/* Desktop background elements */}
@@ -522,7 +579,13 @@ const ProfilePage = () => {
         <div className="hidden md:block absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM3YzY2ZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0di00aC0ydjRoLTR2Mmg0djRoMnYtNGg0di0ySDZ6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRoLTR6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRINnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20 lg:opacity-40 bg-fixed"></div>
       </div>
       
-      <main className="flex-1 mt-12 sm:mt-14 md:mt-16 p-3 sm:p-4 md:p-6 lg:p-10 bg-gradient-to-br from-[#0a0a0a] to-[#141414] text-white min-h-screen overflow-y-auto">
+      <main 
+        className="flex-1 mt-12 sm:mt-14 md:mt-16 p-3 sm:p-4 md:p-6 lg:p-10 bg-gradient-to-br from-[#0a0a0a] to-[#141414] text-white min-h-screen overflow-y-auto"
+        style={{
+          zIndex: isSidebarOpen ? 1 : 'auto',
+          pointerEvents: isSidebarOpen && isMobile ? 'none' : 'auto'
+        }}
+      >
         <div className="max-w-[1440px] mx-auto pb-6 sm:pb-8 md:pb-12">
           {/* Redesigned Profile Header Section */}
           <motion.div 

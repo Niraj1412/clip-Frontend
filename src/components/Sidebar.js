@@ -78,7 +78,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => { // Renamed props to match HomeP
         data-sidebar
         className="fixed top-0 w-[280px] bg-[#121212]/95 backdrop-blur-xl shadow-2xl flex flex-col items-center py-6 px-4 text-white mt-14 border-r border-[#2A2A2A]/50 overflow-hidden lg:shadow-none transition-transform duration-300 ease-in-out"
         style={{ 
-          zIndex: 700, 
+          zIndex: 950, 
           height: "calc(100vh - 3.5rem)",
           left: 0,
           transform: isDesktop ? 'translateX(0)' : (isOpen ? 'translateX(0)' : 'translateX(-100%)')
