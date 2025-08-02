@@ -272,10 +272,9 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 bg-black/70 lg:hidden"
+            className="fixed inset-0 bg-black/70 lg:hidden cursor-pointer"
             onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
+              console.log('Overlay clicked!', e); // Debug log
               setSidebarOpen(false);
             }}
             style={{ 
@@ -314,6 +313,18 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
                 <p className="text-white/90 text-sm font-medium">Tap anywhere to close</p>
               </div>
             </motion.div>
+            
+            {/* Debug indicator - visible overlay click area */}
+            {process.env.NODE_ENV === 'development' && (
+              <div 
+                className="absolute top-1/2 left-3/4 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ zIndex: 1 }}
+              >
+                <div className="bg-red-500/80 text-white px-2 py-1 rounded text-xs">
+                  OVERLAY CLICK AREA
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

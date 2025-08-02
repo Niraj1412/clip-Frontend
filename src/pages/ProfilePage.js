@@ -48,30 +48,30 @@ const ProfilePage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
   
-  // Backup click handler to ensure sidebar can always be closed
+  // Simplified click handler as backup
   useEffect(() => {
     const handleDocumentClick = (e) => {
       // Only handle clicks when sidebar is open on mobile
       if (isSidebarOpen && window.innerWidth < 1024) {
-        // Check if the click is outside the sidebar and navbar
+        // Check if the click is outside the sidebar
         const sidebar = document.querySelector('[data-sidebar]');
-        const navbar = document.querySelector('nav');
         const target = e.target;
         
-        if (sidebar && navbar && 
-            !sidebar.contains(target) && 
-            !navbar.contains(target)) {
-          setIsSidebarOpen(false);
+        if (sidebar && !sidebar.contains(target)) {
+          // Delay the close to avoid conflicts with other handlers
+          setTimeout(() => {
+            setIsSidebarOpen(false);
+          }, 50);
         }
       }
     };
 
     if (isSidebarOpen) {
-      document.addEventListener('click', handleDocumentClick, true);
+      document.addEventListener('click', handleDocumentClick);
     }
 
     return () => {
-      document.removeEventListener('click', handleDocumentClick, true);
+      document.removeEventListener('click', handleDocumentClick);
     };
   }, [isSidebarOpen]);
 
@@ -488,6 +488,13 @@ const ProfilePage = () => {
             style={{ background: 'green', color: 'white', padding: '2px 5px', marginTop: '2px', fontSize: '10px' }}
           >
             Test Toggle
+          </button>
+          <br />
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            style={{ background: 'red', color: 'white', padding: '2px 5px', marginTop: '2px', fontSize: '10px' }}
+          >
+            Force Close
           </button>
         </div>
       )}
