@@ -63,7 +63,30 @@ const ProfilePage = () => {
     };
   }, []);
   
-  // Remove complex document click handler - using simple overlay instead
+  // Add click-outside-to-close functionality (same as other pages)
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isSidebarOpen && window.innerWidth < 1024) {
+        const sidebar = document.querySelector('[data-sidebar]');
+        const navbar = document.querySelector('nav');
+        
+        if (sidebar && navbar && 
+            !sidebar.contains(event.target) && 
+            !navbar.contains(event.target)) {
+          console.log('Clicked outside sidebar - closing (ProfilePage)');
+          setIsSidebarOpen(false);
+        }
+      }
+    };
+
+    if (isSidebarOpen) {
+      document.addEventListener('click', handleClickOutside, true);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true);
+    };
+  }, [isSidebarOpen]);
 
   // Escape key handler to close sidebar
   useEffect(() => {
@@ -412,7 +435,7 @@ const ProfilePage = () => {
         <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
         <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden">
           <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-          <main className="flex-1 mt-12 sm:mt-14 md:mt-16 p-6 md:p-8 bg-gradient-to-br from-[#0a0a0a] to-[#141414] min-h-[calc(100vh-3.5rem)] text-white flex items-center justify-center">
+          <main className="flex-1 lg:ml-[280px] mt-12 sm:mt-14 md:mt-16 p-6 md:p-8 bg-gradient-to-br from-[#0a0a0a] to-[#141414] min-h-[calc(100vh-3.5rem)] text-white flex items-center justify-center">
             <div className="bg-[#151515] rounded-xl p-6 max-w-md w-full">
               <div className="text-red-400 mb-4 flex items-center">
                 <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2 text-xl" />
@@ -438,7 +461,7 @@ const ProfilePage = () => {
         <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
         <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden">
           <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-          <main className="flex-1 mt-12 sm:mt-14 md:mt-16 p-6 md:p-8 bg-gradient-to-br from-[#0a0a0a] to-[#141414] min-h-[calc(100vh-3.5rem)] text-white flex items-center justify-center">
+          <main className="flex-1 lg:ml-[280px] mt-12 sm:mt-14 md:mt-16 p-6 md:p-8 bg-gradient-to-br from-[#0a0a0a] to-[#141414] min-h-[calc(100vh-3.5rem)] text-white flex items-center justify-center">
             <div className="relative">
               {/* Animated loading background elements */}
               <div className="absolute -top-20 -left-20 w-40 h-40 bg-[#7c66ff]/10 rounded-full filter blur-[50px] animate-pulse"></div>
@@ -492,12 +515,12 @@ const ProfilePage = () => {
       
       <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      {/* Simple Full-Screen Click Handler */}
-      {isSidebarOpen && isMobile && (
+      {/* Full-Screen Click Handler - Works on all screen sizes */}
+      {isSidebarOpen && (
         <div
-          className="fixed inset-0 z-50 lg:hidden"
+          className="fixed inset-0 z-50"
           style={{ 
-            background: 'rgba(0,0,0,0.1)', // Subtle dark overlay
+            background: isMobile ? 'rgba(0,0,0,0.1)' : 'transparent', // Only show overlay on mobile
             cursor: 'pointer',
             zIndex: 999
           }}
@@ -519,7 +542,7 @@ const ProfilePage = () => {
             >
               <div className="bg-yellow-500/90 text-black px-4 py-2 rounded font-bold">
                 CLICK ANYWHERE TO CLOSE<br/>
-                (Dark overlay active)
+                (Click handler active - {isMobile ? 'Mobile' : 'Desktop'})
               </div>
             </div>
           )}
@@ -547,7 +570,7 @@ const ProfilePage = () => {
         <div className="hidden md:block absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM3YzY2ZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0di00aC0ydjRoLTR2Mmg0djRoMnYtNGg0di0ySDZ6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRoLTR6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRINnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20 lg:opacity-40 bg-fixed"></div>
       </div>
       
-      <main className="flex-1 mt-12 sm:mt-14 md:mt-16 p-3 sm:p-4 md:p-6 lg:p-10 bg-gradient-to-br from-[#0a0a0a] to-[#141414] text-white min-h-screen overflow-y-auto">
+      <main className="flex-1 lg:ml-[280px] mt-12 sm:mt-14 md:mt-16 p-3 sm:p-4 md:p-6 lg:p-10 bg-gradient-to-br from-[#0a0a0a] to-[#141414] text-white min-h-screen overflow-y-auto">
         <div className="max-w-[1440px] mx-auto pb-6 sm:pb-8 md:pb-12">
           {/* Redesigned Profile Header Section */}
           <motion.div 
