@@ -377,12 +377,12 @@ const ExplorePage = () => {
                   <div className="absolute bottom-0 left-0 w-24 sm:w-32 h-24 sm:h-32 bg-indigo-500/5 rounded-full filter blur-[30px] sm:blur-[50px] animate-float" style={{ animationDelay: "-3s" }}></div>
                   <div className="p-6 sm:p-6 md:p-8 relative z-10">
                     <motion.div 
-                      className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6"
+                      className="flex flex-col md:flex-row md:items-center justify-between md:justify-between gap-4 sm:gap-6 items-center md:items-center"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.7, delay: 0.3 }}
                     >
-                      <div className="max-w-full sm:max-w-2xl">
+                      <div className="max-w-full sm:max-w-2xl text-center md:text-left">
                         <h1 className="text-3xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-3 leading-tight">
                           <motion.span 
                             className="bg-clip-text text-transparent bg-gradient-to-r from-white via-[#7c66ff]/90 to-white animate-gradient"
@@ -410,10 +410,10 @@ const ExplorePage = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5, delay: 0.4 }}
                       >
-                        <div className="absolute -inset-1 bg-gradient-to-r from-[#7c66ff] to-indigo-600 rounded-xl blur-sm opacity-50 sm:opacity-70 group-hover:opacity-100 transition-all duration-500 -z-10"></div>
+                        <div className="absolute -inset-2 sm:-inset-1 md:-inset-1 bg-gradient-to-r from-[#7c66ff] to-indigo-600 rounded-xl blur-md sm:blur-sm opacity-60 sm:opacity-50 md:opacity-70 group-hover:opacity-100 transition-all duration-500 -z-10"></div>
                         <button 
                           onClick={() => navigate('/dashboard')}
-                          className="relative bg-gradient-to-r from-[#7c66ff] to-indigo-600 px-6 sm:px-6 py-3 sm:py-3 text-white rounded-xl font-medium text-lg sm:text-lg flex items-center gap-3 sm:gap-3 shadow-xl shadow-[#7c66ff]/25 overflow-hidden group min-w-[200px] justify-center z-10"
+                          className="relative bg-gradient-to-r from-[#7c66ff] to-indigo-600 px-6 sm:px-8 md:px-6 py-3 sm:py-3 text-white rounded-xl font-medium text-base sm:text-lg flex items-center gap-3 sm:gap-3 shadow-xl shadow-[#7c66ff]/25 overflow-hidden group min-w-[180px] sm:min-w-[200px] justify-center z-10 mx-auto md:mx-0"
                         >
                           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                           <div className="absolute inset-0 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-xl bg-white/10 origin-bottom-right"></div>
@@ -539,10 +539,10 @@ const ExplorePage = () => {
                         whileTap={{ scale: 0.95 }}
                         className="relative inline-block group"
                       >
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#7c66ff] to-indigo-600 rounded-xl blur-sm opacity-50 sm:opacity-70 group-hover:opacity-100 transition-all duration-500 -z-10"></div>
+                        <div className="absolute -inset-1 sm:-inset-0.5 md:-inset-0.5 bg-gradient-to-r from-[#7c66ff] to-indigo-600 rounded-xl blur-md sm:blur-sm opacity-60 sm:opacity-50 md:opacity-70 group-hover:opacity-100 transition-all duration-500 -z-10"></div>
                         <button 
                           onClick={() => navigate('/dashboard')}
-                          className="relative bg-gradient-to-r from-[#7c66ff] to-indigo-600 px-4 sm:px-6 py-2 sm:py-3 text-white rounded-xl font-medium text-sm sm:text-base flex items-center gap-2 sm:gap-3 shadow-xl shadow-[#7c66ff]/20 z-10"
+                          className="relative bg-gradient-to-r from-[#7c66ff] to-indigo-600 px-5 sm:px-6 py-2.5 sm:py-3 text-white rounded-xl font-medium text-sm sm:text-base flex items-center gap-2 sm:gap-3 shadow-xl shadow-[#7c66ff]/20 z-10 justify-center min-w-[160px] sm:min-w-[180px]"
                         >
                           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                           <FontAwesomeIcon icon={faPlus} className="text-xs sm:text-sm" />
