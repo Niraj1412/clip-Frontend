@@ -270,14 +270,15 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 bg-black/70 lg:hidden pointer-events-auto" // Ensuring pointer-events are enabled
+            className="fixed inset-0 bg-black/70 lg:hidden pointer-events-auto"
             style={{
-              zIndex: 2000, // Ensure this has a higher zIndex than sidebar (Sidebar uses zIndex: 1000)
+              zIndex: 100,
               WebkitBackdropFilter: "blur(8px)",
               backdropFilter: "blur(8px)"
             }}
-            onClick={() => setSidebarOpen(false)} // Close sidebar when overlay is clicked
+            onClick={() => setSidebarOpen(false)} // Close the sidebar on clicking the overlay
           >
+            {/* Just visual elements - no click handling */}
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
               <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
                 <p className="text-white/90 text-sm font-medium">Tap anywhere to close</p>
