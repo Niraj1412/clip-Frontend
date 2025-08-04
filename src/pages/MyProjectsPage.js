@@ -34,6 +34,31 @@ const MyProjectsPage = () => {
   const [processingStage, setProcessingStage] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Add click-outside-to-close functionality  
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isSidebarOpen && window.innerWidth < 1024) {
+        const sidebar = document.querySelector('[data-sidebar]');
+        const navbar = document.querySelector('nav');
+        
+        if (sidebar && navbar && 
+            !sidebar.contains(event.target) && 
+            !navbar.contains(event.target)) {
+          console.log('Clicked outside sidebar - closing (MyProjectsPage)');
+          setIsSidebarOpen(false);
+        }
+      }
+    };
+
+    if (isSidebarOpen) {
+      document.addEventListener('click', handleClickOutside, true);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true);
+    };
+  }, [isSidebarOpen]);
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },

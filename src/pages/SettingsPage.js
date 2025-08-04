@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock, faBell, faDesktop, faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -8,6 +8,32 @@ import Sidebar from '../components/Sidebar';
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Add click-outside-to-close functionality  
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isSidebarOpen && window.innerWidth < 1024) {
+        const sidebar = document.querySelector('[data-sidebar]');
+        const navbar = document.querySelector('nav');
+        
+        if (sidebar && navbar && 
+            !sidebar.contains(event.target) && 
+            !navbar.contains(event.target)) {
+          console.log('Clicked outside sidebar - closing (SettingsPage)');
+          setIsSidebarOpen(false);
+        }
+      }
+    };
+
+    if (isSidebarOpen) {
+      document.addEventListener('click', handleClickOutside, true);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true);
+    };
+  }, [isSidebarOpen]);
+  
   const [profileForm, setProfileForm] = useState({
     name: '',
     email: '',
