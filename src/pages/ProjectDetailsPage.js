@@ -59,34 +59,29 @@ const ProjectDetailsPage = () => {
     isGuest: true
   });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
-  // Check if mobile for pointer events
+  // Add simple click-outside-to-close functionality
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-    };
-  }, []);
-
-  // Escape key handler to close sidebar
-  useEffect(() => {
-    const handleEscapeKey = (e) => {
-      if (e.key === 'Escape' && isSidebarOpen) {
-        console.log('Escape key pressed - closing sidebar');
-        setIsSidebarOpen(false);
+    const handleClickOutside = (event) => {
+      if (isSidebarOpen && window.innerWidth < 1024) {
+        const sidebar = document.querySelector('[data-sidebar]');
+        const navbar = document.querySelector('nav');
+        
+        if (sidebar && navbar && 
+            !sidebar.contains(event.target) && 
+            !navbar.contains(event.target)) {
+          console.log('Clicked outside sidebar - closing');
+          setIsSidebarOpen(false);
+        }
       }
     };
 
-    document.addEventListener('keydown', handleEscapeKey);
+    if (isSidebarOpen) {
+      document.addEventListener('click', handleClickOutside, true);
+    }
+
     return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
+      document.removeEventListener('click', handleClickOutside, true);
     };
   }, [isSidebarOpen]);
 
@@ -312,56 +307,9 @@ const ProjectDetailsPage = () => {
     return (
       <>
         <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
-        
-        {/* Debug info for Loading state */}
-        {process.env.NODE_ENV === 'development' && (
-          <div style={{ position: 'fixed', top: '150px', right: '10px', zIndex: 9999, background: 'orange', color: 'white', padding: '8px', fontSize: '14px', maxWidth: '250px', borderRadius: '4px' }}>
-            <div><strong>LOADING SIDEBAR:</strong> {isSidebarOpen ? '🟢 OPEN' : '🔴 CLOSED'}</div>
-            <div><strong>MOBILE:</strong> {isMobile ? '📱 YES' : '💻 NO'}</div>
-            <button 
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              style={{ background: 'green', color: 'white', padding: '4px 8px', marginRight: '4px', fontSize: '12px', borderRadius: '2px', border: 'none' }}
-            >
-              Toggle
-            </button>
-          </div>
-        )}
-        
-        <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden">
+        <div className="flex h-screen overflow-hidden">
           <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-          
-          {/* Simple Full-Screen Click Handler */}
-          {isSidebarOpen && isMobile && (
-            <div
-              className="fixed inset-0 z-50 lg:hidden"
-              style={{ 
-                background: 'rgba(0,0,0,0.1)', // Subtle dark overlay
-                cursor: 'pointer',
-                zIndex: 999
-                          }}
-            onClick={() => {
-              console.log('ProjectDetails overlay clicked!');
-              setIsSidebarOpen(false);
-            }}
-            onTouchEnd={() => {
-              console.log('ProjectDetails touch end!');
-              setIsSidebarOpen(false);
-            }}
-          >
-            {process.env.NODE_ENV === 'development' && (
-              <div 
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-              >
-                <div className="bg-green-500/90 text-white px-4 py-2 rounded font-bold">
-                  PROJECT DETAILS OVERLAY<br/>
-                  CLICK TO CLOSE
-                </div>
-              </div>
-            )}
-          </div>
-          )}
-          
-          <main className="flex-1 mt-14 lg:ml-[280px] p-8 bg-[#121212] min-h-screen">
+          <main className="ml-[280px] flex-1 p-8 bg-[#121212] min-h-screen">
             <div className="max-w-6xl mx-auto">
               <div className="animate-pulse space-y-6">
                 <div className="h-8 w-48 bg-[#252525] rounded"></div>
@@ -386,56 +334,9 @@ const ProjectDetailsPage = () => {
     return (
       <>
         <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
-        
-        {/* Debug info for Error state */}
-        {process.env.NODE_ENV === 'development' && (
-          <div style={{ position: 'fixed', top: '150px', right: '10px', zIndex: 9999, background: 'red', color: 'white', padding: '8px', fontSize: '14px', maxWidth: '250px', borderRadius: '4px' }}>
-            <div><strong>ERROR SIDEBAR:</strong> {isSidebarOpen ? '🟢 OPEN' : '🔴 CLOSED'}</div>
-            <div><strong>MOBILE:</strong> {isMobile ? '📱 YES' : '💻 NO'}</div>
-            <button 
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              style={{ background: 'green', color: 'white', padding: '4px 8px', marginRight: '4px', fontSize: '12px', borderRadius: '2px', border: 'none' }}
-            >
-              Toggle
-            </button>
-          </div>
-        )}
-        
-        <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden">
+        <div className="flex h-screen overflow-hidden">
           <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-          
-          {/* Simple Full-Screen Click Handler */}
-          {isSidebarOpen && isMobile && (
-            <div
-              className="fixed inset-0 z-50 lg:hidden"
-              style={{ 
-                background: 'rgba(0,0,0,0.1)', // Subtle dark overlay
-                cursor: 'pointer',
-                zIndex: 999
-                          }}
-            onClick={() => {
-              console.log('ProjectDetails overlay clicked!');
-              setIsSidebarOpen(false);
-            }}
-            onTouchEnd={() => {
-              console.log('ProjectDetails touch end!');
-              setIsSidebarOpen(false);
-            }}
-          >
-            {process.env.NODE_ENV === 'development' && (
-              <div 
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-              >
-                <div className="bg-green-500/90 text-white px-4 py-2 rounded font-bold">
-                  PROJECT DETAILS OVERLAY<br/>
-                  CLICK TO CLOSE
-                </div>
-              </div>
-            )}
-          </div>
-          )}
-          
-          <main className="flex-1 mt-14 lg:ml-[280px] p-8 bg-[#121212] min-h-screen">
+          <main className="ml-[280px] flex-1 p-8 bg-[#121212] min-h-screen">
             <div className="max-w-6xl mx-auto">
               <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-8 text-center">
                 <FontAwesomeIcon icon={faExclamationTriangle} className="text-4xl text-red-400 mb-4" />
@@ -464,45 +365,22 @@ const ProjectDetailsPage = () => {
     <>
       <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
       
-      {/* Debug info for ProjectDetails */}
+      {/* Simple debug for ProjectDetails */}
       {process.env.NODE_ENV === 'development' && (
-        <div style={{ position: 'fixed', top: '150px', right: '10px', zIndex: 9999, background: 'purple', color: 'white', padding: '8px', fontSize: '14px', maxWidth: '250px', borderRadius: '4px' }}>
-          <div><strong>PROJECT SIDEBAR:</strong> {isSidebarOpen ? '🟢 OPEN' : '🔴 CLOSED'}</div>
-          <div><strong>MOBILE:</strong> {isMobile ? '📱 YES' : '💻 NO'}</div>
-          <div><strong>OVERLAY:</strong> {isSidebarOpen && isMobile ? '🟡 ACTIVE' : '⚫ INACTIVE'}</div>
-          <hr style={{ margin: '8px 0' }} />
+        <div style={{ position: 'fixed', top: '150px', right: '10px', zIndex: 9999, background: 'navy', color: 'white', padding: '8px', fontSize: '12px', borderRadius: '4px' }}>
+          <div>ProjectDetails: {isSidebarOpen ? '🟢 OPEN' : '🔴 CLOSED'}</div>
+          <div>Mobile: {window.innerWidth < 1024 ? '📱 YES' : '💻 NO'}</div>
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            style={{ background: 'green', color: 'white', padding: '4px 8px', marginRight: '4px', fontSize: '12px', borderRadius: '2px', border: 'none' }}
+            style={{ background: 'green', color: 'white', padding: '2px 4px', fontSize: '10px', border: 'none', marginTop: '4px' }}
           >
             Toggle
-          </button>
-          <button 
-            onClick={() => setIsSidebarOpen(false)}
-            style={{ background: 'red', color: 'white', padding: '4px 8px', fontSize: '12px', borderRadius: '2px', border: 'none' }}
-          >
-            Close
           </button>
         </div>
       )}
       
-      <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden">
+      <div className="flex h-screen overflow-hidden">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-        
-        {/* Simple Full-Screen Click Handler */}
-        {isSidebarOpen && isMobile && (
-          <div
-            className="fixed inset-0 z-50 lg:hidden"
-            style={{ 
-              background: 'rgba(0,0,0,0.1)', // Subtle dark overlay
-              cursor: 'pointer',
-              zIndex: 999
-            }}
-            onClick={() => setIsSidebarOpen(false)}
-            onTouchEnd={() => setIsSidebarOpen(false)}
-          />
-        )}
-        
         <main className="flex-1 lg:ml-[280px] p-4 sm:p-6 md:p-8 bg-[#121212] min-h-screen overflow-y-auto mt-14">
           <div className="absolute inset-0 overflow-hidden z-0">
             <motion.div 
