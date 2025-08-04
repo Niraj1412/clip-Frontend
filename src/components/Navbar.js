@@ -132,23 +132,21 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setSidebarOpen(prev => !prev)}
-            className={`lg:hidden relative p-3 rounded-xl shadow-lg transition-all duration-300 group overflow-hidden ${
-              isSidebarOpen 
-                ? 'bg-gradient-to-r from-red-500/80 to-red-600/80 border border-red-400/30' 
+            className={`lg:hidden relative p-3 rounded-xl shadow-lg transition-all duration-300 group overflow-hidden ${isSidebarOpen
+                ? 'bg-gradient-to-r from-red-500/80 to-red-600/80 border border-red-400/30'
                 : 'bg-gradient-to-r from-[#1A1A1A]/90 to-[#2A2A2A]/90 border border-gray-600/30 hover:border-[#6c5ce7]/50'
-            }`}
+              }`}
             aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
           >
             {/* Animated background gradient */}
-            <div className={`absolute inset-0 transition-all duration-300 ${
-              isSidebarOpen 
-                ? 'bg-gradient-to-r from-red-500/20 to-red-600/20 opacity-100' 
+            <div className={`absolute inset-0 transition-all duration-300 ${isSidebarOpen
+                ? 'bg-gradient-to-r from-red-500/20 to-red-600/20 opacity-100'
                 : 'bg-gradient-to-r from-[#6c5ce7]/0 to-purple-500/0 group-hover:from-[#6c5ce7]/20 group-hover:to-purple-500/20 opacity-0 group-hover:opacity-100'
-            }`}></div>
-            
+              }`}></div>
+
             {/* Ripple effect on click */}
             <div className="absolute inset-0 bg-white/10 rounded-xl opacity-0 group-active:opacity-100 transition-opacity duration-150"></div>
-            
+
             {/* Icon container with enhanced animation */}
             <div className="relative w-5 h-5 flex items-center justify-center">
               <AnimatePresence mode="wait">
@@ -158,17 +156,17 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
                     initial={{ rotate: -180, scale: 0.5, opacity: 0 }}
                     animate={{ rotate: 0, scale: 1, opacity: 1 }}
                     exit={{ rotate: 180, scale: 0.5, opacity: 0 }}
-                    transition={{ 
-                      duration: 0.3, 
+                    transition={{
+                      duration: 0.3,
                       ease: [0.25, 0.1, 0.25, 1],
                       scale: { duration: 0.2 }
                     }}
                     className="absolute"
                   >
-                    <FontAwesomeIcon 
-                      icon={faXmark} 
-                      className="text-white drop-shadow-sm" 
-                      size="lg" 
+                    <FontAwesomeIcon
+                      icon={faXmark}
+                      className="text-white drop-shadow-sm"
+                      size="lg"
                     />
                   </motion.div>
                 ) : (
@@ -177,23 +175,23 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
                     initial={{ rotate: 180, scale: 0.5, opacity: 0 }}
                     animate={{ rotate: 0, scale: 1, opacity: 1 }}
                     exit={{ rotate: -180, scale: 0.5, opacity: 0 }}
-                    transition={{ 
-                      duration: 0.3, 
+                    transition={{
+                      duration: 0.3,
                       ease: [0.25, 0.1, 0.25, 1],
                       scale: { duration: 0.2 }
                     }}
                     className="absolute"
                   >
-                    <FontAwesomeIcon 
-                      icon={faBars} 
-                      className="text-white group-hover:text-[#6c5ce7] transition-colors duration-300 drop-shadow-sm" 
-                      size="lg" 
+                    <FontAwesomeIcon
+                      icon={faBars}
+                      className="text-white group-hover:text-[#6c5ce7] transition-colors duration-300 drop-shadow-sm"
+                      size="lg"
                     />
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-            
+
             {/* Active state indicator */}
             {isSidebarOpen && (
               <motion.div
@@ -263,7 +261,7 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
           </div>
         </div>
       </motion.nav>
-      
+
       {/* Simplified Mobile Sidebar Overlay - Only visual blur */}
       <AnimatePresence>
         {isSidebarOpen && (
@@ -272,14 +270,14 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 bg-black/70 lg:hidden pointer-events-none"
-            style={{ 
+            className="fixed inset-0 bg-black/70 lg:hidden pointer-events-auto" // pointer-events-auto allows click events
+            style={{
               zIndex: 100,
               WebkitBackdropFilter: "blur(8px)",
               backdropFilter: "blur(8px)"
             }}
+            onClick={() => setSidebarOpen(false)} // Close sidebar when overlay is clicked
           >
-            {/* Just visual elements - no click handling */}
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
               <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
                 <p className="text-white/90 text-sm font-medium">Tap anywhere to close</p>
