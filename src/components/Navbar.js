@@ -133,15 +133,15 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
             whileTap={{ scale: 0.98 }}
             onClick={() => setSidebarOpen(prev => !prev)}
             className={`lg:hidden relative p-3 rounded-xl shadow-lg transition-all duration-300 group overflow-hidden ${isSidebarOpen
-                ? 'bg-gradient-to-r from-red-500/80 to-red-600/80 border border-red-400/30'
-                : 'bg-gradient-to-r from-[#1A1A1A]/90 to-[#2A2A2A]/90 border border-gray-600/30 hover:border-[#6c5ce7]/50'
+              ? 'bg-gradient-to-r from-red-500/80 to-red-600/80 border border-red-400/30'
+              : 'bg-gradient-to-r from-[#1A1A1A]/90 to-[#2A2A2A]/90 border border-gray-600/30 hover:border-[#6c5ce7]/50'
               }`}
             aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
           >
             {/* Animated background gradient */}
             <div className={`absolute inset-0 transition-all duration-300 ${isSidebarOpen
-                ? 'bg-gradient-to-r from-red-500/20 to-red-600/20 opacity-100'
-                : 'bg-gradient-to-r from-[#6c5ce7]/0 to-purple-500/0 group-hover:from-[#6c5ce7]/20 group-hover:to-purple-500/20 opacity-0 group-hover:opacity-100'
+              ? 'bg-gradient-to-r from-red-500/20 to-red-600/20 opacity-100'
+              : 'bg-gradient-to-r from-[#6c5ce7]/0 to-purple-500/0 group-hover:from-[#6c5ce7]/20 group-hover:to-purple-500/20 opacity-0 group-hover:opacity-100'
               }`}></div>
 
             {/* Ripple effect on click */}
@@ -270,9 +270,9 @@ const Navbar = ({ setSidebarOpen, isSidebarOpen }) => { // Add both props
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 bg-black/70 lg:hidden pointer-events-auto" // pointer-events-auto allows click events
+            className="fixed inset-0 bg-black/70 lg:hidden pointer-events-auto" // Ensuring pointer-events are enabled
             style={{
-              zIndex: 100,
+              zIndex: 2000, // Ensure this has a higher zIndex than sidebar (Sidebar uses zIndex: 1000)
               WebkitBackdropFilter: "blur(8px)",
               backdropFilter: "blur(8px)"
             }}
