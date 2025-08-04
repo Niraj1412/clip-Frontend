@@ -221,7 +221,7 @@ const ExplorePage = () => {
 
   const SectionTitle = ({ title, viewMoreLink, action }) => (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
-      <h2 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-[#7c66ff]/90 to-white mb-3 sm:mb-0">{title}</h2>
+      <h2 className="text-2xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-[#7c66ff]/90 to-white mb-3 sm:mb-0">{title}</h2>
       <div className="flex items-center gap-2 sm:gap-3">
         {action}
         {viewMoreLink && (
@@ -239,8 +239,8 @@ const ExplorePage = () => {
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
       className="relative group"
     >
-      <div className="absolute -inset-1 bg-gradient-to-br from-[#6c5ce7]/20 to-indigo-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      <div className="bg-[#1A1A1A]/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-[#2A2A2A] group-hover:border-[#6c5ce7]/40 transition-all duration-300 relative z-10 h-full shadow-xl">
+      <div className="absolute -inset-1 bg-gradient-to-br from-[#6c5ce7]/20 to-indigo-500/10 rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="bg-[#1A1A1A]/90 backdrop-blur-sm rounded-xl p-4 sm:p-4 border border-[#2A2A2A] group-hover:border-[#6c5ce7]/40 transition-all duration-300 relative z-10 h-full shadow-xl">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-gray-400 text-xs sm:text-sm mb-1">{title}</p>
@@ -254,7 +254,7 @@ const ExplorePage = () => {
               </motion.span>
             </h4>
           </div>
-          <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-xl flex items-center justify-center relative">
+          <div className="w-10 sm:w-10 h-10 sm:h-10 rounded-xl flex items-center justify-center relative">
             <div className="absolute inset-0 bg-gradient-to-br from-[#6c5ce7]/30 to-indigo-600/30 rounded-xl opacity-60 group-hover:opacity-100 transition-all duration-300"></div>
             <FontAwesomeIcon icon={icon} className="text-white text-base sm:text-lg relative z-10" />
           </div>
@@ -303,13 +303,13 @@ const ExplorePage = () => {
         <main className="lg:ml-[280px] mt-12 flex-1 bg-[#0a0a0a] overflow-y-auto text-white relative">
           <ParticleBackground />
           <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-            <div className="absolute top-20 left-1/4 w-48 sm:w-64 md:w-[40rem] h-48 sm:h-64 md:h-[40rem] bg-[#7c66ff]/8 rounded-full filter blur-[80px] sm:blur-[120px] animate-pulse-slow opacity-20 sm:opacity-30"></div>
-            <div className="absolute bottom-40 right-1/4 w-56 sm:w-72 md:w-[45rem] h-56 sm:h-72 md:h-[45rem] bg-indigo-500/8 rounded-full filter blur-[100px] sm:blur-[150px] animate-pulse-slower opacity-20 sm:opacity-30"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-radial from-[#7c66ff]/5 to-transparent opacity-10"></div>
+            <div className="absolute top-20 left-1/4 w-32 sm:w-48 md:w-[30rem] lg:w-[40rem] h-32 sm:h-48 md:h-[30rem] lg:h-[40rem] bg-[#7c66ff]/3 sm:bg-[#7c66ff]/6 md:bg-[#7c66ff]/8 rounded-full filter blur-[60px] sm:blur-[80px] md:blur-[120px] animate-pulse-slow opacity-15 sm:opacity-20 md:opacity-30"></div>
+            <div className="absolute bottom-40 right-1/4 w-40 sm:w-56 md:w-[35rem] lg:w-[45rem] h-40 sm:h-56 md:h-[35rem] lg:h-[45rem] bg-indigo-500/3 sm:bg-indigo-500/6 md:bg-indigo-500/8 rounded-full filter blur-[70px] sm:blur-[100px] md:blur-[150px] animate-pulse-slower opacity-15 sm:opacity-20 md:opacity-30"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-radial from-[#7c66ff]/2 to-transparent opacity-5 sm:opacity-8 md:opacity-10"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM3YzY2ZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0di00aC0ydjRoLTR2Mmg0djRoMnYtNGg0di0ySDZ6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRoLTR6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRINnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10 sm:opacity-20 bg-fixed"></div>
           </div>
           
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
+          <div className="max-w-[1400px] mx-auto px-6 sm:px-6 py-8 sm:py-8 relative z-10">
             <style jsx>{`
               main::-webkit-scrollbar {
                 width: 6px;
@@ -363,7 +363,7 @@ const ExplorePage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#7c66ff]/10 sm:from-[#7c66ff]/20 via-[#a391ff]/10 to-[#7c66ff]/10 sm:to-[#7c66ff]/20 rounded-2xl blur-xl opacity-50 sm:opacity-70 transition-all duration-1000"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#7c66ff]/5 sm:from-[#7c66ff]/15 md:from-[#7c66ff]/20 via-[#a391ff]/5 sm:via-[#a391ff]/10 to-[#7c66ff]/5 sm:to-[#7c66ff]/15 md:to-[#7c66ff]/20 rounded-2xl blur-md sm:blur-lg md:blur-xl opacity-30 sm:opacity-50 md:opacity-70 transition-all duration-1000"></div>
               <div className="bg-[#151515]/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl border border-[#7c66ff]/20 relative animate-gradient bg-gradient-to-r from-[#0a0a0a] via-[#121212] to-[#0a0a0a]">
                 <div className="relative">
                   <motion.div 
@@ -375,7 +375,7 @@ const ExplorePage = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-[#151515] to-[#151515]/80 z-[1]"></div>
                   <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-[#7c66ff]/5 rounded-full filter blur-[50px] sm:blur-[80px] animate-float"></div>
                   <div className="absolute bottom-0 left-0 w-24 sm:w-32 h-24 sm:h-32 bg-indigo-500/5 rounded-full filter blur-[30px] sm:blur-[50px] animate-float" style={{ animationDelay: "-3s" }}></div>
-                  <div className="p-4 sm:p-6 md:p-8 relative z-10">
+                  <div className="p-6 sm:p-6 md:p-8 relative z-10">
                     <motion.div 
                       className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6"
                       initial={{ opacity: 0, y: 20 }}
@@ -383,7 +383,7 @@ const ExplorePage = () => {
                       transition={{ duration: 0.7, delay: 0.3 }}
                     >
                       <div className="max-w-full sm:max-w-2xl">
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">
+                        <h1 className="text-3xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-3 leading-tight">
                           <motion.span 
                             className="bg-clip-text text-transparent bg-gradient-to-r from-white via-[#7c66ff]/90 to-white animate-gradient"
                             initial={{ opacity: 0, y: -20 }}
@@ -394,7 +394,7 @@ const ExplorePage = () => {
                           </motion.span>
                         </h1>
                         <motion.p 
-                          className="text-gray-300 text-sm sm:text-base leading-relaxed"
+                          className="text-gray-300 text-base sm:text-base leading-relaxed max-w-lg"
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.5, delay: 0.2 }}
@@ -410,10 +410,10 @@ const ExplorePage = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5, delay: 0.4 }}
                       >
-                        <div className="absolute -inset-1 bg-gradient-to-r from-[#7c66ff] to-indigo-600 rounded-xl blur opacity-50 sm:opacity-70 group-hover:opacity-100 transition-all duration-500"></div>
+                        <div className="absolute -inset-1 bg-gradient-to-r from-[#7c66ff] to-indigo-600 rounded-xl blur-sm opacity-50 sm:opacity-70 group-hover:opacity-100 transition-all duration-500"></div>
                         <button 
                           onClick={() => navigate('/dashboard')}
-                          className="relative bg-gradient-to-r from-[#7c66ff] to-indigo-600 px-4 sm:px-6 py-2 sm:py-3 text-white rounded-xl font-medium text-base sm:text-lg flex items-center gap-2 sm:gap-3 shadow-xl shadow-[#7c66ff]/20 overflow-hidden group"
+                          className="relative bg-gradient-to-r from-[#7c66ff] to-indigo-600 px-6 sm:px-6 py-3 sm:py-3 text-white rounded-xl font-medium text-lg sm:text-lg flex items-center gap-3 sm:gap-3 shadow-xl shadow-[#7c66ff]/25 overflow-hidden group min-w-[200px] justify-center"
                         >
                           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                           <div className="absolute inset-0 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-xl bg-white/10 origin-bottom-right"></div>
@@ -424,7 +424,7 @@ const ExplorePage = () => {
                     </motion.div>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 p-4 sm:p-6 bg-[#151515]/60 backdrop-blur-sm border-t border-[#2A2A2A]/50">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-4 p-6 sm:p-6 bg-[#151515]/60 backdrop-blur-sm border-t border-[#2A2A2A]/50">
                   <StatCard 
                     icon={faFolder} 
                     title="Total Projects" 
@@ -539,7 +539,7 @@ const ExplorePage = () => {
                         whileTap={{ scale: 0.95 }}
                         className="relative inline-block group"
                       >
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#7c66ff] to-indigo-600 rounded-xl blur opacity-50 sm:opacity-70 group-hover:opacity-100 transition-all duration-500"></div>
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#7c66ff] to-indigo-600 rounded-xl blur-sm opacity-50 sm:opacity-70 group-hover:opacity-100 transition-all duration-500"></div>
                         <button 
                           onClick={() => navigate('/dashboard')}
                           className="relative bg-gradient-to-r from-[#7c66ff] to-indigo-600 px-4 sm:px-6 py-2 sm:py-3 text-white rounded-xl font-medium text-sm sm:text-base flex items-center gap-2 sm:gap-3 shadow-xl shadow-[#7c66ff]/20"
