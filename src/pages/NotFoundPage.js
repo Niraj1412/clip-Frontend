@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faHome, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Link, useLocation } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/NavbarSimple';
 
 const NotFoundPage = () => {
   const location = useLocation();
