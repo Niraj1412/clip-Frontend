@@ -11,7 +11,7 @@ import {
   faGlobe
 } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/NavbarSimple';
 
 const AboutPage = () => {
   const features = [

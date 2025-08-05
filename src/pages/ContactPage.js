@@ -7,7 +7,7 @@ import {
   faExclamationCircle,
   faSpinner 
 } from '@fortawesome/free-solid-svg-icons';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/NavbarSimple';
 import axios from 'axios';
 import { CONTACT_API } from '../config';
 

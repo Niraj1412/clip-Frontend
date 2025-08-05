@@ -10,7 +10,7 @@ import {
   faCookie,
   faHistory
 } from '@fortawesome/free-solid-svg-icons';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/NavbarSimple';
 
 const PrivacyPage = () => {
   const privacySections = [
