@@ -481,19 +481,19 @@ const TranscriptGridPage = () => {
 
       {/* Main Content */}
       {initialLoading ? (
-        <div className="flex-1 flex items-center justify-center relative">
-          <div className="text-center space-y-6 relative">
-            <div className="relative">
+        <div className="flex-1 flex items-center justify-center min-h-0 w-full relative">
+          <div className="flex flex-col items-center justify-center text-center space-y-6 relative mx-auto">
+            <div className="relative flex items-center justify-center mx-auto">
               <div className="absolute -inset-8 bg-gradient-to-r from-[#6c5ce7]/20 to-purple-600/20 rounded-full blur-2xl animate-pulse"></div>
-              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center shadow-2xl shadow-[#6c5ce7]/30">
+              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center shadow-2xl shadow-[#6c5ce7]/30 mx-auto">
                 <FontAwesomeIcon icon={faSpinner} className="text-white text-2xl animate-spin" />
               </div>
             </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            <div className="space-y-2 flex flex-col items-center justify-center">
+              <h3 className="text-lg font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent text-center">
                 Preparing Your Content
               </h3>
-              <p className="text-gray-400 text-sm animate-pulse">Loading video transcripts...</p>
+              <p className="text-gray-400 text-sm animate-pulse text-center">Loading video transcripts...</p>
             </div>
           </div>
         </div>
