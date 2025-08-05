@@ -446,18 +446,20 @@ const TranscriptGridPage = () => {
 
   return (
     <div className="h-screen bg-[#121212] text-white flex flex-col">
-      {/* Header */}
-      <div className="flex justify-between items-center px-6 py-3 border-b border-[#2d2d2d] bg-[#1a1a1a]">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#6c5ce7] flex items-center justify-center">
-            <FontAwesomeIcon icon={faList} className="text-white" />
+      {/* Header - Mobile Optimized */}
+      <div className="flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4 border-b border-[#2d2d2d] bg-[#1a1a1a]">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#6c5ce7] flex items-center justify-center flex-shrink-0">
+            <FontAwesomeIcon icon={faList} className="text-white text-sm sm:text-base" />
           </div>
-          <h1 className="text-lg font-medium text-white">
-            Video Transcripts
-            <span className="ml-2 text-sm text-gray-400">
-              ({selectedVideos.size} selected / {videoIds?.length || 0} videos)
-            </span>
-          </h1>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base sm:text-lg font-medium text-white truncate">
+              Video Transcripts
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-400 mt-0.5 sm:mt-0">
+              {selectedVideos.size} selected / {videoIds?.length || 0} videos
+            </p>
+          </div>
         </div>
       </div>
 
@@ -470,28 +472,29 @@ const TranscriptGridPage = () => {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden pb-16 md:pb-0">
-          {/* Left Panel - Video List */}
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden pb-16 lg:pb-0">
+          {/* Left Panel - Video List - Mobile Optimized */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-full md:w-[420px] bg-gray-900 flex flex-col md:border-r md:border-[#2d2d2d]"
+            className="w-full lg:w-[420px] bg-gray-900 flex flex-col lg:border-r lg:border-[#2d2d2d] max-h-[40vh] lg:max-h-none"
           >
-            {/* Search Bar */}
-            <div className="p-4 border-b border-[#2d2d2d]">
+            {/* Search Bar - Mobile Optimized */}
+            <div className="p-3 sm:p-4 border-b border-[#2d2d2d]">
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Search videos..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-[#252525] text-sm px-10 py-2.5 rounded-lg text-gray-300 
-                           placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#6c5ce7]"
+                  className="w-full bg-[#252525] text-sm px-9 sm:px-10 py-2.5 sm:py-3 rounded-lg text-gray-300 
+                           placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#6c5ce7] 
+                           transition-all duration-200"
                 />
                 <FontAwesomeIcon
                   icon={faSearch}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500"
+                  className="absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"
                 />
               </div>
             </div>
@@ -552,31 +555,31 @@ const TranscriptGridPage = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: index * 0.05 }}
-                  className={`p-2 sm:p-3 cursor-pointer transition-all duration-200 border-b border-[#2d2d2d]
-                ${selectedVideo === videoId ? 'bg-[#2d2d2d]' : 'hover:bg-[#252525]'}
-                ${loading[videoId] ? 'opacity-70' : ''}`}
+                  className={`p-3 sm:p-3 cursor-pointer transition-all duration-200 border-b border-[#2d2d2d]
+                ${selectedVideo === videoId ? 'bg-[#2d2d2d] border-l-2 border-l-[#6c5ce7]' : 'hover:bg-[#252525]'}
+                ${loading[videoId] ? 'opacity-70' : ''} active:bg-[#2d2d2d] active:scale-[0.99]`}
                   onClick={() => selectVideo(videoId)}
                 >
                   {videoDetails[videoId] ? (
-                    <div className="flex gap-2 sm:gap-3">
-                      <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="flex gap-3">
+                      <div className="flex items-start gap-3">
                         <button
                           onClick={(e) => toggleVideoSelection(e, videoId)}
-                          className={`w-4 h-4 sm:w-5 sm:h-5 rounded flex items-center justify-center transition-colors
+                          className={`w-5 h-5 rounded flex items-center justify-center transition-all duration-200 touch-manipulation
                       ${selectedVideos.has(videoId)
-                              ? 'bg-[#6c5ce7] text-white'
-                              : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700'}`}
+                              ? 'bg-[#6c5ce7] text-white shadow-lg shadow-[#6c5ce7]/30'
+                              : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700 active:scale-95'}`}
                         >
                           <FontAwesomeIcon
                             icon={selectedVideos.has(videoId) ? faSquareCheck : faSquare}
-                            className={`text-xs sm:text-sm ${selectedVideos.has(videoId) ? 'scale-110' : ''}`}
+                            className={`text-sm ${selectedVideos.has(videoId) ? 'scale-110' : ''} transition-transform`}
                           />
                         </button>
                         <a
                           href={`https://www.youtube.com/watch?v=${videoId}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="relative group w-24 sm:w-32 h-16 sm:h-20 flex-shrink-0"
+                          className="relative group w-28 h-[4.5rem] sm:w-32 sm:h-20 flex-shrink-0 touch-manipulation"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <img
@@ -586,25 +589,25 @@ const TranscriptGridPage = () => {
                               e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
                             }}
                             alt=""
-                            className="w-full h-full object-cover rounded-lg"
+                            className="w-full h-full object-cover rounded-lg shadow-md"
                           />
-                          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 
-                          flex items-center justify-center transition-colors rounded-lg">
-                            <FontAwesomeIcon icon={faPlay} className="text-white/90" />
+                          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 group-active:bg-black/60
+                          flex items-center justify-center transition-all duration-200 rounded-lg">
+                            <FontAwesomeIcon icon={faPlay} className="text-white/90 text-sm group-hover:scale-110 transition-transform" />
                           </div>
-                          <span className="absolute bottom-1 right-1 text-[8px] sm:text-[10px] bg-black/60 
-                           text-white px-1 sm:px-1.5 py-0.5 rounded">
+                          <span className="absolute bottom-1 right-1 text-[10px] bg-black/70 
+                           text-white px-1.5 py-0.5 rounded font-medium">
                             {formatDuration(videoDetails[videoId].duration)}
                           </span>
                         </a>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-xs sm:text-sm font-medium text-gray-200 line-clamp-2 mb-1 leading-snug">
+                        <h3 className="text-sm font-medium text-gray-200 line-clamp-2 mb-1.5 leading-tight">
                           {videoDetails[videoId].title}
                         </h3>
-                        <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <FontAwesomeIcon icon={faCalendar} className="text-[8px] sm:text-[10px]" />
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <span className="flex items-center gap-1.5">
+                            <FontAwesomeIcon icon={faCalendar} className="text-[10px] text-[#6c5ce7]" />
                             {formatDate(videoDetails[videoId].publishedAt)}
                           </span>
                         </div>
@@ -625,12 +628,12 @@ const TranscriptGridPage = () => {
             </div>
           </motion.div>
 
-          {/* Middle Panel - Transcript */}
+          {/* Middle Panel - Transcript - Mobile Optimized */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.2 }}
-            className="flex-1 flex flex-col overflow-hidden bg-[#121212] relative"
+            className="flex-1 flex flex-col overflow-hidden bg-[#121212] relative min-h-0"
           >
             <AnimatePresence mode="wait">
               {selectedVideo && videoDetails[selectedVideo] ? (
@@ -642,30 +645,30 @@ const TranscriptGridPage = () => {
                   transition={{ duration: 0.3 }}
                   className="flex-1 flex flex-col overflow-hidden"
                 >
-                  {/* Transcript Header */}
-                  <div className="px-6 py-4 border-b border-[#2d2d2d] bg-[#1a1a1a]/80 backdrop-blur-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#6c5ce7]/10 flex items-center justify-center">
-                          <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7]" />
+                  {/* Transcript Header - Mobile Optimized */}
+                  <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-[#2d2d2d] bg-[#1a1a1a]/80 backdrop-blur-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#6c5ce7]/10 flex items-center justify-center flex-shrink-0">
+                          <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7] text-sm sm:text-base" />
                         </div>
-                        <div>
-                          <h2 className="text-sm font-medium text-white">Video Transcript</h2>
-                          <p className="text-xs text-gray-400 mt-0.5">
-                            {transcripts[selectedVideo]?.length || 0} segments • {formatDuration(videoDetails[selectedVideo]?.duration)} total duration
+                        <div className="min-w-0 flex-1">
+                          <h2 className="text-sm sm:text-base font-medium text-white truncate">Video Transcript</h2>
+                          <p className="text-xs text-gray-400 mt-0.5 truncate">
+                            {transcripts[selectedVideo]?.length || 0} segments • {formatDuration(videoDetails[selectedVideo]?.duration)}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="px-3 py-1 rounded-full bg-[#6c5ce7]/10 text-[#6c5ce7] text-xs font-medium">
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="px-2 sm:px-3 py-1 rounded-full bg-[#6c5ce7]/10 text-[#6c5ce7] text-[10px] sm:text-xs font-medium">
                           Auto-Generated
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Transcript Content with custom scrollbar */}
-                  <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-purple-scrollbar">
+                  {/* Transcript Content with custom scrollbar - Mobile Optimized */}
+                  <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 sm:space-y-3 custom-purple-scrollbar">
                     {loading[selectedVideo] ? (
                       <div className="flex items-center justify-center h-full">
                         <FontAwesomeIcon icon={faSpinner} className="text-[#6c5ce7] text-2xl animate-spin" />
@@ -685,25 +688,25 @@ const TranscriptGridPage = () => {
                         return (
                           <React.Fragment key={index}>
                             {showHeading && (
-                              <div className="pt-6 pb-3">
-                                <h2 className="text-[#6c5ce7] text-sm font-semibold flex items-center gap-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-[#6c5ce7]"></div>
-                                  {generateSectionHeading(startTime)}
+                              <div className="pt-4 sm:pt-6 pb-2 sm:pb-3">
+                                <h2 className="text-[#6c5ce7] text-sm sm:text-base font-semibold flex items-center gap-2">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-[#6c5ce7] flex-shrink-0"></div>
+                                  <span className="truncate">{generateSectionHeading(startTime)}</span>
                                   <div className="h-px bg-[#6c5ce7]/20 flex-1 ml-2"></div>
                                 </h2>
                               </div>
                             )}
-                            <div className="p-3 bg-[#1a1a1a]/60 rounded-lg hover:bg-[#252525] 
-                                         transition-colors group flex gap-3">
-                              <div className="flex flex-col items-start gap-1 w-32">
-                                <span className="text-xs font-medium text-[#6c5ce7] whitespace-nowrap">
+                            <div className="p-3 sm:p-4 bg-[#1a1a1a]/60 rounded-lg hover:bg-[#252525] active:bg-[#2a2a2a]
+                                         transition-all duration-200 group flex flex-col sm:flex-row gap-2 sm:gap-3 touch-manipulation">
+                              <div className="flex flex-row sm:flex-col items-center sm:items-start gap-2 sm:gap-1 w-full sm:w-32 flex-shrink-0">
+                                <span className="text-xs sm:text-sm font-medium text-[#6c5ce7] whitespace-nowrap">
                                   {formatTimeRangePrecise(startTime, endTime)}
                                 </span>
-                                <span className="text-[10px] text-gray-500">
-                                  Duration: {duration.toFixed(3)}s
+                                <span className="text-[10px] sm:text-xs text-gray-500">
+                                  {duration.toFixed(3)}s
                                 </span>
                               </div>
-                              <p className="text-sm text-gray-300 flex-1">{segment.text}</p>
+                              <p className="text-sm sm:text-base text-gray-300 flex-1 leading-relaxed">{segment.text}</p>
                             </div>
                           </React.Fragment>
                         );
@@ -721,17 +724,17 @@ const TranscriptGridPage = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex flex-col items-center justify-center h-full w-full p-6"
+                  className="flex flex-col items-center justify-center h-full w-full p-4 sm:p-6"
                 >
-                  <div className="bg-gray-800/50 backdrop-blur-xl p-6 rounded-xl max-w-lg w-full shadow-lg">
-                    <div className="w-12 h-12 rounded-xl bg-[#6c5ce7] flex items-center justify-center mx-auto mb-4">
-                      <FontAwesomeIcon icon={faFilm} className="text-white text-xl" />
+                  <div className="bg-gray-800/50 backdrop-blur-xl p-4 sm:p-6 rounded-xl max-w-sm sm:max-w-lg w-full shadow-lg">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#6c5ce7] flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                      <FontAwesomeIcon icon={faFilm} className="text-white text-lg sm:text-xl" />
                     </div>
-                    <h2 className="text-lg font-bold text-white mb-2 text-center">
+                    <h2 className="text-base sm:text-lg font-bold text-white mb-2 text-center">
                       Video Transcripts
                     </h2>
                     <p className="text-gray-300 text-center text-sm leading-relaxed">
-                      Select a video from the sidebar to view its transcript.
+                      Select a video from the <span className="lg:hidden">list above</span><span className="hidden lg:inline">sidebar</span> to view its transcript.
                     </p>
                   </div>
                 </motion.div>
@@ -790,20 +793,22 @@ const TranscriptGridPage = () => {
         </div>
       )}
 
-      {/* Floating Generate Clips Button with improved animation */}
+      {/* Floating Generate Clips Button - Mobile Optimized */}
       <motion.button
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3, delay: 0.6 }}
         onClick={handleGenerateClips}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-[#6c5ce7] to-[#8b7cf7] 
-                 hover:from-[#5849e0] hover:to-[#7a6af6] px-5 py-3 rounded-xl
-                 text-white font-medium text-sm shadow-lg hover:shadow-xl
-                 transition-all duration-300 flex items-center gap-2.5
-                 hover:scale-105 active:scale-95 z-50"
+        className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 bg-gradient-to-r from-[#6c5ce7] to-[#8b7cf7] 
+                 hover:from-[#5849e0] hover:to-[#7a6af6] px-4 sm:px-5 py-3 sm:py-3 rounded-xl
+                 text-white font-medium text-sm sm:text-base shadow-lg hover:shadow-xl
+                 transition-all duration-300 flex items-center gap-2 sm:gap-2.5
+                 hover:scale-105 active:scale-95 z-50 touch-manipulation
+                 min-h-[48px] min-w-[120px] sm:min-w-[140px] justify-center"
       >
-        <FontAwesomeIcon icon={faWandMagicSparkles} className="text-lg" />
-        Generate Clips
+        <FontAwesomeIcon icon={faWandMagicSparkles} className="text-base sm:text-lg" />
+        <span className="hidden xs:inline sm:inline">Generate Clips</span>
+        <span className="xs:hidden sm:hidden">Clips</span>
       </motion.button>
     </div>
   );
