@@ -14,7 +14,8 @@ import {
   faFilm,
   faList,
   faSquare,
-  faSquareCheck
+  faSquareCheck,
+  faXmark
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import '../styles/TranscriptGrid.css';
@@ -445,19 +446,34 @@ const TranscriptGridPage = () => {
 
 
   return (
-    <div className="h-screen bg-[#121212] text-white flex flex-col">
-      {/* Header - Mobile Optimized */}
-      <div className="flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4 border-b border-[#2d2d2d] bg-[#1a1a1a]">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#6c5ce7] flex items-center justify-center flex-shrink-0">
-            <FontAwesomeIcon icon={faList} className="text-white text-sm sm:text-base" />
+    <div className="h-screen bg-gradient-to-br from-[#0a0a0a] via-[#121212] to-[#1a1a1a] text-white flex flex-col relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#6c5ce7]/5 rounded-full filter blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/3 rounded-full filter blur-[100px] animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-[#6c5ce7]/2 to-transparent opacity-20"></div>
+      </div>
+      
+      {/* Header - Enhanced Design */}
+      <div className="relative flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4 border-b border-[#2d2d2d]/50 bg-gradient-to-r from-[#1a1a1a]/90 via-[#1e1e1e]/90 to-[#1a1a1a]/90 backdrop-blur-xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#6c5ce7]/5 via-transparent to-[#6c5ce7]/5 opacity-50"></div>
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 relative z-10">
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7] to-purple-600 rounded-xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity"></div>
+            <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center flex-shrink-0 shadow-lg">
+              <FontAwesomeIcon icon={faList} className="text-white text-sm sm:text-base drop-shadow-sm" />
+            </div>
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-base sm:text-lg font-medium text-white truncate">
+            <h1 className="text-base sm:text-lg font-bold bg-gradient-to-r from-white via-[#f0f0f0] to-white bg-clip-text text-transparent truncate">
               Video Transcripts
             </h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-0.5 sm:mt-0">
-              {selectedVideos.size} selected / {videoIds?.length || 0} videos
+            <p className="text-xs sm:text-sm text-gray-400 mt-0.5 sm:mt-0 flex items-center gap-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#6c5ce7]/20 text-[#6c5ce7] text-[10px] sm:text-xs font-medium">
+                {selectedVideos.size} selected
+              </span>
+              <span className="text-gray-500">/</span>
+              <span>{videoIds?.length || 0} total</span>
             </p>
           </div>
         </div>
@@ -465,37 +481,60 @@ const TranscriptGridPage = () => {
 
       {/* Main Content */}
       {initialLoading ? (
-        <div className="flex-1 flex items-center justify-center bg-[#121212]">
-          <div className="text-center space-y-4">
-            <FontAwesomeIcon icon={faSpinner} className="text-[#6c5ce7] text-4xl animate-spin" />
-            <p className="text-gray-400 text-sm animate-pulse">Loading your videos...</p>
+        <div className="flex-1 flex items-center justify-center relative">
+          <div className="text-center space-y-6 relative">
+            <div className="relative">
+              <div className="absolute -inset-8 bg-gradient-to-r from-[#6c5ce7]/20 to-purple-600/20 rounded-full blur-2xl animate-pulse"></div>
+              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center shadow-2xl shadow-[#6c5ce7]/30">
+                <FontAwesomeIcon icon={faSpinner} className="text-white text-2xl animate-spin" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Preparing Your Content
+              </h3>
+              <p className="text-gray-400 text-sm animate-pulse">Loading video transcripts...</p>
+            </div>
           </div>
         </div>
       ) : (
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden pb-16 lg:pb-0">
-          {/* Left Panel - Video List - Mobile Optimized */}
+          {/* Left Panel - Video List - Enhanced Design */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-full lg:w-[420px] bg-gray-900 flex flex-col lg:border-r lg:border-[#2d2d2d] max-h-[40vh] lg:max-h-none"
+            className="w-full lg:w-[420px] bg-gradient-to-b from-[#1a1a1a]/95 via-[#151515]/95 to-[#1a1a1a]/95 backdrop-blur-sm flex flex-col lg:border-r lg:border-[#2d2d2d]/50 max-h-[40vh] lg:max-h-none relative"
           >
-            {/* Search Bar - Mobile Optimized */}
-            <div className="p-3 sm:p-4 border-b border-[#2d2d2d]">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search videos..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-[#252525] text-sm px-9 sm:px-10 py-2.5 sm:py-3 rounded-lg text-gray-300 
-                           placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#6c5ce7] 
-                           transition-all duration-200"
-                />
-                <FontAwesomeIcon
-                  icon={faSearch}
-                  className="absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"
-                />
+            {/* Panel Background Effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#6c5ce7]/3 via-transparent to-purple-600/2 pointer-events-none"></div>
+            {/* Search Bar - Enhanced Design */}
+            <div className="relative p-3 sm:p-4 border-b border-[#2d2d2d]/50">
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7]/20 to-purple-600/20 rounded-xl opacity-0 group-focus-within:opacity-100 blur-sm transition-opacity duration-300"></div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search videos..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full bg-gradient-to-r from-[#252525] to-[#2a2a2a] text-sm px-9 sm:px-10 py-2.5 sm:py-3 rounded-xl text-gray-300 
+                             placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#6c5ce7]/50 focus:bg-[#2a2a2a]
+                             transition-all duration-300 border border-[#3a3a3a]/50 focus:border-[#6c5ce7]/30 shadow-lg"
+                  />
+                  <FontAwesomeIcon
+                    icon={faSearch}
+                    className="absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#6c5ce7] transition-colors duration-200 text-sm"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                    >
+                      <FontAwesomeIcon icon={faXmark} className="text-xs" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -510,11 +549,12 @@ const TranscriptGridPage = () => {
                   background: #1a1a1a;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                  background: #2d2d2d;
-                  border-radius: 4px;
+                  background: linear-gradient(180deg, #2d2d2d 0%, #3d3d3d 100%);
+                  border-radius: 8px;
+                  border: 1px solid rgba(255, 255, 255, 0.1);
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                  background: #3d3d3d;
+                  background: linear-gradient(180deg, #3d3d3d 0%, #4d4d4d 100%);
                 }
                 .custom-scrollbar {
                   scrollbar-width: thin;
@@ -524,15 +564,18 @@ const TranscriptGridPage = () => {
                   width: 8px;
                 }
                 .custom-purple-scrollbar::-webkit-scrollbar-track {
-                  background: #1a1a1a;
+                  background: linear-gradient(180deg, #1a1a1a 0%, #151515 100%);
+                  border-radius: 8px;
                 }
                 .custom-purple-scrollbar::-webkit-scrollbar-thumb {
-                  background: #6c5ce7;
-                  border-radius: 4px;
-                  opacity: 0.3;
+                  background: linear-gradient(180deg, #6c5ce7 0%, #8b7cf7 100%);
+                  border-radius: 8px;
+                  border: 1px solid rgba(108, 92, 231, 0.3);
+                  box-shadow: 0 2px 8px rgba(108, 92, 231, 0.2);
                 }
                 .custom-purple-scrollbar::-webkit-scrollbar-thumb:hover {
-                  background: #8b7cf7;
+                  background: linear-gradient(180deg, #8b7cf7 0%, #a78bfa 100%);
+                  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
                 }
                 .custom-purple-scrollbar {
                   scrollbar-width: thin;
@@ -547,6 +590,9 @@ const TranscriptGridPage = () => {
                   transform: translateY(0);
                   transition: opacity 300ms, transform 300ms;
                 }
+                .bg-gradient-radial {
+                  background: radial-gradient(circle, var(--tw-gradient-stops));
+                }
                 `}
               </style>
               {filteredVideoIds?.map((videoId, index) => (
@@ -555,33 +601,45 @@ const TranscriptGridPage = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: index * 0.05 }}
-                  className={`p-3 sm:p-3 cursor-pointer transition-all duration-200 border-b border-[#2d2d2d]
-                ${selectedVideo === videoId ? 'bg-[#2d2d2d] border-l-2 border-l-[#6c5ce7]' : 'hover:bg-[#252525]'}
-                ${loading[videoId] ? 'opacity-70' : ''} active:bg-[#2d2d2d] active:scale-[0.99]`}
+                  className={`relative group p-3 sm:p-4 cursor-pointer transition-all duration-300 border-b border-[#2d2d2d]/30
+                ${selectedVideo === videoId 
+                  ? 'bg-gradient-to-r from-[#6c5ce7]/10 via-[#6c5ce7]/5 to-transparent border-l-2 border-l-[#6c5ce7] shadow-lg shadow-[#6c5ce7]/10' 
+                  : 'hover:bg-gradient-to-r hover:from-[#252525] hover:to-[#2a2a2a] hover:shadow-md'}
+                ${loading[videoId] ? 'opacity-70' : ''} active:scale-[0.98] hover:border-[#6c5ce7]/20`}
                   onClick={() => selectVideo(videoId)}
                 >
+                  {/* Selection Glow Effect */}
+                  {selectedVideo === videoId && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#6c5ce7]/5 to-transparent rounded-r-lg pointer-events-none"></div>
+                  )}
+                  
                   {videoDetails[videoId] ? (
-                    <div className="flex gap-3">
+                    <div className="relative flex gap-3 sm:gap-4">
                       <div className="flex items-start gap-3">
                         <button
                           onClick={(e) => toggleVideoSelection(e, videoId)}
-                          className={`w-5 h-5 rounded flex items-center justify-center transition-all duration-200 touch-manipulation
+                          className={`relative w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-300 touch-manipulation
                       ${selectedVideos.has(videoId)
-                              ? 'bg-[#6c5ce7] text-white shadow-lg shadow-[#6c5ce7]/30'
-                              : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700 active:scale-95'}`}
+                              ? 'bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] text-white shadow-lg shadow-[#6c5ce7]/40 scale-110'
+                              : 'bg-gradient-to-br from-gray-700/50 to-gray-600/50 text-gray-400 hover:from-gray-600/60 hover:to-gray-500/60 hover:text-gray-200 active:scale-95'}`}
                         >
                           <FontAwesomeIcon
                             icon={selectedVideos.has(videoId) ? faSquareCheck : faSquare}
-                            className={`text-sm ${selectedVideos.has(videoId) ? 'scale-110' : ''} transition-transform`}
+                            className={`text-sm transition-all duration-200 ${selectedVideos.has(videoId) ? 'drop-shadow-sm' : ''}`}
                           />
+                          {selectedVideos.has(videoId) && (
+                            <div className="absolute -inset-1 bg-[#6c5ce7]/30 rounded-lg blur-sm -z-10"></div>
+                          )}
                         </button>
+                        
                         <a
                           href={`https://www.youtube.com/watch?v=${videoId}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="relative group w-28 h-[4.5rem] sm:w-32 sm:h-20 flex-shrink-0 touch-manipulation"
+                          className="relative group/thumb w-28 h-[4.5rem] sm:w-32 sm:h-20 flex-shrink-0 touch-manipulation overflow-hidden rounded-xl"
                           onClick={(e) => e.stopPropagation()}
                         >
+                          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#6c5ce7]/20 to-purple-600/20 rounded-xl opacity-0 group-hover/thumb:opacity-100 transition-opacity duration-300 blur-sm"></div>
                           <img
                             src={videoDetails[videoId].thumbnail}
                             onError={(e) => {
@@ -589,26 +647,30 @@ const TranscriptGridPage = () => {
                               e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
                             }}
                             alt=""
-                            className="w-full h-full object-cover rounded-lg shadow-md"
+                            className="relative w-full h-full object-cover rounded-xl shadow-lg border border-[#3a3a3a]/50 group-hover/thumb:border-[#6c5ce7]/30 transition-all duration-300"
                           />
-                          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 group-active:bg-black/60
-                          flex items-center justify-center transition-all duration-200 rounded-lg">
-                            <FontAwesomeIcon icon={faPlay} className="text-white/90 text-sm group-hover:scale-110 transition-transform" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xl"></div>
+                          <div className="absolute inset-0 bg-black/40 group-hover/thumb:bg-black/20 group-active/thumb:bg-black/60
+                          flex items-center justify-center transition-all duration-300 rounded-xl">
+                            <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover/thumb:bg-white/30 group-hover/thumb:scale-110 transition-all duration-300">
+                              <FontAwesomeIcon icon={faPlay} className="text-white text-sm ml-0.5" />
+                            </div>
                           </div>
-                          <span className="absolute bottom-1 right-1 text-[10px] bg-black/70 
-                           text-white px-1.5 py-0.5 rounded font-medium">
+                          <span className="absolute bottom-2 right-2 text-[10px] bg-black/80 backdrop-blur-sm
+                           text-white px-2 py-1 rounded-full font-medium border border-white/20 shadow-lg">
                             {formatDuration(videoDetails[videoId].duration)}
                           </span>
                         </a>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-medium text-gray-200 line-clamp-2 mb-1.5 leading-tight">
+                      
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <h3 className="text-sm sm:text-base font-semibold text-gray-100 line-clamp-2 leading-tight group-hover:text-white transition-colors duration-200">
                           {videoDetails[videoId].title}
                         </h3>
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <span className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-3 text-xs text-gray-400">
+                          <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#6c5ce7]/10 border border-[#6c5ce7]/20">
                             <FontAwesomeIcon icon={faCalendar} className="text-[10px] text-[#6c5ce7]" />
-                            {formatDate(videoDetails[videoId].publishedAt)}
+                            <span className="text-gray-300 font-medium">{formatDate(videoDetails[videoId].publishedAt)}</span>
                           </span>
                         </div>
                       </div>
@@ -645,23 +707,40 @@ const TranscriptGridPage = () => {
                   transition={{ duration: 0.3 }}
                   className="flex-1 flex flex-col overflow-hidden"
                 >
-                  {/* Transcript Header - Mobile Optimized */}
-                  <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-[#2d2d2d] bg-[#1a1a1a]/80 backdrop-blur-sm">
-                    <div className="flex items-center justify-between gap-3">
+                  {/* Transcript Header - Enhanced Design */}
+                  <div className="relative px-4 sm:px-6 py-3 sm:py-4 border-b border-[#2d2d2d]/50 bg-gradient-to-r from-[#1a1a1a]/95 via-[#1e1e1e]/95 to-[#1a1a1a]/95 backdrop-blur-xl">
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#6c5ce7]/5 via-transparent to-purple-600/5 opacity-60"></div>
+                    <div className="relative flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#6c5ce7]/10 flex items-center justify-center flex-shrink-0">
-                          <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7] text-sm sm:text-base" />
+                        <div className="relative group">
+                          <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7] to-purple-600 rounded-xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity"></div>
+                          <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center flex-shrink-0 shadow-lg">
+                            <FontAwesomeIcon icon={faFilm} className="text-white text-sm sm:text-base drop-shadow-sm" />
+                          </div>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h2 className="text-sm sm:text-base font-medium text-white truncate">Video Transcript</h2>
-                          <p className="text-xs text-gray-400 mt-0.5 truncate">
-                            {transcripts[selectedVideo]?.length || 0} segments • {formatDuration(videoDetails[selectedVideo]?.duration)}
+                          <h2 className="text-sm sm:text-lg font-bold bg-gradient-to-r from-white via-[#f0f0f0] to-white bg-clip-text text-transparent truncate">
+                            Video Transcript
+                          </h2>
+                          <p className="text-xs sm:text-sm text-gray-400 mt-0.5 truncate flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#6c5ce7] animate-pulse"></div>
+                              {transcripts[selectedVideo]?.length || 0} segments
+                            </span>
+                            <span className="text-gray-500">•</span>
+                            <span>{formatDuration(videoDetails[selectedVideo]?.duration)}</span>
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="px-2 sm:px-3 py-1 rounded-full bg-[#6c5ce7]/10 text-[#6c5ce7] text-[10px] sm:text-xs font-medium">
-                          Auto-Generated
+                        <div className="relative group">
+                          <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7]/30 to-purple-600/30 rounded-full opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300"></div>
+                          <div className="relative px-2 sm:px-3 py-1 rounded-full bg-gradient-to-r from-[#6c5ce7]/20 to-purple-600/20 border border-[#6c5ce7]/30 text-[#6c5ce7] text-[10px] sm:text-xs font-bold shadow-lg backdrop-blur-sm">
+                            <span className="relative flex items-center gap-1">
+                              <FontAwesomeIcon icon={faWandMagicSparkles} className="text-[8px] sm:text-[10px] animate-pulse" />
+                              Auto-Generated
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -688,26 +767,49 @@ const TranscriptGridPage = () => {
                         return (
                           <React.Fragment key={index}>
                             {showHeading && (
-                              <div className="pt-4 sm:pt-6 pb-2 sm:pb-3">
-                                <h2 className="text-[#6c5ce7] text-sm sm:text-base font-semibold flex items-center gap-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-[#6c5ce7] flex-shrink-0"></div>
-                                  <span className="truncate">{generateSectionHeading(startTime)}</span>
-                                  <div className="h-px bg-[#6c5ce7]/20 flex-1 ml-2"></div>
-                                </h2>
+                              <div className="pt-4 sm:pt-6 pb-3 sm:pb-4">
+                                <div className="relative">
+                                  <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7]/20 to-purple-600/20 rounded-xl blur-sm opacity-50"></div>
+                                  <h2 className="relative text-[#6c5ce7] text-sm sm:text-base font-bold flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-[#6c5ce7]/10 to-purple-600/10 rounded-xl border border-[#6c5ce7]/20 backdrop-blur-sm">
+                                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#6c5ce7] to-purple-600 flex-shrink-0 animate-pulse shadow-lg shadow-[#6c5ce7]/50"></div>
+                                    <span className="truncate bg-gradient-to-r from-[#6c5ce7] to-purple-400 bg-clip-text text-transparent">
+                                      {generateSectionHeading(startTime)}
+                                    </span>
+                                    <div className="h-px bg-gradient-to-r from-[#6c5ce7]/40 to-transparent flex-1 ml-2"></div>
+                                  </h2>
+                                </div>
                               </div>
                             )}
-                            <div className="p-3 sm:p-4 bg-[#1a1a1a]/60 rounded-lg hover:bg-[#252525] active:bg-[#2a2a2a]
-                                         transition-all duration-200 group flex flex-col sm:flex-row gap-2 sm:gap-3 touch-manipulation">
-                              <div className="flex flex-row sm:flex-col items-center sm:items-start gap-2 sm:gap-1 w-full sm:w-32 flex-shrink-0">
-                                <span className="text-xs sm:text-sm font-medium text-[#6c5ce7] whitespace-nowrap">
-                                  {formatTimeRangePrecise(startTime, endTime)}
-                                </span>
-                                <span className="text-[10px] sm:text-xs text-gray-500">
-                                  {duration.toFixed(3)}s
+                            <motion.div 
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.2, delay: index * 0.02 }}
+                              className="relative group p-3 sm:p-4 bg-gradient-to-r from-[#1a1a1a]/80 via-[#1e1e1e]/80 to-[#1a1a1a]/80 rounded-xl hover:from-[#252525]/80 hover:via-[#2a2a2a]/80 hover:to-[#252525]/80 active:from-[#2a2a2a]/80 active:via-[#2f2f2f]/80 active:to-[#2a2a2a]/80
+                                         transition-all duration-300 flex flex-col sm:flex-row gap-3 sm:gap-4 touch-manipulation border border-[#2d2d2d]/50 hover:border-[#6c5ce7]/30 backdrop-blur-sm shadow-lg hover:shadow-xl hover:shadow-[#6c5ce7]/10"
+                            >
+                              {/* Hover Glow Effect */}
+                              <div className="absolute -inset-0.5 bg-gradient-to-r from-[#6c5ce7]/10 to-purple-600/10 rounded-xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300 -z-10"></div>
+                              
+                              <div className="flex flex-row sm:flex-col items-center sm:items-start gap-2 sm:gap-2 w-full sm:w-36 flex-shrink-0">
+                                <div className="relative">
+                                  <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7]/30 to-purple-600/30 rounded-lg opacity-60 blur-sm"></div>
+                                  <span className="relative text-xs sm:text-sm font-bold text-[#6c5ce7] whitespace-nowrap px-2 py-1 bg-[#6c5ce7]/10 rounded-lg border border-[#6c5ce7]/20 backdrop-blur-sm">
+                                    {formatTimeRangePrecise(startTime, endTime)}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] sm:text-xs text-gray-400 px-1.5 py-0.5 bg-gray-700/30 rounded-full border border-gray-600/30 font-medium">
+                                  {duration.toFixed(2)}s
                                 </span>
                               </div>
-                              <p className="text-sm sm:text-base text-gray-300 flex-1 leading-relaxed">{segment.text}</p>
-                            </div>
+                              
+                              <div className="flex-1 relative">
+                                <p className="text-sm sm:text-base text-gray-200 leading-relaxed group-hover:text-gray-100 transition-colors duration-200">
+                                  {segment.text}
+                                </p>
+                                {/* Text gradient overlay on hover */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#6c5ce7]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded pointer-events-none"></div>
+                              </div>
+                            </motion.div>
                           </React.Fragment>
                         );
                       })
@@ -721,21 +823,46 @@ const TranscriptGridPage = () => {
               ) : (
                 <motion.div
                   key="empty-state"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
                   className="flex flex-col items-center justify-center h-full w-full p-4 sm:p-6"
                 >
-                  <div className="bg-gray-800/50 backdrop-blur-xl p-4 sm:p-6 rounded-xl max-w-sm sm:max-w-lg w-full shadow-lg">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#6c5ce7] flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                      <FontAwesomeIcon icon={faFilm} className="text-white text-lg sm:text-xl" />
+                  <div className="relative max-w-sm sm:max-w-lg w-full">
+                    {/* Background Glow */}
+                    <div className="absolute -inset-4 bg-gradient-to-r from-[#6c5ce7]/20 to-purple-600/20 rounded-3xl blur-2xl opacity-50"></div>
+                    
+                    <div className="relative bg-gradient-to-br from-gray-800/60 via-gray-900/60 to-gray-800/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-2xl border border-[#2d2d2d]/50">
+                      {/* Icon Container */}
+                      <div className="relative mx-auto mb-4 sm:mb-6">
+                        <div className="absolute -inset-2 bg-gradient-to-r from-[#6c5ce7] to-purple-600 rounded-2xl opacity-75 blur-lg"></div>
+                        <motion.div
+                          animate={{ rotate: [0, 5, 0, -5, 0] }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                          className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center shadow-2xl shadow-[#6c5ce7]/40"
+                        >
+                          <FontAwesomeIcon icon={faFilm} className="text-white text-xl sm:text-2xl drop-shadow-lg" />
+                        </motion.div>
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="text-center space-y-3">
+                        <h2 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                          Ready to Explore Transcripts
+                        </h2>
+                        <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
+                          Select a video from the <span className="lg:hidden text-[#6c5ce7] font-medium">list above</span><span className="hidden lg:inline text-[#6c5ce7] font-medium">sidebar</span> to view its automatically generated transcript and start creating clips.
+                        </p>
+                        
+                        {/* Decorative Elements */}
+                        <div className="flex items-center justify-center gap-2 pt-2">
+                          <div className="w-2 h-2 rounded-full bg-[#6c5ce7] animate-pulse"></div>
+                          <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                          <div className="w-2 h-2 rounded-full bg-[#6c5ce7] animate-pulse" style={{animationDelay: '1s'}}></div>
+                        </div>
+                      </div>
                     </div>
-                    <h2 className="text-base sm:text-lg font-bold text-white mb-2 text-center">
-                      Video Transcripts
-                    </h2>
-                    <p className="text-gray-300 text-center text-sm leading-relaxed">
-                      Select a video from the <span className="lg:hidden">list above</span><span className="hidden lg:inline">sidebar</span> to view its transcript.
-                    </p>
                   </div>
                 </motion.div>
               )}
@@ -793,23 +920,53 @@ const TranscriptGridPage = () => {
         </div>
       )}
 
-      {/* Floating Generate Clips Button - Mobile Optimized */}
-      <motion.button
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3, delay: 0.6 }}
-        onClick={handleGenerateClips}
-        className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 bg-gradient-to-r from-[#6c5ce7] to-[#8b7cf7] 
-                 hover:from-[#5849e0] hover:to-[#7a6af6] px-4 sm:px-5 py-3 sm:py-3 rounded-xl
-                 text-white font-medium text-sm sm:text-base shadow-lg hover:shadow-xl
-                 transition-all duration-300 flex items-center gap-2 sm:gap-2.5
-                 hover:scale-105 active:scale-95 z-50 touch-manipulation
-                 min-h-[48px] min-w-[120px] sm:min-w-[140px] justify-center"
+      {/* Floating Generate Clips Button - Enhanced Design */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6, type: "spring", stiffness: 200 }}
+        className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50"
       >
-        <FontAwesomeIcon icon={faWandMagicSparkles} className="text-base sm:text-lg" />
-        <span className="hidden xs:inline sm:inline">Generate Clips</span>
-        <span className="xs:hidden sm:hidden">Clips</span>
-      </motion.button>
+        {/* Floating Glow Effect */}
+        <div className="absolute -inset-3 bg-gradient-to-r from-[#6c5ce7]/30 to-purple-600/30 rounded-2xl blur-xl opacity-60 animate-pulse"></div>
+        
+        <motion.button
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleGenerateClips}
+          className="relative group bg-gradient-to-r from-[#6c5ce7] via-[#7c66ff] to-[#8b7cf7] 
+                   hover:from-[#5849e0] hover:via-[#6c5ce7] hover:to-[#7a6af6] 
+                   px-4 sm:px-6 py-3 sm:py-4 rounded-2xl
+                   text-white font-bold text-sm sm:text-base shadow-2xl shadow-[#6c5ce7]/40
+                   transition-all duration-500 flex items-center gap-2 sm:gap-3
+                   touch-manipulation min-h-[52px] min-w-[130px] sm:min-w-[160px] justify-center
+                   border border-[#6c5ce7]/30 backdrop-blur-sm overflow-hidden"
+        >
+          {/* Shimmer Effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
+          {/* Icon with Animation */}
+          <motion.div
+            animate={{ rotate: [0, 15, 0, -15, 0] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            className="relative z-10"
+          >
+            <FontAwesomeIcon icon={faWandMagicSparkles} className="text-base sm:text-lg drop-shadow-lg" />
+          </motion.div>
+          
+          {/* Text */}
+          <span className="relative z-10 font-bold tracking-wide drop-shadow-sm">
+            <span className="hidden xs:inline sm:inline">Generate Clips</span>
+            <span className="xs:hidden sm:hidden">Clips</span>
+          </span>
+          
+          {/* Pulse Effect */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7] to-purple-600 rounded-2xl opacity-30 group-hover:opacity-50 blur-sm transition-opacity duration-300 -z-10"></div>
+        </motion.button>
+      </motion.div>
     </div>
   );
 };
