@@ -362,37 +362,55 @@ const ClipsPreviewerDemo = () => {
     return selectedClips.some(selectedClip => selectedClip.id === clip.id);
   };
 
-  // Custom clip item renderer
+  // Custom clip item renderer - Enhanced Design
   const renderClipItem = (clip) => {
     const isSelected = isClipSelected(clip);
     const isActive = currentClip && currentClip.id === clip.id;
 
     return (
-      <div
+      <motion.div
         key={clip.id}
-        className={`p-3 border-b border-[#2d2d2d] cursor-pointer transition-colors hover:bg-[#2d2d2d]/70 relative
-                  ${isActive ? 'bg-[#2d2d2d]' : isSelected ? 'bg-[#2d2d2d]/30' : 'bg-transparent'}`}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className={`relative group p-3 sm:p-4 cursor-pointer transition-all duration-300 border-b border-[#2d2d2d]/30
+                  ${isActive 
+                    ? 'bg-gradient-to-r from-[#6c5ce7]/10 via-[#6c5ce7]/5 to-transparent border-l-2 border-l-[#6c5ce7] shadow-lg shadow-[#6c5ce7]/10' 
+                    : isSelected 
+                      ? 'bg-gradient-to-r from-[#252525]/50 to-[#2a2a2a]/50' 
+                      : 'hover:bg-gradient-to-r hover:from-[#252525] hover:to-[#2a2a2a] hover:shadow-md'
+                  } active:scale-[0.98] hover:border-[#6c5ce7]/20`}
         onClick={() => handlePlayClip(clip)}
       >
-        <div className="flex items-center gap-3">
+        {/* Selection Glow Effect */}
+        {isActive && (
+          <div className="absolute inset-0 bg-gradient-to-r from-[#6c5ce7]/5 to-transparent rounded-r-lg pointer-events-none"></div>
+        )}
+        
+        <div className="relative flex gap-3 sm:gap-4">
           <button
             onClick={(e) => {
               e.stopPropagation();
               isSelected ? handleUnselectClip(clip) : handleSelectClip(clip);
             }}
-            className={`flex-shrink-0 w-5 h-5 flex items-center justify-center ${isSelected ? 'text-[#6c5ce7]' : 'text-gray-500'}`}
+            className={`relative w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-300 touch-manipulation
+                      ${isSelected
+                        ? 'bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] text-white shadow-lg shadow-[#6c5ce7]/40 scale-110'
+                        : 'bg-gradient-to-br from-gray-700/50 to-gray-600/50 text-gray-400 hover:from-gray-600/60 hover:to-gray-500/60 hover:text-gray-200 active:scale-95'}`}
           >
-            <FontAwesomeIcon icon={isSelected ? faCheckSquare : faSquare} className={`text-sm ${isSelected ? 'scale-110' : ''}`} />
+            <FontAwesomeIcon icon={isSelected ? faCheckSquare : faSquare} className={`text-sm transition-all duration-200 ${isSelected ? 'drop-shadow-sm' : ''}`} />
+            {isSelected && (
+              <div className="absolute -inset-1 bg-[#6c5ce7]/30 rounded-lg blur-sm -z-10"></div>
+            )}
           </button>
 
-          <div className={`relative flex-shrink-0 w-32 h-20 bg-black/50 rounded-md overflow-hidden ${isActive ? 'ring-2 ring-[#6c5ce7]' : isSelected ? 'ring-1 ring-[#6c5ce7]/50' : ''}`}>
+          <div className={`relative flex-shrink-0 w-28 h-[4.5rem] sm:w-32 sm:h-20 bg-black/50 rounded-xl overflow-hidden shadow-lg ${isActive ? 'ring-2 ring-[#6c5ce7]' : isSelected ? 'ring-1 ring-[#6c5ce7]/50' : ''} group-hover:ring-1 group-hover:ring-[#6c5ce7]/30 transition-all duration-300`}>
             <img
               src={clip.thumbnail}
               alt={clip.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               onError={(e) => {
-                e.target.onerror = null; // prevent infinite loop
-                // Try different YouTube thumbnail qualities
+                e.target.onerror = null;
                 if (e.target.src.includes('maxresdefault.jpg')) {
                   e.target.src = `https://img.youtube.com/vi/${clip.videoId}/hqdefault.jpg`;
                 }
@@ -400,57 +418,83 @@ const ClipsPreviewerDemo = () => {
                   e.target.src = `https://ai-clip-backend1-1.onrender.com/api/v1/thumbnails/${clip.videoId}.jpg`;
                 }
                 else {
-                  // Final fallback - use a data URL or empty image
                   e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjgiIGhlaWdodD0iNzIiIHZpZXdCb3g9IjAgMCAxMjggNzIiPjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iNzIiIGZpbGw9IiMyMjIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNTU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5ObyBQcmV2aWV3PC90ZXh0Pjwvc3ZnPg==';
                 }
               }}
             />
-            <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1 py-0.5 rounded">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xl"></div>
+            <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium border border-white/20 shadow-lg">
               {Math.round(clip.duration)}s
             </div>
             {isActive && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <div className="w-8 h-8 rounded-full bg-[#6c5ce7]/80 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all duration-300 rounded-xl">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center shadow-lg">
                   <FontAwesomeIcon icon={faScissors} className="text-white text-xs" />
                 </div>
               </div>
             )}
           </div>
 
-          <div className="flex-1 min-w-0">
-            <h3 className={`text-sm font-medium ${isActive ? 'text-white' : isSelected ? 'text-gray-200' : 'text-gray-300'} truncate`}>
+          <div className="flex-1 min-w-0 space-y-2">
+            <h3 className={`text-sm sm:text-base font-semibold ${isActive ? 'text-white' : isSelected ? 'text-gray-200' : 'text-gray-300'} truncate group-hover:text-white transition-colors duration-200`}>
               {clip.title}
             </h3>
-            <div className="flex items-center mt-1 text-xs text-gray-400">
-              <FontAwesomeIcon icon={faClock} className="mr-1 text-[10px]" />
-              {formatTimeRange(clip.startTime, clip.endTime)}
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#6c5ce7]/10 border border-[#6c5ce7]/20">
+                <FontAwesomeIcon icon={faClock} className="text-[10px] text-[#6c5ce7]" />
+                <span className="text-gray-300 font-medium">{formatTimeRange(clip.startTime, clip.endTime)}</span>
+              </span>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   };
 
   return (
-    <div className="h-screen bg-[#121212] text-white flex flex-col">
-      {/* Simple Header Bar */}
-      <div className="flex justify-between items-center px-4 md:px-6 py-3 border-b border-[#2d2d2d] bg-[#1a1a1a]">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[#6c5ce7] flex items-center justify-center">
-            <FontAwesomeIcon icon={faScissors} className="text-white text-sm md:text-base" />
+    <div className="h-screen bg-gradient-to-br from-[#0a0a0a] via-[#121212] to-[#1a1a1a] text-white flex flex-col relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#6c5ce7]/5 rounded-full filter blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/3 rounded-full filter blur-[100px] animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-[#6c5ce7]/2 to-transparent opacity-20"></div>
+      </div>
+      
+      {/* Enhanced Header Bar - Mobile Optimized */}
+      <div className="relative flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4 border-b border-[#2d2d2d]/50 bg-gradient-to-r from-[#1a1a1a]/95 via-[#1e1e1e]/95 to-[#1a1a1a]/95 backdrop-blur-xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#6c5ce7]/5 via-transparent to-[#6c5ce7]/5 opacity-50"></div>
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 relative z-10">
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7] to-purple-600 rounded-xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity"></div>
+            <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center flex-shrink-0 shadow-lg">
+              <FontAwesomeIcon icon={faScissors} className="text-white text-sm sm:text-base drop-shadow-sm" />
+            </div>
           </div>
-          <h1 className="text-base md:text-lg font-medium text-white">
-            Clip Editor
-            <span className="ml-1 md:ml-2 text-xs md:text-sm text-gray-400">
-              ({selectedClips.length} selected / {processedClips.length || 0} total)
-            </span>
-          </h1>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base sm:text-lg font-bold bg-gradient-to-r from-white via-[#f0f0f0] to-white bg-clip-text text-transparent truncate">
+              Clip Editor
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-400 mt-0.5 flex items-center gap-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#6c5ce7]/20 text-[#6c5ce7] text-[10px] sm:text-xs font-medium">
+                {selectedClips.length} selected
+              </span>
+              <span className="text-gray-500">/</span>
+              <span>{processedClips.length || 0} total</span>
+            </p>
+          </div>
         </div>
 
-        {/* Help text */}
-        <div className="hidden md:flex text-gray-400 text-sm items-center">
-          <FontAwesomeIcon icon={faInfoCircle} className="mr-2 text-[#6c5ce7]" />
-          <span>Select and edit clips, then save to continue</span>
+        {/* Mobile Help Button */}
+        <div className="relative z-10">
+          <button className="md:hidden w-8 h-8 rounded-lg bg-[#6c5ce7]/20 border border-[#6c5ce7]/30 flex items-center justify-center text-[#6c5ce7] hover:bg-[#6c5ce7]/30 transition-all duration-200">
+            <FontAwesomeIcon icon={faInfoCircle} className="text-sm" />
+          </button>
+          
+          {/* Desktop Help text */}
+          <div className="hidden md:flex text-gray-400 text-sm items-center">
+            <FontAwesomeIcon icon={faInfoCircle} className="mr-2 text-[#6c5ce7]" />
+            <span>Select and edit clips, then save to continue</span>
+          </div>
         </div>
       </div>
 
@@ -480,25 +524,25 @@ const ClipsPreviewerDemo = () => {
         )}
       </AnimatePresence>
 
-      {/* Enhanced Loading State */}
+      {/* Enhanced Loading State - Mobile Optimized */}
       {loading && processedClips.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center bg-[#121212] p-6 overflow-hidden">
+        <div className="flex-1 flex items-center justify-center relative p-4 sm:p-6 overflow-hidden">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative max-w-3xl w-full"
+            className="relative max-w-sm sm:max-w-2xl lg:max-w-3xl w-full"
           >
             {/* Main card */}
-            <div className="bg-[#1a1a1a] rounded-2xl p-8 shadow-2xl border border-[#2d2d2d]">
+            <div className="bg-gradient-to-br from-[#1a1a1a]/95 via-[#1e1e1e]/95 to-[#1a1a1a]/95 backdrop-blur-xl rounded-2xl p-4 sm:p-6 lg:p-8 shadow-2xl border border-[#2d2d2d]/50">
               {/* Top section with pulse animation */}
-              <div className="mb-8 relative">
-                <div className="absolute -top-20 -left-20 w-40 h-40 bg-[#6c5ce7]/30 rounded-full filter blur-3xl animate-pulse-slow"></div>
-                <div className="absolute -top-16 -right-16 w-32 h-32 bg-[#a281ff]/20 rounded-full filter blur-3xl animate-pulse-slower"></div>
+              <div className="mb-6 sm:mb-8 relative">
+                <div className="absolute -top-16 sm:-top-20 -left-16 sm:-left-20 w-32 sm:w-40 h-32 sm:h-40 bg-[#6c5ce7]/30 rounded-full filter blur-3xl animate-pulse-slow"></div>
+                <div className="absolute -top-12 sm:-top-16 -right-12 sm:-right-16 w-24 sm:w-32 h-24 sm:h-32 bg-[#a281ff]/20 rounded-full filter blur-3xl animate-pulse-slower"></div>
 
                 <div className="relative flex justify-center">
-                  <div className="relative w-24 h-24 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-5">
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-4 sm:mb-5">
                     <div className="absolute inset-0 rounded-full border-4 border-[#6c5ce7]/30 border-t-[#6c5ce7] animate-spin"></div>
-                    <div className="w-16 h-16 bg-[#232323] rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#232323] rounded-full flex items-center justify-center">
                       <FontAwesomeIcon
                         icon={
                           loadingStage === 0 ? faBrain :
@@ -507,7 +551,7 @@ const ClipsPreviewerDemo = () => {
                                 loadingStage === 3 ? faScissors :
                                   faMagic
                         }
-                        className="text-[#6c5ce7] text-xl"
+                        className="text-[#6c5ce7] text-lg sm:text-xl"
                       />
                     </div>
                   </div>
@@ -519,7 +563,7 @@ const ClipsPreviewerDemo = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3 }}
-                  className="text-xl font-bold text-white text-center mb-2"
+                  className="text-lg sm:text-xl font-bold bg-gradient-to-r from-white via-[#f0f0f0] to-white bg-clip-text text-transparent text-center mb-2"
                 >
                   {stageMessages[loadingStage].title}
                 </motion.h2>
@@ -530,14 +574,14 @@ const ClipsPreviewerDemo = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3, delay: 0.1 }}
-                  className="text-gray-400 text-sm text-center max-w-md mx-auto"
+                  className="text-gray-400 text-xs sm:text-sm text-center max-w-sm sm:max-w-md mx-auto leading-relaxed"
                 >
                   {stageMessages[loadingStage].subtitle}
                 </motion.p>
               </div>
 
               {/* Progress bar */}
-              <div className="h-2 bg-[#2d2d2d] rounded-full overflow-hidden mb-8">
+              <div className="h-2 bg-[#2d2d2d] rounded-full overflow-hidden mb-6 sm:mb-8">
                 <motion.div
                   className="h-full bg-gradient-to-r from-[#6c5ce7] to-[#a281ff]"
                   initial={{ width: '0%' }}
@@ -547,21 +591,21 @@ const ClipsPreviewerDemo = () => {
               </div>
 
               {/* Steps */}
-              <div className="grid grid-cols-5 gap-2 mb-8">
+              <div className="grid grid-cols-5 gap-1 sm:gap-2 mb-6 sm:mb-8">
                 {stageMessages.map((stage, index) => (
                   <div key={index} className="relative">
-                    <div className="absolute top-3 left-0 right-0 -z-10">
+                    <div className="absolute top-2 sm:top-3 left-0 right-0 -z-10">
                       <div className={`h-0.5 ${index === 0 ? 'w-1/2 ml-auto' : index === stageMessages.length - 1 ? 'w-1/2' : 'w-full'} ${index <= loadingStage ? 'bg-[#6c5ce7]' : 'bg-[#2d2d2d]'} transition-colors duration-300`}></div>
                     </div>
                     <div className="flex flex-col items-center">
-                      <div className={`w-6 h-6 rounded-full mb-2 flex items-center justify-center ${index <= loadingStage ? 'bg-[#6c5ce7]' : 'bg-[#2d2d2d]'} transition-colors duration-300`}>
+                      <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full mb-1 sm:mb-2 flex items-center justify-center ${index <= loadingStage ? 'bg-[#6c5ce7]' : 'bg-[#2d2d2d]'} transition-colors duration-300`}>
                         {index < loadingStage ? (
-                          <FontAwesomeIcon icon={faCheck} className="text-white text-xs" />
+                          <FontAwesomeIcon icon={faCheck} className="text-white text-[10px] sm:text-xs" />
                         ) : (
-                          <div className={`w-2 h-2 rounded-full ${index === loadingStage ? 'bg-white' : 'bg-transparent'}`}></div>
+                          <div className={`w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full ${index === loadingStage ? 'bg-white' : 'bg-transparent'}`}></div>
                         )}
                       </div>
-                      <span className={`text-xs ${index <= loadingStage ? 'text-gray-300' : 'text-gray-500'} transition-colors duration-300`}>
+                      <span className={`text-[10px] sm:text-xs ${index <= loadingStage ? 'text-gray-300' : 'text-gray-500'} transition-colors duration-300`}>
                         {index + 1}
                       </span>
                     </div>
@@ -570,20 +614,20 @@ const ClipsPreviewerDemo = () => {
               </div>
 
               {/* Rotating insights */}
-              <div className="bg-[#232323] rounded-xl p-4 mb-6">
-                <div className="flex items-start space-x-3">
-                  <div className="bg-[#6c5ce7]/20 rounded-lg p-2 text-[#6c5ce7]">
-                    <FontAwesomeIcon icon={faLightbulb} />
+              <div className="bg-gradient-to-r from-[#232323]/80 to-[#2a2a2a]/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 border border-[#3a3a3a]/30">
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <div className="bg-gradient-to-br from-[#6c5ce7]/20 to-purple-600/20 rounded-lg p-1.5 sm:p-2 text-[#6c5ce7] flex-shrink-0">
+                    <FontAwesomeIcon icon={faLightbulb} className="text-sm sm:text-base" />
                   </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-white mb-1">ClipSmart AI Insight</h4>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-xs sm:text-sm font-bold text-white mb-1 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">ClipSmart AI Insight</h4>
                     <AnimatePresence mode="wait">
                       <motion.p
                         key={`tip-${loadingStage}`}
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -5 }}
-                        className="text-gray-400 text-xs leading-relaxed"
+                        className="text-gray-400 text-[10px] sm:text-xs leading-relaxed"
                       >
                         {loadingStage === 0 && "Our AI is scanning through all your video content to identify the most engaging moments based on speech patterns, content, and context."}
                         {loadingStage === 1 && "We're extracting meaningful segments from your video and arranging them to form the most compelling narrative structure."}
@@ -604,7 +648,7 @@ const ClipsPreviewerDemo = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="text-center text-gray-500 text-xs"
+                  className="text-center text-gray-500 text-[10px] sm:text-xs px-2"
                 >
                   {[
                     "Did you know? The human brain can process video 60,000 times faster than text.",
@@ -620,13 +664,15 @@ const ClipsPreviewerDemo = () => {
         </div>
       ) : (
         <div className="flex-1 flex flex-col lg:flex-row h-full lg:h-[calc(100vh-49px)] overflow-y-auto lg:overflow-hidden">
-          {/* Left Panel - Clip Selection */}
+          {/* Left Panel - Clip Selection - Mobile Optimized */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-full lg:w-[420px] bg-gray-900 flex flex-col lg:border-r border-[#2d2d2d] max-h-[50vh] lg:max-h-full"
+            className="w-full lg:w-[420px] bg-gradient-to-b from-[#1a1a1a]/95 via-[#151515]/95 to-[#1a1a1a]/95 backdrop-blur-sm flex flex-col lg:border-r border-[#2d2d2d]/50 max-h-[45vh] lg:max-h-full relative"
           >
+            {/* Panel Background Effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#6c5ce7]/3 via-transparent to-purple-600/2 pointer-events-none"></div>
             {/* Clips List Header
             <div className="flex items-center px-4 py-2 border-b border-[#2d2d2d] bg-gray-900">
               <div className="flex items-center">
@@ -640,48 +686,66 @@ const ClipsPreviewerDemo = () => {
               </div>
             </div> */}
 
-            {/* Search Bar */}
-            <div className="px-4 py-2 border-b border-[#2d2d2d] bg-gray-900">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search clips..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#252525] text-sm px-10 py-2 rounded text-gray-300 
-                             placeholder-gray-500 outline-none focus:ring-1 focus:ring-[#6c5ce7]"
-                />
-                <FontAwesomeIcon
-                  icon={faSearch}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-                />
+            {/* Search Bar - Enhanced Design */}
+            <div className="relative p-3 sm:p-4 border-b border-[#2d2d2d]/50">
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7]/20 to-purple-600/20 rounded-xl opacity-0 group-focus-within:opacity-100 blur-sm transition-opacity duration-300"></div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search clips..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-gradient-to-r from-[#252525] to-[#2a2a2a] text-sm px-9 sm:px-10 py-2.5 sm:py-3 rounded-xl text-gray-300 
+                             placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#6c5ce7]/50 focus:bg-[#2a2a2a]
+                             transition-all duration-300 border border-[#3a3a3a]/50 focus:border-[#6c5ce7]/30 shadow-lg"
+                  />
+                  <FontAwesomeIcon
+                    icon={faSearch}
+                    className="absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#6c5ce7] transition-colors duration-200 text-sm"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                    >
+                      <FontAwesomeIcon icon={faTimes} className="text-xs" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Sort and Filter Controls */}
-            <div className="flex justify-between items-center px-4 py-2 border-b border-[#2d2d2d] bg-gray-900">
-              <div className="flex items-center space-x-3">
+            {/* Sort and Filter Controls - Enhanced Design */}
+            <div className="flex justify-between items-center px-3 sm:px-4 py-2 sm:py-3 border-b border-[#2d2d2d]/50">
+              <div className="flex items-center space-x-2 sm:space-x-3">
                 <button
-                  className={`flex items-center text-xs px-3 py-1 rounded-full ${sortOrder === 'time' ? 'bg-[#6c5ce7]/20 text-[#6c5ce7]' : 'bg-[#252525] text-gray-400'
-                    }`}
+                  className={`flex items-center text-[10px] sm:text-xs px-2 sm:px-3 py-1.5 sm:py-1 rounded-full transition-all duration-200 ${
+                    sortOrder === 'time' 
+                      ? 'bg-gradient-to-r from-[#6c5ce7]/20 to-purple-600/20 text-[#6c5ce7] border border-[#6c5ce7]/30 shadow-sm' 
+                      : 'bg-gradient-to-r from-[#252525] to-[#2a2a2a] text-gray-400 hover:text-gray-300 hover:bg-[#2a2a2a]'
+                  }`}
                   onClick={toggleSort}
                 >
-                  <FontAwesomeIcon icon={faClock} className="mr-1.5" />
+                  <FontAwesomeIcon icon={faClock} className="mr-1 sm:mr-1.5 text-[10px] sm:text-xs" />
                   <span>Time</span>
                 </button>
 
                 <button
-                  className={`flex items-center text-xs px-3 py-1 rounded-full ${sortOrder === 'length' ? 'bg-[#6c5ce7]/20 text-[#6c5ce7]' : 'bg-[#252525] text-gray-400'
-                    }`}
+                  className={`flex items-center text-[10px] sm:text-xs px-2 sm:px-3 py-1.5 sm:py-1 rounded-full transition-all duration-200 ${
+                    sortOrder === 'length' 
+                      ? 'bg-gradient-to-r from-[#6c5ce7]/20 to-purple-600/20 text-[#6c5ce7] border border-[#6c5ce7]/30 shadow-sm' 
+                      : 'bg-gradient-to-r from-[#252525] to-[#2a2a2a] text-gray-400 hover:text-gray-300 hover:bg-[#2a2a2a]'
+                  }`}
                   onClick={toggleSort}
                 >
-                  <FontAwesomeIcon icon={faRuler} className="mr-1.5" />
+                  <FontAwesomeIcon icon={faRuler} className="mr-1 sm:mr-1.5 text-[10px] sm:text-xs" />
                   <span>Length</span>
                 </button>
               </div>
 
               <button
-                className="text-xs text-gray-400 hover:text-white transition-colors"
+                className="text-[10px] sm:text-xs text-gray-400 hover:text-white transition-colors px-2 py-1 rounded-md hover:bg-[#252525]/50"
                 onClick={handleUnselectAll}
               >
                 Unselect All
@@ -689,75 +753,94 @@ const ClipsPreviewerDemo = () => {
             </div>
 
             {/* Clips List */}
-            <div className="flex-1 overflow-y-auto custom-purple-scrollbar bg-gray-900">
+            <div className="flex-1 overflow-y-auto custom-purple-scrollbar relative">
               {error ? (
-                <div className="flex items-center justify-center h-full text-red-400 text-sm">
-                  <FontAwesomeIcon icon={faExclamationCircle} className="mr-2" />
-                  {error}
+                <div className="flex items-center justify-center h-full text-red-400 text-sm p-4">
+                  <div className="text-center">
+                    <FontAwesomeIcon icon={faExclamationCircle} className="text-2xl mb-2 text-red-400" />
+                    <p className="text-sm">{error}</p>
+                  </div>
                 </div>
               ) : sortedClips.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-                  <p>No clips found</p>
+                <div className="flex items-center justify-center h-full text-gray-500 text-sm p-4">
+                  <div className="text-center">
+                    <FontAwesomeIcon icon={faFilm} className="text-2xl mb-2 text-gray-400" />
+                    <p className="text-sm">No clips found</p>
+                  </div>
                 </div>
               ) : (
-                <div className="divide-y divide-[#2d2d2d]">
+                <div className="divide-y divide-[#2d2d2d]/30">
                   {sortedClips.map(renderClipItem)}
                 </div>
               )}
             </div>
 
-            {/* Selection Counter and Clear Button */}
-            <div className="p-3 border-t border-[#2d2d2d] bg-gray-900 flex justify-between items-center">
-              <div className="text-sm text-gray-400">
-                {selectedClips.length} selected
-              </div>
+            {/* Selection Counter and Clear Button - Enhanced Design */}
+            <div className="relative p-3 sm:p-4 border-t border-[#2d2d2d]/50 bg-gradient-to-r from-[#1a1a1a]/80 to-[#1e1e1e]/80 backdrop-blur-sm">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#6c5ce7] animate-pulse"></div>
+                  <span className="text-sm text-gray-300 font-medium">
+                    {selectedClips.length} selected
+                  </span>
+                </div>
 
-              {selectedClips.length > 0 && (
-                <button
-                  className="flex items-center text-xs px-3 py-1.5 rounded-md bg-[#252525] text-gray-300 hover:bg-[#303030] transition-colors"
-                  onClick={handleClearSelection}
-                >
-                  <FontAwesomeIcon icon={faTimes} className="mr-1.5" />
-                  <span>Clear Selection</span>
-                </button>
-              )}
+                {selectedClips.length > 0 && (
+                  <button
+                    className="flex items-center text-xs px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#252525] to-[#2a2a2a] text-gray-300 hover:from-[#2a2a2a] hover:to-[#303030] transition-all duration-200 border border-[#3a3a3a]/50 hover:border-[#6c5ce7]/30 shadow-sm"
+                    onClick={handleClearSelection}
+                  >
+                    <FontAwesomeIcon icon={faTimes} className="mr-1.5 text-[10px]" />
+                    <span>Clear</span>
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
 
-          {/* Middle Panel - Trimming Tool */}
+          {/* Middle Panel - Trimming Tool - Enhanced Design */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.2 }}
             className="flex-1 flex flex-col bg-[#121212] relative"
           >
-            <div className="px-4 py-3 border-b border-[#2d2d2d] bg-[#1f1f1f] flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-[#6c5ce7]/20 flex items-center justify-center">
-                  <FontAwesomeIcon icon={faScissors} className="text-[#6c5ce7]" />
+            <div className="relative px-4 sm:px-6 py-3 sm:py-4 border-b border-[#2d2d2d]/50 bg-gradient-to-r from-[#1a1a1a]/95 via-[#1e1e1e]/95 to-[#1a1a1a]/95 backdrop-blur-xl">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#6c5ce7]/5 via-transparent to-purple-600/5 opacity-50"></div>
+              <div className="relative flex justify-between items-center">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7] to-purple-600 rounded-xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity"></div>
+                    <div className="relative w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center flex-shrink-0 shadow-lg">
+                      <FontAwesomeIcon icon={faScissors} className="text-white text-sm sm:text-base drop-shadow-sm" />
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className="text-sm sm:text-base font-bold bg-gradient-to-r from-white via-[#f0f0f0] to-white bg-clip-text text-transparent">
+                      Edit Clip {currentClip ? currentClip.id.replace('clip_', '#') : ''}
+                    </h2>
+                    <p className="text-xs text-gray-400 mt-0.5">Trim and adjust your clip timing</p>
+                  </div>
                 </div>
-                <h2 className="text-sm font-medium text-white">
-                  Edit Clip {currentClip ? currentClip.id.replace('clip_', '#') : ''}
-                </h2>
+                {currentClip && processedClips.length > 1 && (
+                  <div className="flex gap-2 sm:gap-3">
+                    <button
+                      className="px-2 sm:px-3 py-1.5 sm:py-1 bg-gradient-to-r from-[#252525] to-[#2a2a2a] hover:from-[#2a2a2a] hover:to-[#303030] text-white rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:pointer-events-none border border-[#3a3a3a]/50 hover:border-[#6c5ce7]/30 shadow-sm"
+                      onClick={handlePreviousClip}
+                    >
+                      <FontAwesomeIcon icon={faBackwardStep} className="text-xs" />
+                      <span className="hidden sm:inline">Previous</span>
+                    </button>
+                    <button
+                      className="px-2 sm:px-3 py-1.5 sm:py-1 bg-gradient-to-r from-[#252525] to-[#2a2a2a] hover:from-[#2a2a2a] hover:to-[#303030] text-white rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:pointer-events-none border border-[#3a3a3a]/50 hover:border-[#6c5ce7]/30 shadow-sm"
+                      onClick={handleNextClip}
+                    >
+                      <span className="hidden sm:inline">Next</span>
+                      <FontAwesomeIcon icon={faForwardStep} className="text-xs" />
+                    </button>
+                  </div>
+                )}
               </div>
-              {currentClip && processedClips.length > 1 && (
-                <div className="flex gap-3">
-                  <button
-                    className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-xs font-medium transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:pointer-events-none"
-                    onClick={handlePreviousClip}
-                  >
-                    <FontAwesomeIcon icon={faBackwardStep} className="text-xs" />
-                    <span>Previous</span>
-                  </button>
-                  <button
-                    className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-xs font-medium transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:pointer-events-none"
-                    onClick={handleNextClip}
-                  >
-                    <span>Next</span>
-                    <FontAwesomeIcon icon={faForwardStep} className="text-xs" />
-                  </button>
-                </div>
-              )}
             </div>
             <div className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-6">
               <AnimatePresence mode="wait">
@@ -774,48 +857,91 @@ const ClipsPreviewerDemo = () => {
                     onSaveTrim={handleSaveTrim}
                   />
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-500 text-sm">
-                    Select a clip to start trimming
+                  <div className="flex flex-col items-center justify-center h-full text-gray-500 text-sm p-4">
+                    <div className="text-center">
+                      <div className="relative mx-auto mb-4">
+                        <div className="absolute -inset-2 bg-gradient-to-r from-[#6c5ce7]/20 to-purple-600/20 rounded-2xl opacity-75 blur-lg"></div>
+                        <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center shadow-2xl shadow-[#6c5ce7]/40">
+                          <FontAwesomeIcon icon={faScissors} className="text-white text-xl drop-shadow-lg" />
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-2">
+                        Ready to Edit
+                      </h3>
+                      <p className="text-sm text-gray-400">Select a clip from the list to start trimming</p>
+                    </div>
                   </div>
                 )}
               </AnimatePresence>
             </div>
           </motion.div>
 
-          {/* Right Panel - Video Details */}
+          {/* Right Panel - Video Details - Enhanced Design */}
           {currentClip && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.4 }}
-              className="w-full lg:w-[300px] bg-[#1f1f1f] lg:border-l border-t lg:border-t-0 border-[#2d2d2d] flex flex-col"
+              className="w-full lg:w-[300px] bg-gradient-to-b from-[#1a1a1a]/95 via-[#151515]/95 to-[#1a1a1a]/95 backdrop-blur-sm lg:border-l border-t lg:border-t-0 border-[#2d2d2d]/50 flex flex-col relative"
             >
-              <div className="p-4 border-b border-[#2d2d2d] bg-[#1f1f1f]">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-[#6c5ce7]/20 flex items-center justify-center">
-                    <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7]" />
+              {/* Panel Background Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#6c5ce7]/3 via-transparent to-purple-600/2 pointer-events-none"></div>
+              
+              <div className="relative p-4 sm:p-6 border-b border-[#2d2d2d]/50 bg-gradient-to-r from-[#1a1a1a]/80 to-[#1e1e1e]/80 backdrop-blur-sm">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7] to-purple-600 rounded-xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity"></div>
+                    <div className="relative w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center flex-shrink-0 shadow-lg">
+                      <FontAwesomeIcon icon={faFilm} className="text-white text-sm sm:text-base drop-shadow-sm" />
+                    </div>
                   </div>
-                  <h2 className="text-sm font-medium text-white">Video Details</h2>
+                  <div>
+                    <h2 className="text-sm sm:text-base font-bold bg-gradient-to-r from-white via-[#f0f0f0] to-white bg-clip-text text-transparent">Video Details</h2>
+                    <p className="text-xs text-gray-400 mt-0.5">Clip information and metadata</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto custom-purple-scrollbar p-4">
+              <div className="flex-1 overflow-y-auto custom-purple-scrollbar p-4 sm:p-6 relative">
                 <VideoDetails
                   currentClip={currentClip}
                   showTranscript={true}
                 />
               </div>
 
-              {/* Save & Continue Button in Right Panel */}
-              <div className="p-4 border-t border-[#2d2d2d] bg-[#1f1f1f]">
+              {/* Save & Continue Button in Right Panel - Enhanced Design */}
+              <div className="relative p-4 sm:p-6 border-t border-[#2d2d2d]/50 bg-gradient-to-r from-[#1a1a1a]/80 to-[#1e1e1e]/80 backdrop-blur-sm">
                 <button
-                  className="w-full py-3 bg-[#6c5ce7] hover:bg-[#5849e0] text-white rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+                  className="relative group w-full py-3 sm:py-4 bg-gradient-to-r from-[#6c5ce7] via-[#7c66ff] to-[#8b7cf7] hover:from-[#5849e0] hover:via-[#6c5ce7] hover:to-[#7a6af6] text-white rounded-xl text-sm sm:text-base font-bold transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none shadow-xl shadow-[#6c5ce7]/25 border border-[#6c5ce7]/30 backdrop-blur-sm overflow-hidden"
                   onClick={handleFinishAndSave}
                   disabled={processedClips.length === 0 || selectedClips.length === 0}
                 >
-                  <FontAwesomeIcon icon={faSave} className="text-sm" />
-                  <span>Save & Continue</span>
-                  <FontAwesomeIcon icon={faArrowRight} className="ml-1 text-sm" />
+                  {/* Shimmer Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  
+                  {/* Background Pattern */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  {/* Icon with Animation */}
+                  <motion.div
+                    animate={{ rotate: [0, 15, 0, -15, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    className="relative z-10"
+                  >
+                    <FontAwesomeIcon icon={faSave} className="text-sm sm:text-base drop-shadow-lg" />
+                  </motion.div>
+                  
+                  {/* Text */}
+                  <span className="relative z-10 font-bold tracking-wide drop-shadow-sm">
+                    <span className="hidden sm:inline">Save & Continue</span>
+                    <span className="sm:hidden">Save</span>
+                  </span>
+                  
+                  {/* Arrow Icon */}
+                  <FontAwesomeIcon icon={faArrowRight} className="relative z-10 ml-1 text-sm sm:text-base drop-shadow-sm" />
+                  
+                  {/* Pulse Effect */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-[#6c5ce7] to-purple-600 rounded-xl opacity-30 group-hover:opacity-50 blur-sm transition-opacity duration-300 -z-10"></div>
                 </button>
               </div>
             </motion.div>
@@ -830,19 +956,25 @@ const ClipsPreviewerDemo = () => {
           width: 8px;
         }
         .custom-purple-scrollbar::-webkit-scrollbar-track {
-          background: #1a1a1a;
+          background: linear-gradient(180deg, #1a1a1a 0%, #151515 100%);
+          border-radius: 8px;
         }
         .custom-purple-scrollbar::-webkit-scrollbar-thumb {
-          background: #6c5ce7;
-          border-radius: 4px;
-          opacity: 0.3;
+          background: linear-gradient(180deg, #6c5ce7 0%, #8b7cf7 100%);
+          border-radius: 8px;
+          border: 1px solid rgba(108, 92, 231, 0.3);
+          box-shadow: 0 2px 8px rgba(108, 92, 231, 0.2);
         }
         .custom-purple-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #8b7cf7;
+          background: linear-gradient(180deg, #8b7cf7 0%, #a78bfa 100%);
+          box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
         }
         .custom-purple-scrollbar {
           scrollbar-width: thin;
           scrollbar-color: #6c5ce7 #1a1a1a;
+        }
+        .bg-gradient-radial {
+          background: radial-gradient(circle, var(--tw-gradient-stops));
         }
         @keyframes pulse-slow {
           0%, 100% { opacity: 0.3; }
