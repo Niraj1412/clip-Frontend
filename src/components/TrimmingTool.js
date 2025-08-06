@@ -736,7 +736,7 @@ const TrimmingTool = ({
   return (
     <div className="flex flex-col items-center w-full">
       <div className="w-full bg-gradient-to-br from-[#111827] to-[#1e293b] rounded-xl shadow-lg overflow-hidden transform transition-all duration-500">
-        <div ref={containerRef} className="w-full p-3 flex flex-col gap-3">
+        <div ref={containerRef} className="w-full p-2 sm:p-3 flex flex-col gap-2 sm:gap-3">
           <div
             className="w-full aspect-video bg-[#0f172a] rounded-lg overflow-hidden flex items-center justify-center relative shadow-inner"
             onMouseEnter={() => setIsHovering(true)}
@@ -763,12 +763,12 @@ const TrimmingTool = ({
             <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)' }}></div>
             {error && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20">
-                <div className="bg-red-900/60 backdrop-blur-lg p-4 rounded-xl max-w-lg text-center border border-red-500/30 shadow-xl">
-                  <FontAwesomeIcon icon={faCircleNotch} className="text-red-400 text-2xl mb-2" />
-                  <h3 className="text-white text-lg font-medium mb-1">Video Error</h3>
-                  <p className="text-white/80 text-sm mb-4">{error}</p>
+                <div className="bg-red-900/60 backdrop-blur-lg p-4 sm:p-6 rounded-xl max-w-sm sm:max-w-lg text-center border border-red-500/30 shadow-xl mx-4">
+                  <FontAwesomeIcon icon={faCircleNotch} className="text-red-400 text-xl sm:text-2xl mb-2" />
+                  <h3 className="text-white text-base sm:text-lg font-medium mb-1">Video Error</h3>
+                  <p className="text-white/80 text-xs sm:text-sm mb-4 leading-relaxed">{error}</p>
                   <button
-                    className="bg-[#6366f1] hover:bg-[#4f46e5] text-white px-4 py-2 rounded-lg text-sm"
+                    className="bg-[#6366f1] hover:bg-[#4f46e5] text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200"
                     onClick={() => {
                       setError('');
                       setReady(false);
@@ -783,141 +783,161 @@ const TrimmingTool = ({
             )}
             {!videoId && !videoUrl && !error && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
-                <div className="bg-[#1e293b]/80 backdrop-blur-lg p-4 rounded-xl max-w-lg text-center border border-[#6366f1]/20 shadow-xl">
-                  <FontAwesomeIcon icon={faScissors} className="text-[#6366f1] text-2xl mb-2" />
-                  <h3 className="text-white text-lg font-medium mb-1">No Video Selected</h3>
-                  <p className="text-white/80 text-sm">Please select a clip to trim</p>
+                <div className="bg-[#1e293b]/80 backdrop-blur-lg p-4 sm:p-6 rounded-xl max-w-sm sm:max-w-lg text-center border border-[#6366f1]/20 shadow-xl mx-4">
+                  <FontAwesomeIcon icon={faScissors} className="text-[#6366f1] text-xl sm:text-2xl mb-2" />
+                  <h3 className="text-white text-base sm:text-lg font-medium mb-1">No Video Selected</h3>
+                  <p className="text-white/80 text-xs sm:text-sm">Please select a clip to trim</p>
                 </div>
               </div>
             )}
             {!ready && (
               <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-30">
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={faCircleNotch} className="text-[#6366f1] text-4xl animate-spin mb-2" />
-                  <p className="text-white text-sm">Loading video...</p>
+                  <FontAwesomeIcon icon={faCircleNotch} className="text-[#6366f1] text-3xl sm:text-4xl animate-spin mb-2" />
+                  <p className="text-white text-xs sm:text-sm">Loading video...</p>
                 </div>
               </div>
             )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-[#1e293b] p-2 rounded-lg shadow-inner items-center">
-            <div className="flex gap-2 items-center">
-              <div className="text-[#f9fafb] text-sm bg-[#0f172a] px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-[#6366f1]/20 shadow-inner whitespace-nowrap">
-                <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-xs" />
-                <span className="font-medium tabular-nums text-xs">{formatPreciseTime(currentTime)}</span>
-                <span className="opacity-50 mx-0.5 text-xs">/</span>
-                <span className="opacity-75 tabular-nums text-xs">{formatPreciseTime(duration)}</span>
+          {/* Mobile-Optimized Controls */}
+          <div className="bg-[#1e293b] p-2 sm:p-3 rounded-lg shadow-inner">
+            {/* Time Display Row */}
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="flex items-center gap-2">
+                <div className="text-[#f9fafb] text-xs sm:text-sm bg-[#0f172a] px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-[#6366f1]/20 shadow-inner whitespace-nowrap">
+                  <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-[10px] sm:text-xs" />
+                  <span className="font-medium tabular-nums text-[10px] sm:text-xs">{formatPreciseTime(currentTime)}</span>
+                  <span className="opacity-50 mx-0.5 text-[10px] sm:text-xs">/</span>
+                  <span className="opacity-75 tabular-nums text-[10px] sm:text-xs">{formatPreciseTime(duration)}</span>
+                </div>
+                <div className="text-[#f9fafb] text-[10px] sm:text-xs bg-[#0f172a] px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-[#6366f1]/20 shadow-inner">
+                  <span className="tabular-nums">{playbackRate}x</span>
+                </div>
               </div>
-              <div className="text-[#f9fafb] text-xs bg-[#0f172a] px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-[#6366f1]/20 shadow-inner">
-                <span className="tabular-nums">{playbackRate}x</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-center gap-2">
               <button
-                className="w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
+                onClick={saveTrim}
+                className="bg-gradient-to-r from-[#6366f1] to-[#4f46e5] hover:from-[#4f46e5] hover:to-[#4338ca] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg flex items-center gap-1.5 transition-all duration-300 shadow-md text-xs sm:text-sm font-medium"
+                disabled={!ready}
+              >
+                <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                <span>Save</span>
+              </button>
+            </div>
+            
+            {/* Playback Controls Row */}
+            <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-3">
+              <button
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
                 onClick={skipToStart}
                 disabled={!ready}
               >
-                <FontAwesomeIcon icon={faBackwardStep} className="text-sm" />
+                <FontAwesomeIcon icon={faBackwardStep} className="text-sm sm:text-base" />
               </button>
               <button
-                className="w-10 h-10 text-[#f9fafb] text-base bg-gradient-to-r from-[#6366f1] to-[#4f46e5] rounded-full flex items-center justify-center hover:from-[#4f46e5] hover:to-[#4338ca] transition-all shadow-md"
+                className="w-12 h-12 sm:w-14 sm:h-14 text-[#f9fafb] text-lg sm:text-xl bg-gradient-to-r from-[#6366f1] to-[#4f46e5] rounded-full flex items-center justify-center hover:from-[#4f46e5] hover:to-[#4338ca] transition-all shadow-md"
                 onClick={handlePlayPause}
                 disabled={!ready}
               >
                 <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
               </button>
               <button
-                className="w-8 h-8 rounded-full bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
                 onClick={skipToEnd}
                 disabled={!ready}
               >
-                <FontAwesomeIcon icon={faForwardStep} className="text-sm" />
+                <FontAwesomeIcon icon={faForwardStep} className="text-sm sm:text-base" />
               </button>
             </div>
-            <div className="flex justify-end items-center gap-2">
+            
+            {/* Additional Controls Row */}
+            <div className="flex items-center justify-center gap-3 sm:gap-4">
               <button
-                className="w-10 h-10 sm:w-8 sm:h-8 rounded-full bg bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
                 onClick={toggleMute}
               >
                 <FontAwesomeIcon
                   icon={isMuted ? faVolumeMute : volume > 0.5 ? faVolumeHigh : faVolumeLow}
-                  className="text-sm"
+                  className="text-xs sm:text-sm"
                 />
               </button>
               <button
-                className="w-8 h-8 rounded-full bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#0f172a] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/20 shadow-inner"
                 onClick={toggleFullscreen}
               >
-                <FontAwesomeIcon icon={faExpand} className="text-sm" />
-              </button>
-              <button
-                onClick={saveTrim}
-                className="bg-gradient-to-r from-[#6366f1] to-[#4f46e5] hover:from-[#4f46e5] hover:to-[#4338ca] text-white px-4 py-2 sm:px-2.5 sm:py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 shadow-md text-sm sm:text-xs font-medium"
-                disabled={!ready}
-              >
-                <FontAwesomeIcon icon={faCheck} className="text-sm sm:text-xs" />
-                <span>Save</span>
+                <FontAwesomeIcon icon={faExpand} className="text-xs sm:text-sm" />
               </button>
             </div>
           </div>
-          <div className="flex flex-col gap-2 bg-[#1e293b] p-2 rounded-lg shadow-inner">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-1 bg-[#0f172a] rounded-lg px-2 py-1 border border-[#6366f1]/20 shadow-inner">
-                <div className="text-[#9ca3af] text-xs">Start</div>
-                <button
-                  className="w-6 h-6 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded-lg transition-colors"
-                  onClick={() => adjustStartTime(false)}
-                  disabled={!ready || startTime <= 0}
-                >
-                  <FontAwesomeIcon icon={faMinus} className="text-xs" />
-                </button>
-                <div className="text-[#f9fafb] text-xs font-medium min-w-[3rem] text-center tabular-nums">
-                  {formatTime(startTime)}
-                </div>
-                <button
-                  className="w-6 h-6 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded-lg transition-colors"
-                  onClick={() => adjustStartTime(true)}
-                  disabled={!ready || startTime >= endTime - 1}
-                >
-                  <FontAwesomeIcon icon={faPlus} className="text-xs" />
-                </button>
-              </div>
-              <div className="bg-[#0f172a] px-2 py-1 rounded-lg text-[#f9fafb] text-xs flex items-center gap-2 border border-[#6366f1]/20 shadow-inner">
-                <FontAwesomeIcon icon={faCut} className="text-[#22d3ee] text-xs" />
-                <span className="tabular-nums font-medium">{formatPreciseTime(trimDuration)}</span>
-              </div>
-              <div className="flex items-center gap-1 bg-[#0f172a] rounded-lg px-2 py-1 border border-[#6366f1]/20 shadow-inner">
-                <div className="text-[#9ca3af] text-xs">End</div>
-                <button
-                  className="w-6 h-6 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded-lg transition-colors"
-                  onClick={() => adjustEndTime(false)}
-                  disabled={!ready || endTime <= startTime + 1}
-                >
-                  <FontAwesomeIcon icon={faMinus} className="text-xs" />
-                </button>
-                <div className="text-[#f9fafb] text-xs font-medium min-w-[3rem] text-center tabular-nums">
-                  {formatTime(endTime)}
-                </div>
-                <button
-                  className="w-6 h-6 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded-lg transition-colors"
-                  onClick={() => adjustEndTime(true)}
-                  disabled={!ready || endTime >= duration}
-                >
-                  <FontAwesomeIcon icon={faPlus} className="text-xs" />
-                </button>
+          {/* Mobile-Optimized Trim Controls */}
+          <div className="flex flex-col gap-3 sm:gap-4 bg-[#1e293b] p-3 sm:p-4 rounded-lg shadow-inner">
+            {/* Duration Display */}
+            <div className="flex justify-center">
+              <div className="bg-[#0f172a] px-3 py-2 rounded-lg text-[#f9fafb] text-sm flex items-center gap-2 border border-[#6366f1]/20 shadow-inner">
+                <FontAwesomeIcon icon={faCut} className="text-[#22d3ee] text-sm" />
+                <span className="tabular-nums font-medium text-sm">Duration: {formatPreciseTime(trimDuration)}</span>
               </div>
             </div>
-            <div ref={timelineRef} className="w-full px-1 py-2 select-none relative touch-pan-y">
-              <div className="relative w-full h-12 flex items-center">
+            
+            {/* Start Time Controls */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex-1">
+                <div className="text-[#9ca3af] text-xs mb-2 text-center sm:text-left">Start Time</div>
+                <div className="flex items-center justify-center sm:justify-start gap-2 bg-[#0f172a] rounded-lg px-3 py-2 border border-[#6366f1]/20 shadow-inner">
+                  <button
+                    className="w-8 h-8 text-[#f9fafb]/80 text-sm flex items-center justify-center hover:bg-[#6366f1]/20 rounded-lg transition-colors"
+                    onClick={() => adjustStartTime(false)}
+                    disabled={!ready || startTime <= 0}
+                  >
+                    <FontAwesomeIcon icon={faMinus} className="text-sm" />
+                  </button>
+                  <div className="text-[#f9fafb] text-sm font-medium min-w-[4rem] text-center tabular-nums">
+                    {formatTime(startTime)}
+                  </div>
+                  <button
+                    className="w-8 h-8 text-[#f9fafb]/80 text-sm flex items-center justify-center hover:bg-[#6366f1]/20 rounded-lg transition-colors"
+                    onClick={() => adjustStartTime(true)}
+                    disabled={!ready || startTime >= endTime - 1}
+                  >
+                    <FontAwesomeIcon icon={faPlus} className="text-sm" />
+                  </button>
+                </div>
+              </div>
+              
+              {/* End Time Controls */}
+              <div className="flex-1">
+                <div className="text-[#9ca3af] text-xs mb-2 text-center sm:text-left">End Time</div>
+                <div className="flex items-center justify-center sm:justify-start gap-2 bg-[#0f172a] rounded-lg px-3 py-2 border border-[#6366f1]/20 shadow-inner">
+                  <button
+                    className="w-8 h-8 text-[#f9fafb]/80 text-sm flex items-center justify-center hover:bg-[#6366f1]/20 rounded-lg transition-colors"
+                    onClick={() => adjustEndTime(false)}
+                    disabled={!ready || endTime <= startTime + 1}
+                  >
+                    <FontAwesomeIcon icon={faMinus} className="text-sm" />
+                  </button>
+                  <div className="text-[#f9fafb] text-sm font-medium min-w-[4rem] text-center tabular-nums">
+                    {formatTime(endTime)}
+                  </div>
+                  <button
+                    className="w-8 h-8 text-[#f9fafb]/80 text-sm flex items-center justify-center hover:bg-[#6366f1]/20 rounded-lg transition-colors"
+                    onClick={() => adjustEndTime(true)}
+                    disabled={!ready || endTime >= duration}
+                  >
+                    <FontAwesomeIcon icon={faPlus} className="text-sm" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div ref={timelineRef} className="w-full px-1 py-3 sm:py-4 select-none relative touch-pan-y">
+              <div className="relative w-full h-16 sm:h-20 flex items-center">
                 <div
-                  className="w-full h-2.5 bg-gradient-to-r from-[#1f2937] via-[#2d3748] to-[#1f2937] rounded-full relative cursor-pointer group/timeline shadow-inner"
+                  className="w-full h-3 sm:h-4 bg-gradient-to-r from-[#1f2937] via-[#2d3748] to-[#1f2937] rounded-full relative cursor-pointer group/timeline shadow-inner"
                   onClick={handleSeek}
                 >
                   <div
                     className="absolute h-full bg-gradient-to-r from-[#6366f1]/40 to-[#22d3ee]/40 rounded-full"
                     style={{ width: `${(currentTime / duration) * 100}%` }}
                   >
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full shadow-md"></div>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 bg-white rounded-full shadow-md"></div>
                   </div>
                   <div
                     className="absolute h-full overflow-hidden rounded-full z-10"
@@ -930,7 +950,7 @@ const TrimmingTool = ({
                   >
                     <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
                   </div>
-                  <div className="absolute w-full top-4 flex justify-between text-xs text-[#9ca3af]">
+                  <div className="absolute w-full top-6 sm:top-8 flex justify-between text-xs sm:text-sm text-[#9ca3af]">
                     <span className="tabular-nums">{formatTime(0)}</span>
                     <span className="tabular-nums">{formatTime(duration)}</span>
                   </div>
@@ -944,16 +964,16 @@ const TrimmingTool = ({
                       style={{ left: `${(pointer.time / duration) * 100}%` }}
                     >
                       <div className="relative">
-                        <div className="absolute w-0.5 h-8 bg-[#6366f1] -top-4 left-1/2 -translate-x-1/2 rounded-full cursor-ew-resize" />
+                        <div className="absolute w-1 h-10 sm:h-12 bg-[#6366f1] -top-5 sm:-top-6 left-1/2 -translate-x-1/2 rounded-full cursor-ew-resize" />
                         <div
-                          className="absolute w-5 h-5 -top-2.5 left-1/2 -translate-x-1/2 cursor-ew-resize shadow-md"
+                          className="absolute w-6 h-6 sm:w-7 sm:h-7 -top-3 sm:-top-3.5 left-1/2 -translate-x-1/2 cursor-ew-resize shadow-md"
                           style={{
                             background: pointer.isStart
                               ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)'
                               : 'linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%)',
                             borderRadius: '50%',
-                            border: '1.5px solid white',
-                            boxShadow: '0 0 6px rgba(99, 102, 241, 0.7)',
+                            border: '2px solid white',
+                            boxShadow: '0 0 8px rgba(99, 102, 241, 0.7)',
                           }}
                           onMouseDown={(e) => {
                             e.stopPropagation();
@@ -988,17 +1008,17 @@ const TrimmingTool = ({
                     </div>
                   ))}
                   <div
-                    className="absolute w-0.5 h-6 top-[-0.8em] pointer-events-none z-[15]"
+                    className="absolute w-1 h-8 sm:h-10 top-[-1em] sm:top-[-1.2em] pointer-events-none z-[15]"
                     style={{
                       left: `${(currentTime / duration) * 100}%`,
                       background: 'linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0.3))',
                     }}
                   >
                     <div
-                      className="absolute -top-[0.25em] left-1/2 -translate-x-1/2 w-[0.625em] h-[0.625em] rounded-full"
+                      className="absolute -top-[0.3em] sm:-top-[0.4em] left-1/2 -translate-x-1/2 w-[0.75em] h-[0.75em] sm:w-[0.875em] sm:h-[0.875em] rounded-full"
                       style={{
                         background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
-                        boxShadow: '0 0 0.2em rgba(255, 255, 255, 0.5)',
+                        boxShadow: '0 0 0.3em rgba(255, 255, 255, 0.5)',
                       }}
                     />
                   </div>
@@ -1006,20 +1026,21 @@ const TrimmingTool = ({
               </div>
             </div>
           </div>
-          <div className="w-full h-[0.375em] bg-[#1f2937] rounded-full relative mx-[1em]">
+          {/* Mini Timeline */}
+          <div className="w-full h-1 sm:h-1.5 bg-[#1f2937] rounded-full relative mx-2 sm:mx-4">
             <div
-              className="absolute h-full bg-[#6366f1] rounded-full"
+              className="absolute h-full bg-gradient-to-r from-[#6366f1] to-[#22d3ee] rounded-full"
               style={{
                 left: `${(startTime / duration) * 100}%`,
                 width: `${((endTime - startTime) / duration) * 100}%`,
               }}
             />
             <div
-              className="absolute h-[0.75em] w-[0.25em] bg-[#6366f1] rounded-full top-1/2 -translate-y-1/2"
+              className="absolute h-2 w-1 sm:h-2.5 sm:w-1.5 bg-[#6366f1] rounded-full top-1/2 -translate-y-1/2 shadow-sm"
               style={{ left: `${(startTime / duration) * 100}%` }}
             />
             <div
-              className="absolute h-[0.75em] w-[0.25em] bg-[#6366f1] rounded-full top-1/2 -translate-y-1/2"
+              className="absolute h-2 w-1 sm:h-2.5 sm:w-1.5 bg-[#22d3ee] rounded-full top-1/2 -translate-y-1/2 shadow-sm"
               style={{ left: `${(endTime / duration) * 100}%` }}
             />
           </div>
