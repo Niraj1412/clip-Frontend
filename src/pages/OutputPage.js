@@ -733,7 +733,7 @@ const OutputPage = () => {
                     </div>
                   </div>
                                    <div className="p-3 sm:p-4 flex-1 overflow-hidden min-h-0">
-                                         <div className="aspect-video w-full h-auto max-h-[calc(100vh-200px)] sm:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-200px)] lg:max-h-[calc(100vh-180px)] relative z-10 rounded-xl overflow-hidden shadow-2xl">
+                                         <div className="aspect-video w-full h-auto max-h-[calc(100vh-200px)] sm:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-300px)] lg:max-h-[calc(100vh-180px)] relative z-10 rounded-xl overflow-hidden shadow-2xl">
                                              <video
                          controls
                          src={videoUrl}
