@@ -764,15 +764,15 @@ const OutputPage = () => {
                           <FontAwesomeIcon icon={faShare} className="text-sm" />
                           <span>Share Video</span>
                         </motion.button>
-                      <AnimatePresence>
-                        {showShareMenu && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            transition={{ duration: 0.2 }}
-                                                         className="absolute left-0 right-0 mt-2 bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-xl border border-[#2d2d2d] shadow-2xl overflow-hidden z-50 backdrop-blur-sm"
-                          >
+                                               <AnimatePresence>
+                           {showShareMenu && (
+                             <motion.div
+                               initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                               animate={{ opacity: 1, y: 0, scale: 1 }}
+                               exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                               transition={{ duration: 0.2 }}
+                                                          className="absolute left-0 right-0 bottom-full mb-2 bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-xl border border-[#2d2d2d] shadow-2xl overflow-hidden z-50 backdrop-blur-sm"
+                             >
                                                           <div className="p-4 border-b border-[#2d2d2d]">
                                <h3 className="text-base font-semibold text-gray-300">Share via</h3>
                              </div>
