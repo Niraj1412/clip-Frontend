@@ -475,52 +475,61 @@ const OutputPage = () => {
   }, []);
 
   return (
-    <div className="h-screen bg-[#121212] text-white flex flex-col">
-      {/* Compact Header */}
-      <div className="flex justify-between items-center px-4 sm:px-6 py-2 sm:py-3 border-b border-[#2d2d2d] bg-[#1a1a1a] flex-shrink-0">
+    <div className="h-screen bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0f0f0f] text-white flex flex-col">
+      {/* Enhanced Mobile Header */}
+      <div className="flex justify-between items-center px-3 sm:px-4 md:px-6 py-2 sm:py-3 border-b border-[#2d2d2d] bg-gradient-to-r from-[#1a1a1a] to-[#252525] flex-shrink-0 shadow-lg">
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-[#6c5ce7] flex items-center justify-center">
-            <FontAwesomeIcon icon={faFilm} className="text-white text-xs sm:text-sm" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center shadow-lg">
+            <FontAwesomeIcon icon={faFilm} className="text-white text-sm sm:text-base" />
           </div>
-          <h1 className="text-base sm:text-lg font-medium text-white">
-            Video Output
-            <span className="ml-2 text-xs sm:text-sm text-gray-400">
-              ({getTotalClips()} clips)
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-2">
+            <h1 className="text-lg sm:text-xl font-bold text-white">
+              Video Output
+            </h1>
+            <span className="text-xs sm:text-sm text-gray-400 bg-[#2d2d2d] px-2 py-0.5 rounded-full">
+              {getTotalClips()} clips
             </span>
-          </h1>
+          </div>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
-                     <motion.button
-             whileHover={{ scale: 1.05 }}
-             whileTap={{ scale: 0.95 }}
-             onClick={() => {
-               clearStoredData();
-               navigate('/explore');
-             }}
-             className="flex items-center gap-1 sm:gap-2 text-gray-300 hover:text-white transition-colors text-xs sm:text-sm"
-           >
-             <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-             <span className="hidden sm:inline">Explore</span>
-           </motion.button>
-           <motion.button
-             whileHover={{ scale: 1.05 }}
-             whileTap={{ scale: 0.95 }}
-             onClick={() => {
-               clearStoredData();
-               navigate('/transcripts');
-             }}
-             className="flex items-center gap-1 sm:gap-2 text-gray-300 hover:text-white transition-colors text-xs sm:text-sm"
-           >
-             <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-             <span className="hidden sm:inline">Clips</span>
-           </motion.button>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              clearStoredData();
+              navigate('/explore');
+            }}
+            className="flex items-center gap-1 sm:gap-2 text-gray-300 hover:text-white transition-colors text-xs sm:text-sm bg-[#2d2d2d] hover:bg-[#3d3d3d] px-2 py-1.5 rounded-lg"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
+            <span className="hidden sm:inline">Explore</span>
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              clearStoredData();
+              navigate('/transcripts');
+            }}
+            className="flex items-center gap-1 sm:gap-2 text-gray-300 hover:text-white transition-colors text-xs sm:text-sm bg-[#2d2d2d] hover:bg-[#3d3d3d] px-2 py-1.5 rounded-lg"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
+            <span className="hidden sm:inline">Clips</span>
+          </motion.button>
         </div>
       </div>
 
-      {/* Background Elements */}
-      <ParticleBackground />
+             {/* Enhanced Background Elements */}
+       <ParticleBackground />
 
-      <style jsx>{`
+       {/* Mobile-optimized floating elements */}
+       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+         <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-[#6c5ce7]/5 rounded-full blur-3xl animate-pulse"></div>
+         <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-[#8b7cf7]/5 rounded-full blur-2xl animate-pulse delay-1000"></div>
+         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-[#6c5ce7]/3 rounded-full blur-3xl animate-pulse delay-500"></div>
+       </div>
+
+       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;
         }
@@ -563,8 +572,8 @@ const OutputPage = () => {
         }
       `}</style>
 
-             {/* Main Content Area */}
-       <div className="flex-1 overflow-hidden p-1 sm:p-2">
+                           {/* Enhanced Main Content Area */}
+        <div className="flex-1 overflow-hidden p-2 sm:p-3 md:p-4">
         {/* Error State */}
         <AnimatePresence>
           {error && (
@@ -574,29 +583,29 @@ const OutputPage = () => {
               exit={{ opacity: 0, y: -20 }}
               className="h-full flex items-center justify-center p-2"
             >
-              <div className="bg-[#1a1a1a] rounded-lg p-4 sm:p-6 border border-[#ff5757]/30 shadow-lg max-w-lg w-full">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-[#ff5757]/20 flex items-center justify-center shrink-0">
-                    <FontAwesomeIcon icon={faExclamationCircle} className="text-[#ff5757] text-lg sm:text-xl" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-white mb-2">Processing Error</h2>
-                    <p className="text-gray-300 text-sm">{error}</p>
-                                         <motion.button
+                             <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl p-4 sm:p-6 border border-[#ff5757]/30 shadow-2xl max-w-lg w-full backdrop-blur-sm">
+                 <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                   <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-[#ff5757]/20 to-[#ff5757]/10 flex items-center justify-center shrink-0 shadow-lg">
+                     <FontAwesomeIcon icon={faExclamationCircle} className="text-[#ff5757] text-xl sm:text-2xl" />
+                   </div>
+                   <div className="flex-1">
+                     <h2 className="text-xl sm:text-2xl font-bold text-white mb-3">Processing Error</h2>
+                     <p className="text-gray-300 text-sm sm:text-base mb-4">{error}</p>
+                     <motion.button
                        whileHover={{ scale: 1.02 }}
                        whileTap={{ scale: 0.98 }}
                        onClick={() => {
                          clearStoredData();
                          navigate('/transcripts');
                        }}
-                       className="mt-3 bg-[#252525] px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-[#303030] transition-colors"
+                       className="w-full sm:w-auto bg-gradient-to-r from-[#252525] to-[#303030] px-4 py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2 hover:from-[#303030] hover:to-[#353535] transition-all shadow-lg"
                      >
                        <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
                        <span>Go Back and Try Again</span>
                      </motion.button>
-                  </div>
-                </div>
-              </div>
+                   </div>
+                 </div>
+               </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -610,9 +619,9 @@ const OutputPage = () => {
                exit={{ opacity: 0 }}
                className="h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
              >
-              <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] p-4 sm:p-6 flex flex-col items-center justify-center shadow-lg flex-1 min-h-0">
-                {/* Compact Loading visualization */}
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-4 sm:mb-6">
+                             <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] p-4 sm:p-6 flex flex-col items-center justify-center shadow-2xl flex-1 min-h-0 backdrop-blur-sm">
+                 {/* Enhanced Loading visualization */}
+                 <div className="relative w-28 h-28 sm:w-36 sm:h-36 mb-4 sm:mb-6">
                   <svg className="w-full h-full" viewBox="0 0 100 100">
                     <circle cx="50" cy="50" r="46" fill="none" stroke="#232323" strokeWidth="8" />
                     <circle
@@ -640,13 +649,13 @@ const OutputPage = () => {
                     <span className="font-mono text-xs sm:text-sm font-bold text-[#6c5ce7]">{Math.round(loadingProgress)}%</span>
                   </div>
                 </div>
-                <h2 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 text-center">Processing Your Video</h2>
-                <p className="text-gray-400 text-center text-xs sm:text-sm max-w-xs sm:max-w-md">
-                  Merging and processing your clips...
-                </p>
+                                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 text-center bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Processing Your Video</h2>
+                 <p className="text-gray-400 text-center text-sm sm:text-base max-w-xs sm:max-w-md">
+                   Merging and processing your clips...
+                 </p>
               </div>
-                             <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] p-2 sm:p-3 shadow-lg lg:w-[260px] sm:w-[300px] flex-shrink-0 flex flex-col min-h-0">
-                <h3 className="text-base sm:text-lg font-bold mb-3 text-white">Processing Steps</h3>
+                                                           <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] p-3 sm:p-4 shadow-2xl lg:w-[280px] sm:w-[320px] flex-shrink-0 flex flex-col min-h-0 backdrop-blur-sm">
+                 <h3 className="text-lg sm:text-xl font-bold mb-4 text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Processing Steps</h3>
                 <div className="space-y-2 sm:space-y-3 flex-1 min-h-0">
                   {[
                     { label: 'Initializing', done: loadingProgress > 10 },
@@ -655,48 +664,48 @@ const OutputPage = () => {
                     { label: 'Applying Transitions', done: loadingProgress > 80 },
                     { label: 'Finalizing Video', done: loadingProgress > 95 }
                   ].map((step, index) => (
-                    <div key={index} className="flex items-center gap-2 sm:gap-3">
-                      <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center ${step.done ? 'bg-[#6c5ce7]/20' : 'bg-[#2A2A2A]/40'}`}>
-                        {step.done ? (
-                          <FontAwesomeIcon icon={faCheckCircle} className="text-[#6c5ce7] text-xs" />
-                        ) : (
-                          index === [0, 10, 30, 60, 80, 95].findIndex(threshold => loadingProgress <= threshold) ? (
-                            <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}>
-                              <FontAwesomeIcon icon={faSpinner} className="text-gray-400 text-xs" />
-                            </motion.div>
-                          ) : (
-                            <div className="w-2 h-2 bg-[#2A2A2A] rounded-full"></div>
-                          )
-                        )}
-                      </div>
-                      <span className={`text-xs sm:text-sm ${step.done ? 'text-white' : 'text-gray-500'}`}>{step.label}</span>
-                    </div>
+                                         <div key={index} className="flex items-center gap-3 sm:gap-4 p-2 rounded-lg hover:bg-[#2d2d2d]/50 transition-colors">
+                       <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-lg ${step.done ? 'bg-gradient-to-br from-[#6c5ce7]/30 to-[#8b7cf7]/20' : 'bg-[#2A2A2A]/60'}`}>
+                         {step.done ? (
+                           <FontAwesomeIcon icon={faCheckCircle} className="text-[#6c5ce7] text-sm" />
+                         ) : (
+                           index === [0, 10, 30, 60, 80, 95].findIndex(threshold => loadingProgress <= threshold) ? (
+                             <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}>
+                               <FontAwesomeIcon icon={faSpinner} className="text-gray-400 text-sm" />
+                             </motion.div>
+                           ) : (
+                             <div className="w-3 h-3 bg-[#2A2A2A] rounded-full"></div>
+                           )
+                         )}
+                       </div>
+                       <span className={`text-sm sm:text-base font-medium ${step.done ? 'text-white' : 'text-gray-500'}`}>{step.label}</span>
+                     </div>
                   ))}
                 </div>
-                                 <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-[#2d2d2d] flex-shrink-0">
-                   <h4 className="text-gray-400 text-xs sm:text-sm mb-1.5">Clips Being Processed</h4>
-                   <div className="space-y-1 max-h-[100px] sm:max-h-[120px] overflow-y-auto custom-scrollbar">
-                    {selectedClipsData.length > 0 && selectedClipsData.some(video => video.segments && video.segments.length > 0) ? (
-                      selectedClipsData.flatMap((video, videoIndex) =>
-                        video.segments.map((segment, segmentIndex) => (
-                          <div key={`${videoIndex}-${segmentIndex}`} className="bg-[#252525] rounded-lg p-2 text-xs">
-                            <div className="flex justify-between mb-1">
-                              <span className="text-[#6c5ce7]">Clip {videoIndex + 1}.{segmentIndex + 1}</span>
-                              <span className="text-gray-500">
-                                {(parseFloat(segment.endTime) - parseFloat(segment.startTime)).toFixed(1)}s
-                              </span>
-                            </div>
-                            <div className="text-gray-400 truncate">
-                              {segment.text?.slice(0, 25)}...
-                            </div>
-                          </div>
-                        ))
-                      )
-                    ) : (
-                      <div className="text-gray-400 text-xs">No clips to display</div>
-                    )}
-                  </div>
-                </div>
+                                                                   <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-[#2d2d2d] flex-shrink-0">
+                    <h4 className="text-gray-400 text-sm sm:text-base mb-2 font-medium">Clips Being Processed</h4>
+                    <div className="space-y-2 max-h-[120px] sm:max-h-[140px] overflow-y-auto custom-scrollbar">
+                     {selectedClipsData.length > 0 && selectedClipsData.some(video => video.segments && video.segments.length > 0) ? (
+                       selectedClipsData.flatMap((video, videoIndex) =>
+                         video.segments.map((segment, segmentIndex) => (
+                           <div key={`${videoIndex}-${segmentIndex}`} className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] rounded-xl p-3 text-sm hover:from-[#2a2a2a] hover:to-[#2f2f2f] transition-all shadow-md">
+                             <div className="flex justify-between items-center mb-2">
+                               <span className="text-[#6c5ce7] font-semibold">Clip {videoIndex + 1}.{segmentIndex + 1}</span>
+                               <span className="text-gray-500 bg-[#1a1a1a] px-2 py-1 rounded-full text-xs">
+                                 {(parseFloat(segment.endTime) - parseFloat(segment.startTime)).toFixed(1)}s
+                               </span>
+                             </div>
+                             <div className="text-gray-400 text-sm line-clamp-2">
+                               {segment.text?.slice(0, 30)}...
+                             </div>
+                           </div>
+                         ))
+                       )
+                     ) : (
+                       <div className="text-gray-400 text-sm text-center py-4">No clips to display</div>
+                     )}
+                   </div>
+                 </div>
               </div>
             </motion.div>
           )}
@@ -711,50 +720,50 @@ const OutputPage = () => {
                exit={{ opacity: 0 }}
                className="h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
              >
-               {/* Video Player */}
-               <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] flex flex-col shadow-lg flex-1 min-h-0">
-                 <div className="border-b border-[#2d2d2d] px-2 sm:px-4 py-1.5 sm:py-2 flex justify-between items-center flex-shrink-0">
-                   <h2 className="font-bold text-sm sm:text-base flex items-center gap-2">
-                     <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7] text-xs sm:text-sm" />
-                     <span>Final Video</span>
-                   </h2>
-                   <div className="flex items-center gap-1.5 bg-[#252525] px-2 py-0.5 rounded-full text-xs">
-                     <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                     <span>Ready</span>
-                   </div>
-                 </div>
-                 <div className="p-2 sm:p-4 flex-1 overflow-hidden min-h-0">
-                   <div className="aspect-video w-full h-auto max-h-[calc(100vh-220px)] relative z-10 rounded-lg overflow-hidden">
-                     <video
-                       controls
-                       src={videoUrl}
-                       className="w-full h-full object-contain bg-[#080808]"
-                       onLoadedData={() => setVideoLoaded(true)}
-                       onError={() => setVideoError(true)}
-                     />
-                   </div>
-                 </div>
-                 <div className="bg-[#151515] border-t border-[#2d2d2d] px-2 sm:px-4 py-2 sm:py-3 flex-shrink-0">
-                   <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
-                     <motion.button
-                       whileHover={{ scale: 1.02 }}
-                       whileTap={{ scale: 0.98 }}
-                       onClick={downloadVideo}
-                       className="flex-1 bg-[#6c5ce7] hover:bg-[#5849e0] py-1.5 sm:py-2 rounded-lg font-medium text-white flex items-center gap-1.5 sm:gap-2 justify-center transition-colors text-xs sm:text-sm"
-                     >
-                       <FontAwesomeIcon icon={faDownload} className="text-xs" />
-                       <span>Download Video</span>
-                     </motion.button>
-                     <div className="relative flex-1">
-                       <motion.button
-                         whileHover={{ scale: 1.02 }}
-                         whileTap={{ scale: 0.98 }}
-                         onClick={() => setShowShareMenu(!showShareMenu)}
-                         className="w-full bg-[#252525] border border-[#3A3A3A] py-1.5 sm:py-2 rounded-lg font-medium text-white flex items-center gap-1.5 sm:gap-2 justify-center hover:bg-[#303030] transition-colors text-xs sm:text-sm"
-                       >
-                         <FontAwesomeIcon icon={faShare} className="text-xs" />
-                         <span>Share Video</span>
-                       </motion.button>
+                               {/* Enhanced Video Player */}
+                <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] flex flex-col shadow-2xl flex-1 min-h-0 backdrop-blur-sm">
+                  <div className="border-b border-[#2d2d2d] px-3 sm:px-4 py-2 sm:py-3 flex justify-between items-center flex-shrink-0">
+                    <h2 className="font-bold text-base sm:text-lg flex items-center gap-2">
+                      <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7] text-sm sm:text-base" />
+                      <span>Final Video</span>
+                    </h2>
+                    <div className="flex items-center gap-2 bg-gradient-to-r from-[#252525] to-[#2a2a2a] px-3 py-1 rounded-full text-xs shadow-lg">
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                      <span className="font-medium">Ready</span>
+                    </div>
+                  </div>
+                                   <div className="p-3 sm:p-4 flex-1 overflow-hidden min-h-0">
+                    <div className="aspect-video w-full h-auto max-h-[calc(100vh-240px)] relative z-10 rounded-xl overflow-hidden shadow-2xl">
+                      <video
+                        controls
+                        src={videoUrl}
+                        className="w-full h-full object-contain bg-gradient-to-br from-[#080808] to-[#0a0a0a]"
+                        onLoadedData={() => setVideoLoaded(true)}
+                        onError={() => setVideoError(true)}
+                      />
+                    </div>
+                  </div>
+                                   <div className="bg-gradient-to-r from-[#151515] to-[#1a1a1a] border-t border-[#2d2d2d] px-3 sm:px-4 py-3 sm:py-4 flex-shrink-0">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={downloadVideo}
+                        className="flex-1 bg-gradient-to-r from-[#6c5ce7] to-[#8b7cf7] hover:from-[#5849e0] hover:to-[#7c6cf6] py-3 sm:py-3 rounded-xl font-semibold text-white flex items-center gap-2 justify-center transition-all text-sm shadow-lg"
+                      >
+                        <FontAwesomeIcon icon={faDownload} className="text-sm" />
+                        <span>Download Video</span>
+                      </motion.button>
+                      <div className="relative flex-1">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setShowShareMenu(!showShareMenu)}
+                          className="w-full bg-gradient-to-r from-[#252525] to-[#2a2a2a] border border-[#3A3A3A] py-3 sm:py-3 rounded-xl font-semibold text-white flex items-center gap-2 justify-center hover:from-[#303030] hover:to-[#353535] transition-all text-sm shadow-lg"
+                        >
+                          <FontAwesomeIcon icon={faShare} className="text-sm" />
+                          <span>Share Video</span>
+                        </motion.button>
                       <AnimatePresence>
                         {showShareMenu && (
                           <motion.div
@@ -762,36 +771,36 @@ const OutputPage = () => {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
                             transition={{ duration: 0.2 }}
-                            className="absolute left-0 right-0 mt-2 bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] shadow-xl overflow-hidden z-50"
+                                                         className="absolute left-0 right-0 mt-2 bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-xl border border-[#2d2d2d] shadow-2xl overflow-hidden z-50 backdrop-blur-sm"
                           >
-                            <div className="p-3 border-b border-[#2d2d2d]">
-                              <h3 className="text-sm font-medium text-gray-300">Share via</h3>
-                            </div>
-                            <div className="p-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              <motion.button
-                                whileHover={{ backgroundColor: 'rgba(108, 92, 231, 0.1)' }}
-                                className="flex items-center gap-3 p-3 rounded-lg"
-                                onClick={() => shareToSocial('twitter')}
-                              >
-                                <div className="w-8 h-8 rounded-full bg-[#1DA1F2]/10 flex items-center justify-center">
-                                  <FontAwesomeIcon icon={faTwitter} className="text-[#1DA1F2]" />
-                                </div>
-                                <span className="text-sm">Twitter</span>
-                              </motion.button>
+                                                          <div className="p-4 border-b border-[#2d2d2d]">
+                               <h3 className="text-base font-semibold text-gray-300">Share via</h3>
+                             </div>
+                             <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                               <motion.button
+                                 whileHover={{ backgroundColor: 'rgba(108, 92, 231, 0.1)' }}
+                                 className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#2d2d2d]/50 transition-colors"
+                                 onClick={() => shareToSocial('twitter')}
+                               >
+                                 <div className="w-10 h-10 rounded-full bg-[#1DA1F2]/10 flex items-center justify-center shadow-lg">
+                                   <FontAwesomeIcon icon={faTwitter} className="text-[#1DA1F2] text-lg" />
+                                 </div>
+                                 <span className="text-sm font-medium">Twitter</span>
+                               </motion.button>
                               {/* Other share buttons unchanged */}
                             </div>
-                            <div className="p-2 border-t border-[#2d2d2d]">
-                              <motion.button
-                                whileHover={{ backgroundColor: 'rgba(108, 92, 231, 0.1)' }}
-                                className="w-full flex items-center gap-3 p-3 rounded-lg"
-                                onClick={copyToClipboard}
-                              >
-                                <div className="w-8 h-8 rounded-full bg-[#6c5ce7]/10 flex items-center justify-center">
-                                  <FontAwesomeIcon icon={copied ? faCheckCircle : faCopy} className={copied ? "text-green-500" : "text-[#6c5ce7]"} />
-                                </div>
-                                <span className="text-sm">{copied ? 'Copied!' : 'Copy Video Link'}</span>
-                              </motion.button>
-                            </div>
+                                                         <div className="p-3 border-t border-[#2d2d2d]">
+                               <motion.button
+                                 whileHover={{ backgroundColor: 'rgba(108, 92, 231, 0.1)' }}
+                                 className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#2d2d2d]/50 transition-colors"
+                                 onClick={copyToClipboard}
+                               >
+                                 <div className="w-10 h-10 rounded-full bg-[#6c5ce7]/10 flex items-center justify-center shadow-lg">
+                                   <FontAwesomeIcon icon={copied ? faCheckCircle : faCopy} className={copied ? "text-green-500" : "text-[#6c5ce7]"} />
+                                 </div>
+                                 <span className="text-sm font-medium">{copied ? 'Copied!' : 'Copy Video Link'}</span>
+                               </motion.button>
+                             </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -800,119 +809,119 @@ const OutputPage = () => {
                 </div>
               </div>
 
-                             {/* Information Panel */}
-               <div className="w-full lg:w-[260px] sm:w-[300px] flex flex-col gap-2 sm:gap-3 min-h-0">
-                 <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] shadow-lg overflow-hidden flex-shrink-0">
-                   <div className="px-2 sm:px-4 py-2 sm:py-3 border-b border-[#2d2d2d]">
-                     <h3 className="font-bold text-sm sm:text-base flex items-center gap-2">
-                       <FontAwesomeIcon icon={faVideo} className="text-[#6c5ce7] text-xs sm:text-sm" />
-                       Video Info
-                     </h3>
-                   </div>
-                   <div className="p-2 sm:p-4">
-                     <div className="grid grid-cols-2 gap-x-3 sm:gap-x-4 gap-y-2 sm:gap-y-3">
-                       <div>
-                         <div className="text-gray-500 text-xs mb-0.5">Duration</div>
-                         <div className="font-medium flex items-center text-xs sm:text-sm">
-                           <FontAwesomeIcon icon={faClock} className="text-[#6c5ce7] mr-1.5 text-xs" />
-                           {formatDuration(getTotalDuration())}
-                         </div>
-                       </div>
-                       <div>
-                         <div className="text-gray-500 text-xs mb-0.5">Format</div>
-                         <div className="font-medium text-xs sm:text-sm">MP4</div>
-                       </div>
-                       <div>
-                         <div className="text-gray-500 text-xs mb-0.5">Clips</div>
-                         <div className="font-medium text-xs sm:text-sm">{selectedClipsData.length}</div>
-                       </div>
-                       <div>
-                         <div className="text-gray-500 text-xs mb-0.5">Status</div>
-                         <div className="font-medium text-[#6c5ce7] text-xs sm:text-sm">Completed</div>
-                       </div>
-                     </div>
-                     <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-[#2d2d2d]">
-                       <div className="text-gray-500 text-xs mb-1.5">Video URL</div>
-                       <div className="bg-[#252525] rounded-lg p-1.5 sm:p-2 flex items-center justify-between">
-                         <div className="text-gray-300 text-xs truncate max-w-[160px] sm:max-w-[200px]">
-                           {videoUrl.substring(0, 25)}...
-                         </div>
-                         <motion.button
-                           whileHover={{ scale: 1.05 }}
-                           whileTap={{ scale: 0.95 }}
-                           onClick={copyToClipboard}
-                           className="bg-[#333333] p-1 sm:p-1.5 rounded-lg hover:bg-[#3a3a3a] transition-colors"
-                         >
-                           <FontAwesomeIcon icon={copied ? faCheckCircle : faCopy} className={copied ? "text-green-500" : "text-[#6c5ce7]"} />
-                         </motion.button>
-                       </div>
-                     </div>
+                                                           {/* Enhanced Information Panel */}
+                <div className="w-full lg:w-[280px] sm:w-[320px] flex flex-col gap-3 sm:gap-4 min-h-0">
+                  <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] shadow-2xl overflow-hidden flex-shrink-0 backdrop-blur-sm">
+                    <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-[#2d2d2d]">
+                      <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
+                        <FontAwesomeIcon icon={faVideo} className="text-[#6c5ce7] text-sm sm:text-base" />
+                        Video Info
+                      </h3>
+                    </div>
+                                       <div className="p-3 sm:p-4">
+                      <div className="grid grid-cols-2 gap-x-4 sm:gap-x-5 gap-y-3 sm:gap-y-4">
+                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-3 rounded-xl">
+                          <div className="text-gray-400 text-xs mb-1 font-medium">Duration</div>
+                          <div className="font-semibold flex items-center text-sm sm:text-base">
+                            <FontAwesomeIcon icon={faClock} className="text-[#6c5ce7] mr-2 text-sm" />
+                            {formatDuration(getTotalDuration())}
+                          </div>
+                        </div>
+                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-3 rounded-xl">
+                          <div className="text-gray-400 text-xs mb-1 font-medium">Format</div>
+                          <div className="font-semibold text-sm sm:text-base">MP4</div>
+                        </div>
+                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-3 rounded-xl">
+                          <div className="text-gray-400 text-xs mb-1 font-medium">Clips</div>
+                          <div className="font-semibold text-sm sm:text-base">{selectedClipsData.length}</div>
+                        </div>
+                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-3 rounded-xl">
+                          <div className="text-gray-400 text-xs mb-1 font-medium">Status</div>
+                          <div className="font-semibold text-[#6c5ce7] text-sm sm:text-base">Completed</div>
+                        </div>
+                      </div>
+                                           <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-[#2d2d2d]">
+                        <div className="text-gray-400 text-sm mb-2 font-medium">Video URL</div>
+                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] rounded-xl p-3 flex items-center justify-between shadow-lg">
+                          <div className="text-gray-300 text-sm truncate max-w-[180px] sm:max-w-[220px] font-medium">
+                            {videoUrl.substring(0, 25)}...
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={copyToClipboard}
+                            className="bg-gradient-to-r from-[#333333] to-[#3a3a3a] p-2 rounded-lg hover:from-[#3a3a3a] hover:to-[#404040] transition-all shadow-md"
+                          >
+                            <FontAwesomeIcon icon={copied ? faCheckCircle : faCopy} className={copied ? "text-green-500" : "text-[#6c5ce7]"} />
+                          </motion.button>
+                        </div>
+                      </div>
                    </div>
                  </div>
-                 <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] shadow-lg flex flex-col min-h-0 flex-1">
-                   <div className="px-2 sm:px-4 py-2 sm:py-3 border-b border-[#2d2d2d] flex-shrink-0">
-                     <h3 className="font-bold text-sm sm:text-base flex items-center gap-2">
-                       <FontAwesomeIcon icon={faList} className="text-[#6c5ce7] text-xs sm:text-sm" />
-                       Merged Clips
-                     </h3>
-                   </div>
-                   <div className="p-1.5 sm:p-2 flex-1 overflow-y-auto custom-purple-scrollbar min-h-0">
-                     {selectedClipsData.length > 0 && selectedClipsData.some(video => video.segments && video.segments.length > 0) ? (
-                       selectedClipsData.flatMap((video, videoIndex) =>
-                         video.segments.map((segment, segmentIndex) => (
-                           <div
-                             key={`${videoIndex}-${segmentIndex}`}
-                             className="bg-[#252525] rounded-lg p-1.5 sm:p-2 mb-1.5 hover:bg-[#2a2a2a] transition-colors"
-                           >
-                             <div className="flex justify-between items-center mb-1">
-                               <div className="flex items-center">
-                                 <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#6c5ce7]/20 flex items-center justify-center mr-1.5">
-                                   <span className="text-xs text-[#6c5ce7] font-bold">{videoIndex + 1}.{segmentIndex + 1}</span>
-                                 </div>
-                                 <span className="font-medium text-xs">Clip {videoIndex + 1}.{segmentIndex + 1}</span>
-                               </div>
-                               <span className="text-gray-500 text-xs">
-                                 {(parseFloat(segment.endTime) - parseFloat(segment.startTime)).toFixed(1)}s
-                               </span>
-                             </div>
-                             <div className="text-gray-400 text-xs line-clamp-2">
-                               {segment.text}
-                             </div>
-                           </div>
-                         ))
-                       )
-                     ) : (
-                       <div className="text-gray-400 text-xs">No clips to display</div>
-                     )}
-                   </div>
-                   <div className="px-2 sm:px-4 py-2 sm:py-3 border-t border-[#2d2d2d] bg-[#151515] flex-shrink-0">
-                     <div className="flex flex-col sm:flex-row gap-1.5">
-                       <motion.button
-                         whileHover={{ scale: 1.02 }}
-                         whileTap={{ scale: 0.98 }}
-                         onClick={() => {
-                           clearStoredData();
-                           navigate('/transcripts');
-                         }}
-                         className="flex-1 bg-[#252525] py-1.5 sm:py-2 rounded-lg text-xs font-medium hover:bg-[#303030] transition-colors flex items-center justify-center gap-1.5"
-                       >
-                         <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-                         <span>Back to Clips</span>
-                       </motion.button>
-                       <motion.button
-                         whileHover={{ scale: 1.02 }}
-                         whileTap={{ scale: 0.98 }}
-                         onClick={() => {
-                           clearStoredData();
-                           navigate('/explore');
-                         }}
-                         className="flex-1 bg-[#6c5ce7] py-1.5 sm:py-2 rounded-lg text-xs font-medium hover:bg-[#5849e0] transition-colors flex items-center justify-center gap-1.5"
-                       >
-                         <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-                         <span>Back to Explore</span>
-                       </motion.button>
-                     </div>
-                   </div>
+                                   <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] shadow-2xl flex flex-col min-h-0 flex-1 backdrop-blur-sm">
+                    <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-[#2d2d2d] flex-shrink-0">
+                      <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
+                        <FontAwesomeIcon icon={faList} className="text-[#6c5ce7] text-sm sm:text-base" />
+                        Merged Clips
+                      </h3>
+                    </div>
+                                       <div className="p-2 sm:p-3 flex-1 overflow-y-auto custom-purple-scrollbar min-h-0">
+                      {selectedClipsData.length > 0 && selectedClipsData.some(video => video.segments && video.segments.length > 0) ? (
+                        selectedClipsData.flatMap((video, videoIndex) =>
+                          video.segments.map((segment, segmentIndex) => (
+                            <div
+                              key={`${videoIndex}-${segmentIndex}`}
+                              className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] rounded-xl p-3 mb-2 hover:from-[#2a2a2a] hover:to-[#2f2f2f] transition-all shadow-md"
+                            >
+                              <div className="flex justify-between items-center mb-2">
+                                <div className="flex items-center">
+                                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-[#6c5ce7]/30 to-[#8b7cf7]/20 flex items-center justify-center mr-2 shadow-lg">
+                                    <span className="text-xs text-[#6c5ce7] font-bold">{videoIndex + 1}.{segmentIndex + 1}</span>
+                                  </div>
+                                  <span className="font-semibold text-sm">Clip {videoIndex + 1}.{segmentIndex + 1}</span>
+                                </div>
+                                <span className="text-gray-500 text-xs bg-[#1a1a1a] px-2 py-1 rounded-full">
+                                  {(parseFloat(segment.endTime) - parseFloat(segment.startTime)).toFixed(1)}s
+                                </span>
+                              </div>
+                              <div className="text-gray-400 text-sm line-clamp-2">
+                                {segment.text}
+                              </div>
+                            </div>
+                          ))
+                        )
+                      ) : (
+                        <div className="text-gray-400 text-sm text-center py-6">No clips to display</div>
+                      )}
+                    </div>
+                                       <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-[#2d2d2d] bg-gradient-to-r from-[#151515] to-[#1a1a1a] flex-shrink-0">
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            clearStoredData();
+                            navigate('/transcripts');
+                          }}
+                          className="flex-1 bg-gradient-to-r from-[#252525] to-[#2a2a2a] py-2 sm:py-3 rounded-xl text-sm font-semibold hover:from-[#303030] hover:to-[#353535] transition-all flex items-center justify-center gap-2 shadow-lg"
+                        >
+                          <FontAwesomeIcon icon={faArrowLeft} className="text-sm" />
+                          <span>Back to Clips</span>
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            clearStoredData();
+                            navigate('/explore');
+                          }}
+                          className="flex-1 bg-gradient-to-r from-[#6c5ce7] to-[#8b7cf7] py-2 sm:py-3 rounded-xl text-sm font-semibold hover:from-[#5849e0] hover:to-[#7c6cf6] transition-all flex items-center justify-center gap-2 shadow-lg"
+                        >
+                          <FontAwesomeIcon icon={faArrowLeft} className="text-sm" />
+                          <span>Back to Explore</span>
+                        </motion.button>
+                      </div>
+                    </div>
                  </div>
                </div>
             </motion.div>
@@ -927,41 +936,41 @@ const OutputPage = () => {
                animate={{ opacity: 1, y: 0 }}
                className="h-full flex items-center justify-center p-1"
              >
-                             <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] p-4 sm:p-6 shadow-lg max-w-sm w-full">
-                <div className="flex flex-col items-center text-center">
-                                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#6c5ce7] flex items-center justify-center mb-3 sm:mb-4">
-                     <FontAwesomeIcon icon={faVideo} className="text-white text-sm sm:text-lg" />
-                   </div>
-                   <h2 className="text-base sm:text-lg font-bold text-white mb-1.5 sm:mb-2">No Video Generated</h2>
-                   <p className="text-gray-400 text-xs sm:text-sm max-w-xs mb-3 sm:mb-4">Your clips need to be processed to generate a video. Please select clips to merge.</p>
-                                     <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
-                     <motion.button
-                       whileHover={{ scale: 1.05 }}
-                       whileTap={{ scale: 0.95 }}
-                       onClick={() => {
-                         clearStoredData();
-                         navigate('/transcripts');
-                       }}
-                       className="bg-[#6c5ce7] hover:bg-[#5849e0] px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-white flex items-center gap-1.5 transition-colors text-xs sm:text-sm"
-                     >
-                       <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-                       <span>Select Clips</span>
-                     </motion.button>
-                     <motion.button
-                       whileHover={{ scale: 1.05 }}
-                       whileTap={{ scale: 0.95 }}
-                       onClick={() => {
-                         clearStoredData();
-                         navigate('/explore');
-                       }}
-                       className="bg-[#252525] hover:bg-[#303030] px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-white flex items-center gap-1.5 transition-colors text-xs sm:text-sm"
-                     >
-                       <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-                       <span>Back to Explore</span>
-                     </motion.button>
-                   </div>
-                </div>
-              </div>
+                                                           <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] p-6 sm:p-8 shadow-2xl max-w-md w-full backdrop-blur-sm">
+                 <div className="flex flex-col items-center text-center">
+                                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#6c5ce7] to-[#8b7cf7] flex items-center justify-center mb-4 sm:mb-6 shadow-2xl">
+                      <FontAwesomeIcon icon={faVideo} className="text-white text-lg sm:text-xl" />
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">No Video Generated</h2>
+                    <p className="text-gray-400 text-sm sm:text-base max-w-sm mb-5 sm:mb-6">Your clips need to be processed to generate a video. Please select clips to merge.</p>
+                                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          clearStoredData();
+                          navigate('/transcripts');
+                        }}
+                        className="bg-gradient-to-r from-[#6c5ce7] to-[#8b7cf7] hover:from-[#5849e0] hover:to-[#7c6cf6] px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-semibold text-white flex items-center gap-2 transition-all text-sm shadow-lg"
+                      >
+                        <FontAwesomeIcon icon={faArrowLeft} className="text-sm" />
+                        <span>Select Clips</span>
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          clearStoredData();
+                          navigate('/explore');
+                        }}
+                        className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] hover:from-[#303030] hover:to-[#353535] px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-semibold text-white flex items-center gap-2 transition-all text-sm shadow-lg"
+                      >
+                        <FontAwesomeIcon icon={faArrowLeft} className="text-sm" />
+                        <span>Back to Explore</span>
+                      </motion.button>
+                    </div>
+                 </div>
+               </div>
             </motion.div>
           )}
         </AnimatePresence>
