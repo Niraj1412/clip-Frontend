@@ -573,7 +573,7 @@ const OutputPage = () => {
       `}</style>
 
                            {/* Enhanced Main Content Area */}
-        <div className="flex-1 overflow-hidden lg:overflow-y-auto p-2 sm:p-3 md:p-4">
+        <div className="flex-1 overflow-y-auto lg:overflow-hidden p-2 sm:p-3 md:p-4">
         {/* Error State */}
         <AnimatePresence>
           {error && (
@@ -617,7 +617,7 @@ const OutputPage = () => {
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
                exit={{ opacity: 0 }}
-               className="h-full lg:min-h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
+               className="min-h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
              >
                              <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] p-4 sm:p-6 flex flex-col items-center justify-center shadow-2xl flex-1 min-h-0 backdrop-blur-sm">
                  {/* Enhanced Loading visualization */}
@@ -654,7 +654,7 @@ const OutputPage = () => {
                    Merging and processing your clips...
                  </p>
               </div>
-                                                           <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] p-3 sm:p-4 shadow-2xl lg:w-[280px] sm:w-[320px] flex-shrink-0 flex flex-col min-h-0 backdrop-blur-sm">
+                                                                                                                       <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] p-3 sm:p-4 shadow-2xl lg:w-[320px] sm:w-[320px] flex-shrink-0 flex flex-col min-h-0 backdrop-blur-sm">
                  <h3 className="text-lg sm:text-xl font-bold mb-4 text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Processing Steps</h3>
                 <div className="space-y-2 sm:space-y-3 flex-1 min-h-0">
                   {[
@@ -718,7 +718,7 @@ const OutputPage = () => {
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
                exit={{ opacity: 0 }}
-               className="h-full lg:min-h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
+               className="min-h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
              >
                                                               {/* Enhanced Video Player */}
                  <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] flex flex-col shadow-2xl flex-1 min-h-0 backdrop-blur-sm">
@@ -733,7 +733,7 @@ const OutputPage = () => {
                     </div>
                   </div>
                                    <div className="p-3 sm:p-4 flex-1 overflow-hidden min-h-0">
-                                         <div className="aspect-video w-full h-auto max-h-[calc(100vh-280px)] lg:max-h-[calc(100vh-240px)] relative z-10 rounded-xl overflow-hidden shadow-2xl">
+                                         <div className="aspect-video w-full h-auto max-h-[calc(100vh-320px)] sm:max-h-[calc(100vh-280px)] lg:max-h-[calc(100vh-240px)] relative z-10 rounded-xl overflow-hidden shadow-2xl">
                                              <video
                          controls
                          src={videoUrl}
@@ -809,8 +809,8 @@ const OutputPage = () => {
                 </div>
               </div>
 
-                                                           {/* Enhanced Information Panel */}
-                <div className="w-full lg:w-[280px] sm:w-[320px] flex flex-col gap-3 sm:gap-4 min-h-0">
+                                                                                                                       {/* Enhanced Information Panel */}
+                 <div className="w-full lg:w-[320px] sm:w-[320px] flex flex-col gap-3 sm:gap-4 min-h-0">
                   <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] shadow-2xl overflow-hidden flex-shrink-0 backdrop-blur-sm">
                     <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-[#2d2d2d]">
                       <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
@@ -858,14 +858,14 @@ const OutputPage = () => {
                       </div>
                    </div>
                  </div>
-                                   <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] shadow-2xl flex flex-col min-h-0 flex-1 backdrop-blur-sm">
-                    <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-[#2d2d2d] flex-shrink-0">
-                      <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
-                        <FontAwesomeIcon icon={faList} className="text-[#6c5ce7] text-sm sm:text-base" />
-                        Merged Clips
-                      </h3>
-                    </div>
-                                       <div className="p-2 sm:p-3 flex-1 overflow-y-auto custom-purple-scrollbar min-h-0">
+                                                                       <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] shadow-2xl flex flex-col min-h-0 flex-1 backdrop-blur-sm">
+                     <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-[#2d2d2d] flex-shrink-0">
+                       <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
+                         <FontAwesomeIcon icon={faList} className="text-[#6c5ce7] text-sm sm:text-base" />
+                         Merged Clips
+                       </h3>
+                     </div>
+                                        <div className="p-2 sm:p-3 flex-1 overflow-y-auto custom-purple-scrollbar min-h-0 max-h-[300px] lg:max-h-[400px]">
                       {selectedClipsData.length > 0 && selectedClipsData.some(video => video.segments && video.segments.length > 0) ? (
                         selectedClipsData.flatMap((video, videoIndex) =>
                           video.segments.map((segment, segmentIndex) => (
@@ -894,34 +894,34 @@ const OutputPage = () => {
                         <div className="text-gray-400 text-sm text-center py-6">No clips to display</div>
                       )}
                     </div>
-                                       <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-[#2d2d2d] bg-gradient-to-r from-[#151515] to-[#1a1a1a] flex-shrink-0">
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            clearStoredData();
-                            navigate('/transcripts');
-                          }}
-                          className="flex-1 bg-gradient-to-r from-[#252525] to-[#2a2a2a] py-2 sm:py-3 rounded-xl text-sm font-semibold hover:from-[#303030] hover:to-[#353535] transition-all flex items-center justify-center gap-2 shadow-lg"
-                        >
-                          <FontAwesomeIcon icon={faArrowLeft} className="text-sm" />
-                          <span>Back to Clips</span>
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            clearStoredData();
-                            navigate('/explore');
-                          }}
-                          className="flex-1 bg-gradient-to-r from-[#6c5ce7] to-[#8b7cf7] py-2 sm:py-3 rounded-xl text-sm font-semibold hover:from-[#5849e0] hover:to-[#7c6cf6] transition-all flex items-center justify-center gap-2 shadow-lg"
-                        >
-                          <FontAwesomeIcon icon={faArrowLeft} className="text-sm" />
-                          <span>Back to Explore</span>
-                        </motion.button>
-                      </div>
-                    </div>
+                                                                               <div className="px-3 sm:px-4 py-2 sm:py-3 border-t border-[#2d2d2d] bg-gradient-to-r from-[#151515] to-[#1a1a1a] flex-shrink-0">
+                       <div className="flex flex-col sm:flex-row gap-2">
+                         <motion.button
+                           whileHover={{ scale: 1.02 }}
+                           whileTap={{ scale: 0.98 }}
+                           onClick={() => {
+                             clearStoredData();
+                             navigate('/transcripts');
+                           }}
+                           className="flex-1 bg-gradient-to-r from-[#252525] to-[#2a2a2a] py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold hover:from-[#303030] hover:to-[#353535] transition-all flex items-center justify-center gap-2 shadow-lg"
+                         >
+                           <FontAwesomeIcon icon={faArrowLeft} className="text-xs sm:text-sm" />
+                           <span>Back to Clips</span>
+                         </motion.button>
+                         <motion.button
+                           whileHover={{ scale: 1.02 }}
+                           whileTap={{ scale: 0.98 }}
+                           onClick={() => {
+                             clearStoredData();
+                             navigate('/explore');
+                           }}
+                           className="flex-1 bg-gradient-to-r from-[#6c5ce7] to-[#8b7cf7] py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold hover:from-[#5849e0] hover:to-[#7c6cf6] transition-all flex items-center justify-center gap-2 shadow-lg"
+                         >
+                           <FontAwesomeIcon icon={faArrowLeft} className="text-xs sm:text-sm" />
+                           <span>Back to Explore</span>
+                         </motion.button>
+                       </div>
+                     </div>
                  </div>
                </div>
             </motion.div>
