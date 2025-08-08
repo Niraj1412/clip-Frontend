@@ -810,7 +810,7 @@ const OutputPage = () => {
               </div>
 
                                                                                                                                                                                    {/* Enhanced Information Panel */}
-                  <div className="w-full lg:w-[340px] md:w-full sm:w-[320px] flex flex-col gap-2 sm:gap-3 lg:gap-3 min-h-0 md:h-full lg:h-full">
+                  <div className="w-full lg:w-[340px] md:w-full sm:w-full flex flex-col gap-2 sm:gap-3 lg:gap-3 min-h-0 md:h-full lg:h-full">
                   <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] shadow-2xl overflow-hidden flex-shrink-0 backdrop-blur-sm">
                     <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-[#2d2d2d]">
                       <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
