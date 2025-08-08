@@ -573,7 +573,7 @@ const OutputPage = () => {
       `}</style>
 
                            {/* Enhanced Main Content Area */}
-        <div className="flex-1 overflow-y-auto p-2 sm:p-3 md:p-4">
+        <div className="flex-1 overflow-hidden lg:overflow-y-auto p-2 sm:p-3 md:p-4">
         {/* Error State */}
         <AnimatePresence>
           {error && (
@@ -617,7 +617,7 @@ const OutputPage = () => {
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
                exit={{ opacity: 0 }}
-               className="min-h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
+               className="h-full lg:min-h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
              >
                              <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] p-4 sm:p-6 flex flex-col items-center justify-center shadow-2xl flex-1 min-h-0 backdrop-blur-sm">
                  {/* Enhanced Loading visualization */}
@@ -718,10 +718,10 @@ const OutputPage = () => {
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
                exit={{ opacity: 0 }}
-               className="min-h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
+               className="h-full lg:min-h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
              >
-                               {/* Enhanced Video Player */}
-                <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] flex flex-col shadow-2xl flex-1 min-h-0 backdrop-blur-sm w-full">
+                                                              {/* Enhanced Video Player */}
+                 <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] flex flex-col shadow-2xl flex-1 min-h-0 backdrop-blur-sm">
                   <div className="border-b border-[#2d2d2d] px-3 sm:px-4 py-2 sm:py-3 flex justify-between items-center flex-shrink-0">
                     <h2 className="font-bold text-base sm:text-lg flex items-center gap-2">
                       <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7] text-sm sm:text-base" />
@@ -733,14 +733,14 @@ const OutputPage = () => {
                     </div>
                   </div>
                                    <div className="p-3 sm:p-4 flex-1 overflow-hidden min-h-0">
-                    <div className="aspect-video w-full h-auto max-h-[calc(100vh-320px)] sm:max-h-[calc(100vh-280px)] lg:max-h-[calc(100vh-240px)] relative z-10 rounded-xl overflow-hidden shadow-2xl">
-                      <video
-                        controls
-                        src={videoUrl}
-                        className="w-full h-full object-contain bg-gradient-to-br from-[#080808] to-[#0a0a0a] min-h-[200px] sm:min-h-[300px]"
-                        onLoadedData={() => setVideoLoaded(true)}
-                        onError={() => setVideoError(true)}
-                      />
+                                         <div className="aspect-video w-full h-auto max-h-[calc(100vh-280px)] lg:max-h-[calc(100vh-240px)] relative z-10 rounded-xl overflow-hidden shadow-2xl">
+                                             <video
+                         controls
+                         src={videoUrl}
+                         className="w-full h-full object-contain bg-gradient-to-br from-[#080808] to-[#0a0a0a]"
+                         onLoadedData={() => setVideoLoaded(true)}
+                         onError={() => setVideoError(true)}
+                       />
                     </div>
                   </div>
                                    <div className="bg-gradient-to-r from-[#151515] to-[#1a1a1a] border-t border-[#2d2d2d] px-3 sm:px-4 py-3 sm:py-4 flex-shrink-0">
@@ -810,7 +810,7 @@ const OutputPage = () => {
               </div>
 
                                                            {/* Enhanced Information Panel */}
-                <div className="w-full lg:w-[280px] sm:w-[320px] flex flex-col gap-3 sm:gap-4 min-h-0 mt-4 lg:mt-0">
+                <div className="w-full lg:w-[280px] sm:w-[320px] flex flex-col gap-3 sm:gap-4 min-h-0">
                   <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] shadow-2xl overflow-hidden flex-shrink-0 backdrop-blur-sm">
                     <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-[#2d2d2d]">
                       <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
