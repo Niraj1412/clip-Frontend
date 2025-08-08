@@ -19,7 +19,6 @@ import {
   faList,
   faWandMagicSparkles,
   faPlay,
-  faTwitter,
   faRefresh
 } from '@fortawesome/free-solid-svg-icons';
 import {
