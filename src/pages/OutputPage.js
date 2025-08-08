@@ -573,7 +573,7 @@ const OutputPage = () => {
       `}</style>
 
                            {/* Enhanced Main Content Area */}
-        <div className="flex-1 overflow-y-auto lg:overflow-hidden p-2 sm:p-3 md:p-4">
+        <div className="flex-1 overflow-y-auto md:overflow-y-auto lg:overflow-hidden p-2 sm:p-3 md:p-4">
         {/* Error State */}
         <AnimatePresence>
           {error && (
@@ -733,7 +733,7 @@ const OutputPage = () => {
                     </div>
                   </div>
                                    <div className="p-3 sm:p-4 flex-1 overflow-hidden min-h-0">
-                                         <div className="aspect-video w-full h-auto max-h-[calc(100vh-320px)] sm:max-h-[calc(100vh-280px)] lg:max-h-[calc(100vh-240px)] relative z-10 rounded-xl overflow-hidden shadow-2xl">
+                                         <div className="aspect-video w-full h-auto max-h-[calc(100vh-320px)] sm:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-200px)] lg:max-h-[calc(100vh-180px)] relative z-10 rounded-xl overflow-hidden shadow-2xl">
                                              <video
                          controls
                          src={videoUrl}
@@ -809,8 +809,8 @@ const OutputPage = () => {
                 </div>
               </div>
 
-                                                                                                                       {/* Enhanced Information Panel */}
-                 <div className="w-full lg:w-[320px] sm:w-[320px] flex flex-col gap-3 sm:gap-4 min-h-0">
+                                                                                                                                                                                   {/* Enhanced Information Panel */}
+                  <div className="w-full lg:w-[340px] md:w-[320px] sm:w-[320px] flex flex-col gap-2 sm:gap-3 lg:gap-3 min-h-0">
                   <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] shadow-2xl overflow-hidden flex-shrink-0 backdrop-blur-sm">
                     <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-[#2d2d2d]">
                       <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
@@ -818,41 +818,41 @@ const OutputPage = () => {
                         Video Info
                       </h3>
                     </div>
-                                       <div className="p-3 sm:p-4">
-                      <div className="grid grid-cols-2 gap-x-4 sm:gap-x-5 gap-y-3 sm:gap-y-4">
-                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-3 rounded-xl">
+                                                                               <div className="p-2 sm:p-3 lg:p-3">
+                      <div className="grid grid-cols-2 gap-x-3 sm:gap-x-4 lg:gap-x-4 gap-y-2 sm:gap-y-3 lg:gap-y-3">
+                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-2 sm:p-3 rounded-xl">
                           <div className="text-gray-400 text-xs mb-1 font-medium">Duration</div>
-                          <div className="font-semibold flex items-center text-sm sm:text-base">
-                            <FontAwesomeIcon icon={faClock} className="text-[#6c5ce7] mr-2 text-sm" />
+                          <div className="font-semibold flex items-center text-xs sm:text-sm lg:text-base">
+                            <FontAwesomeIcon icon={faClock} className="text-[#6c5ce7] mr-1 sm:mr-2 text-xs sm:text-sm" />
                             {formatDuration(getTotalDuration())}
                           </div>
                         </div>
-                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-3 rounded-xl">
+                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-2 sm:p-3 rounded-xl">
                           <div className="text-gray-400 text-xs mb-1 font-medium">Format</div>
-                          <div className="font-semibold text-sm sm:text-base">MP4</div>
+                          <div className="font-semibold text-xs sm:text-sm lg:text-base">MP4</div>
                         </div>
-                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-3 rounded-xl">
+                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-2 sm:p-3 rounded-xl">
                           <div className="text-gray-400 text-xs mb-1 font-medium">Clips</div>
-                          <div className="font-semibold text-sm sm:text-base">{selectedClipsData.length}</div>
+                          <div className="font-semibold text-xs sm:text-sm lg:text-base">{selectedClipsData.length}</div>
                         </div>
-                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-3 rounded-xl">
+                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] p-2 sm:p-3 rounded-xl">
                           <div className="text-gray-400 text-xs mb-1 font-medium">Status</div>
-                          <div className="font-semibold text-[#6c5ce7] text-sm sm:text-base">Completed</div>
+                          <div className="font-semibold text-[#6c5ce7] text-xs sm:text-sm lg:text-base">Completed</div>
                         </div>
                       </div>
-                                           <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-[#2d2d2d]">
-                        <div className="text-gray-400 text-sm mb-2 font-medium">Video URL</div>
-                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] rounded-xl p-3 flex items-center justify-between shadow-lg">
-                          <div className="text-gray-300 text-sm truncate max-w-[180px] sm:max-w-[220px] font-medium">
-                            {videoUrl.substring(0, 25)}...
+                                           <div className="mt-3 sm:mt-4 lg:mt-3 pt-2 sm:pt-3 lg:pt-3 border-t border-[#2d2d2d]">
+                        <div className="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 font-medium">Video URL</div>
+                        <div className="bg-gradient-to-r from-[#252525] to-[#2a2a2a] rounded-xl p-2 sm:p-3 flex items-center justify-between shadow-lg">
+                          <div className="text-gray-300 text-xs sm:text-sm truncate max-w-[140px] sm:max-w-[180px] lg:max-w-[200px] font-medium">
+                            {videoUrl.substring(0, 20)}...
                           </div>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={copyToClipboard}
-                            className="bg-gradient-to-r from-[#333333] to-[#3a3a3a] p-2 rounded-lg hover:from-[#3a3a3a] hover:to-[#404040] transition-all shadow-md"
+                            className="bg-gradient-to-r from-[#333333] to-[#3a3a3a] p-1.5 sm:p-2 rounded-lg hover:from-[#3a3a3a] hover:to-[#404040] transition-all shadow-md"
                           >
-                            <FontAwesomeIcon icon={copied ? faCheckCircle : faCopy} className={copied ? "text-green-500" : "text-[#6c5ce7]"} />
+                            <FontAwesomeIcon icon={copied ? faCheckCircle : faCopy} className={`text-xs sm:text-sm ${copied ? "text-green-500" : "text-[#6c5ce7]"}`} />
                           </motion.button>
                         </div>
                       </div>
@@ -865,7 +865,7 @@ const OutputPage = () => {
                          Merged Clips
                        </h3>
                      </div>
-                                        <div className="p-2 sm:p-3 flex-1 overflow-y-auto custom-purple-scrollbar min-h-0 max-h-[300px] lg:max-h-[400px]">
+                                        <div className="p-2 sm:p-3 flex-1 overflow-y-auto custom-purple-scrollbar min-h-0 max-h-[200px] sm:max-h-[250px] md:max-h-[280px] lg:max-h-[320px]">
                       {selectedClipsData.length > 0 && selectedClipsData.some(video => video.segments && video.segments.length > 0) ? (
                         selectedClipsData.flatMap((video, videoIndex) =>
                           video.segments.map((segment, segmentIndex) => (
