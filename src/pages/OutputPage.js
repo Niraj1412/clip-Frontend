@@ -32,7 +32,7 @@ import { API_URL, PYTHON_API, INITIAL_VERSION_API } from '../config';
 import authService from '../services/authService';
 
 const OutputPage = () => {
-  const { selectedClipsData } = useClipsData();
+  const { selectedClipsData, setSelectedClipsData } = useClipsData();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [videoUrl, setVideoUrl] = useState('');
@@ -63,12 +63,40 @@ const OutputPage = () => {
   useEffect(() => {
     // Check if there are clips to merge
     if (selectedClipsData.length === 0) {
-      setError('No clips selected for merging');
+      // Try to get clips from localStorage as fallback
+      const savedClips = localStorage.getItem('selectedClipsData');
+      if (savedClips) {
+        try {
+          const parsedClips = JSON.parse(savedClips);
+          if (parsedClips && parsedClips.length > 0) {
+            // Restore clips to context
+            console.log('Restoring clips from localStorage:', parsedClips);
+            setSelectedClipsData(parsedClips);
+            return; // Don't proceed with mergeClips yet, let the effect run again with restored data
+          }
+        } catch (err) {
+          console.error('Error parsing saved clips:', err);
+        }
+      }
+      
+      // If no saved clips or invalid data, show error
+      setError('No clips selected for merging. Please go back and select clips to merge.');
       return;
     }
 
-    mergeClips();
-  }, []);
+    // Save clips to localStorage for persistence
+    localStorage.setItem('selectedClipsData', JSON.stringify(selectedClipsData));
+    
+    // Only merge if we haven't already processed this data
+    const processedVideoUrl = localStorage.getItem('processedVideoUrl');
+    if (!processedVideoUrl) {
+      mergeClips();
+    } else {
+      // If we have a processed video URL, restore it
+      setVideoUrl(processedVideoUrl);
+      setLoading(false);
+    }
+  }, [selectedClipsData, setSelectedClipsData]);
 
   // Function to validate and clean video URL
   const validateVideoUrl = (url) => {
@@ -175,8 +203,11 @@ const OutputPage = () => {
         throw new Error('Invalid video URL format received from server');
       }
 
-      setVideoUrl(cleanVideoUrl);
-      setLoadingProgress(98);
+             setVideoUrl(cleanVideoUrl);
+       setLoadingProgress(98);
+       
+       // Save the processed video URL to localStorage for persistence
+       localStorage.setItem('processedVideoUrl', cleanVideoUrl);
 
       // Test video accessibility
       try {
@@ -237,10 +268,12 @@ const OutputPage = () => {
 
 
   const handleBackToClips = () => {
+    clearStoredData();
     navigate('/transcripts');
   };
 
   const handleBackToExplore = () => {
+    clearStoredData();
     navigate('/explore');
   };
 
@@ -419,6 +452,29 @@ const OutputPage = () => {
       acc + (video.segments ? video.segments.length : 0), 0);
   };
 
+  // Cleanup function to clear localStorage when navigating away
+  const clearStoredData = () => {
+    localStorage.removeItem('selectedClipsData');
+    localStorage.removeItem('processedVideoUrl');
+  };
+
+  // Clear stored data when component unmounts or when user navigates away
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Don't clear on page reload, only on navigation away
+      if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_RELOAD) {
+        return;
+      }
+      clearStoredData();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   return (
     <div className="h-screen bg-[#121212] text-white flex flex-col">
       {/* Compact Header */}
@@ -435,24 +491,30 @@ const OutputPage = () => {
           </h1>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/explore')}
-            className="flex items-center gap-1 sm:gap-2 text-gray-300 hover:text-white transition-colors text-xs sm:text-sm"
-          >
-            <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-            <span className="hidden sm:inline">Explore</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/transcripts')}
-            className="flex items-center gap-1 sm:gap-2 text-gray-300 hover:text-white transition-colors text-xs sm:text-sm"
-          >
-            <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-            <span className="hidden sm:inline">Clips</span>
-          </motion.button>
+                     <motion.button
+             whileHover={{ scale: 1.05 }}
+             whileTap={{ scale: 0.95 }}
+             onClick={() => {
+               clearStoredData();
+               navigate('/explore');
+             }}
+             className="flex items-center gap-1 sm:gap-2 text-gray-300 hover:text-white transition-colors text-xs sm:text-sm"
+           >
+             <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
+             <span className="hidden sm:inline">Explore</span>
+           </motion.button>
+           <motion.button
+             whileHover={{ scale: 1.05 }}
+             whileTap={{ scale: 0.95 }}
+             onClick={() => {
+               clearStoredData();
+               navigate('/transcripts');
+             }}
+             className="flex items-center gap-1 sm:gap-2 text-gray-300 hover:text-white transition-colors text-xs sm:text-sm"
+           >
+             <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
+             <span className="hidden sm:inline">Clips</span>
+           </motion.button>
         </div>
       </div>
 
@@ -502,8 +564,8 @@ const OutputPage = () => {
         }
       `}</style>
 
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden p-2 sm:p-4">
+             {/* Main Content Area */}
+       <div className="flex-1 overflow-hidden p-1 sm:p-2">
         {/* Error State */}
         <AnimatePresence>
           {error && (
@@ -521,15 +583,18 @@ const OutputPage = () => {
                   <div>
                     <h2 className="text-lg sm:text-xl font-bold text-white mb-2">Processing Error</h2>
                     <p className="text-gray-300 text-sm">{error}</p>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => navigate('/transcripts')}
-                      className="mt-3 bg-[#252525] px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-[#303030] transition-colors"
-                    >
-                      <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-                      <span>Go Back and Try Again</span>
-                    </motion.button>
+                                         <motion.button
+                       whileHover={{ scale: 1.02 }}
+                       whileTap={{ scale: 0.98 }}
+                       onClick={() => {
+                         clearStoredData();
+                         navigate('/transcripts');
+                       }}
+                       className="mt-3 bg-[#252525] px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-[#303030] transition-colors"
+                     >
+                       <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
+                       <span>Go Back and Try Again</span>
+                     </motion.button>
                   </div>
                 </div>
               </div>
@@ -537,15 +602,15 @@ const OutputPage = () => {
           )}
         </AnimatePresence>
 
-        {/* Loading State */}
-        <AnimatePresence>
-          {loading && !error && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="h-full flex flex-col lg:flex-row gap-3 sm:gap-4"
-            >
+                 {/* Loading State */}
+         <AnimatePresence>
+           {loading && !error && (
+             <motion.div
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               className="h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
+             >
               <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] p-4 sm:p-6 flex flex-col items-center justify-center shadow-lg flex-1 min-h-0">
                 {/* Compact Loading visualization */}
                 <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-4 sm:mb-6">
@@ -581,7 +646,7 @@ const OutputPage = () => {
                   Merging and processing your clips...
                 </p>
               </div>
-              <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] p-3 sm:p-4 shadow-lg lg:w-[280px] sm:w-[320px] flex-shrink-0 flex flex-col min-h-0">
+                             <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] p-2 sm:p-3 shadow-lg lg:w-[260px] sm:w-[300px] flex-shrink-0 flex flex-col min-h-0">
                 <h3 className="text-base sm:text-lg font-bold mb-3 text-white">Processing Steps</h3>
                 <div className="space-y-2 sm:space-y-3 flex-1 min-h-0">
                   {[
@@ -609,9 +674,9 @@ const OutputPage = () => {
                     </div>
                   ))}
                 </div>
-                <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-[#2d2d2d] flex-shrink-0">
-                  <h4 className="text-gray-400 text-xs sm:text-sm mb-2">Clips Being Processed</h4>
-                  <div className="space-y-1 max-h-[120px] sm:max-h-[150px] overflow-y-auto custom-scrollbar">
+                                 <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-[#2d2d2d] flex-shrink-0">
+                   <h4 className="text-gray-400 text-xs sm:text-sm mb-1.5">Clips Being Processed</h4>
+                   <div className="space-y-1 max-h-[100px] sm:max-h-[120px] overflow-y-auto custom-scrollbar">
                     {selectedClipsData.length > 0 && selectedClipsData.some(video => video.segments && video.segments.length > 0) ? (
                       selectedClipsData.flatMap((video, videoIndex) =>
                         video.segments.map((segment, segmentIndex) => (
@@ -638,59 +703,59 @@ const OutputPage = () => {
           )}
         </AnimatePresence>
 
-        {/* Success State */}
-        <AnimatePresence>
-          {videoUrl && !loading && !error && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="h-full flex flex-col lg:flex-row gap-3 sm:gap-4"
-            >
-              {/* Video Player */}
-              <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] flex flex-col shadow-lg flex-1 min-h-0">
-                <div className="border-b border-[#2d2d2d] px-3 sm:px-6 py-2 sm:py-4 flex justify-between items-center flex-shrink-0">
-                  <h2 className="font-bold text-base sm:text-lg flex items-center gap-2">
-                    <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7] text-sm" />
-                    <span>Final Video</span>
-                  </h2>
-                  <div className="flex items-center gap-2 bg-[#252525] px-2 sm:px-3 py-1 rounded-full text-xs">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span>Ready</span>
-                  </div>
-                </div>
-                <div className="p-3 sm:p-6 flex-1 overflow-hidden min-h-0">
-                  <div className="aspect-video w-full h-auto max-h-[calc(100vh-180px)] relative z-10 rounded-lg overflow-hidden">
-                    <video
-                      controls
-                      src={videoUrl}
-                      className="w-full h-full object-contain bg-[#080808]"
-                      onLoadedData={() => setVideoLoaded(true)}
-                      onError={() => setVideoError(true)}
-                    />
-                  </div>
-                </div>
-                <div className="bg-[#151515] border-t border-[#2d2d2d] px-3 sm:px-6 py-3 sm:py-4 flex-shrink-0">
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={downloadVideo}
-                      className="flex-1 bg-[#6c5ce7] hover:bg-[#5849e0] py-2 sm:py-3 rounded-lg font-medium text-white flex items-center gap-2 sm:gap-3 justify-center transition-colors text-sm"
-                    >
-                      <FontAwesomeIcon icon={faDownload} className="text-xs sm:text-sm" />
-                      <span>Download Video</span>
-                    </motion.button>
-                    <div className="relative flex-1">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setShowShareMenu(!showShareMenu)}
-                        className="w-full bg-[#252525] border border-[#3A3A3A] py-2 sm:py-3 rounded-lg font-medium text-white flex items-center gap-2 sm:gap-3 justify-center hover:bg-[#303030] transition-colors text-sm"
-                      >
-                        <FontAwesomeIcon icon={faShare} className="text-xs sm:text-sm" />
-                        <span>Share Video</span>
-                      </motion.button>
+                 {/* Success State */}
+         <AnimatePresence>
+           {videoUrl && !loading && !error && (
+             <motion.div
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               className="h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
+             >
+               {/* Video Player */}
+               <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] flex flex-col shadow-lg flex-1 min-h-0">
+                 <div className="border-b border-[#2d2d2d] px-2 sm:px-4 py-1.5 sm:py-2 flex justify-between items-center flex-shrink-0">
+                   <h2 className="font-bold text-sm sm:text-base flex items-center gap-2">
+                     <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7] text-xs sm:text-sm" />
+                     <span>Final Video</span>
+                   </h2>
+                   <div className="flex items-center gap-1.5 bg-[#252525] px-2 py-0.5 rounded-full text-xs">
+                     <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                     <span>Ready</span>
+                   </div>
+                 </div>
+                 <div className="p-2 sm:p-4 flex-1 overflow-hidden min-h-0">
+                   <div className="aspect-video w-full h-auto max-h-[calc(100vh-220px)] relative z-10 rounded-lg overflow-hidden">
+                     <video
+                       controls
+                       src={videoUrl}
+                       className="w-full h-full object-contain bg-[#080808]"
+                       onLoadedData={() => setVideoLoaded(true)}
+                       onError={() => setVideoError(true)}
+                     />
+                   </div>
+                 </div>
+                 <div className="bg-[#151515] border-t border-[#2d2d2d] px-2 sm:px-4 py-2 sm:py-3 flex-shrink-0">
+                   <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
+                     <motion.button
+                       whileHover={{ scale: 1.02 }}
+                       whileTap={{ scale: 0.98 }}
+                       onClick={downloadVideo}
+                       className="flex-1 bg-[#6c5ce7] hover:bg-[#5849e0] py-1.5 sm:py-2 rounded-lg font-medium text-white flex items-center gap-1.5 sm:gap-2 justify-center transition-colors text-xs sm:text-sm"
+                     >
+                       <FontAwesomeIcon icon={faDownload} className="text-xs" />
+                       <span>Download Video</span>
+                     </motion.button>
+                     <div className="relative flex-1">
+                       <motion.button
+                         whileHover={{ scale: 1.02 }}
+                         whileTap={{ scale: 0.98 }}
+                         onClick={() => setShowShareMenu(!showShareMenu)}
+                         className="w-full bg-[#252525] border border-[#3A3A3A] py-1.5 sm:py-2 rounded-lg font-medium text-white flex items-center gap-1.5 sm:gap-2 justify-center hover:bg-[#303030] transition-colors text-xs sm:text-sm"
+                       >
+                         <FontAwesomeIcon icon={faShare} className="text-xs" />
+                         <span>Share Video</span>
+                       </motion.button>
                       <AnimatePresence>
                         {showShareMenu && (
                           <motion.div
@@ -736,154 +801,166 @@ const OutputPage = () => {
                 </div>
               </div>
 
-              {/* Information Panel */}
-              <div className="w-full lg:w-[280px] sm:w-[320px] flex flex-col gap-3 sm:gap-4 min-h-0">
-                <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] shadow-lg overflow-hidden flex-shrink-0">
-                  <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-[#2d2d2d]">
-                    <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
-                      <FontAwesomeIcon icon={faVideo} className="text-[#6c5ce7] text-sm" />
-                      Video Info
-                    </h3>
-                  </div>
-                  <div className="p-3 sm:p-6">
-                    <div className="grid grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-3 sm:gap-y-4">
-                      <div>
-                        <div className="text-gray-500 text-xs mb-1">Duration</div>
-                        <div className="font-medium flex items-center text-sm">
-                          <FontAwesomeIcon icon={faClock} className="text-[#6c5ce7] mr-2 text-xs" />
-                          {formatDuration(getTotalDuration())}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500 text-xs mb-1">Format</div>
-                        <div className="font-medium text-sm">MP4</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500 text-xs mb-1">Clips</div>
-                        <div className="font-medium text-sm">{selectedClipsData.length}</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500 text-xs mb-1">Status</div>
-                        <div className="font-medium text-[#6c5ce7] text-sm">Completed</div>
-                      </div>
-                    </div>
-                    <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-[#2d2d2d]">
-                      <div className="text-gray-500 text-xs mb-2">Video URL</div>
-                      <div className="bg-[#252525] rounded-lg p-2 flex items-center justify-between">
-                        <div className="text-gray-300 text-xs sm:text-sm truncate max-w-[180px] sm:max-w-[220px]">
-                          {videoUrl.substring(0, 30)}...
-                        </div>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={copyToClipboard}
-                          className="bg-[#333333] p-1.5 sm:p-2 rounded-lg hover:bg-[#3a3a3a] transition-colors"
-                        >
-                          <FontAwesomeIcon icon={copied ? faCheckCircle : faCopy} className={copied ? "text-green-500" : "text-[#6c5ce7]"} />
-                        </motion.button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] shadow-lg flex flex-col min-h-0 flex-1">
-                  <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-[#2d2d2d] flex-shrink-0">
-                    <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
-                      <FontAwesomeIcon icon={faList} className="text-[#6c5ce7] text-sm" />
-                      Merged Clips
-                    </h3>
-                  </div>
-                  <div className="p-2 flex-1 overflow-y-auto custom-purple-scrollbar min-h-0">
-                    {selectedClipsData.length > 0 && selectedClipsData.some(video => video.segments && video.segments.length > 0) ? (
-                      selectedClipsData.flatMap((video, videoIndex) =>
-                        video.segments.map((segment, segmentIndex) => (
-                          <div
-                            key={`${videoIndex}-${segmentIndex}`}
-                            className="bg-[#252525] rounded-lg p-2 sm:p-3 mb-2 hover:bg-[#2a2a2a] transition-colors"
-                          >
-                            <div className="flex justify-between items-center mb-1 sm:mb-2">
-                              <div className="flex items-center">
-                                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#6c5ce7]/20 flex items-center justify-center mr-2">
-                                  <span className="text-xs text-[#6c5ce7] font-bold">{videoIndex + 1}.{segmentIndex + 1}</span>
-                                </div>
-                                <span className="font-medium text-xs sm:text-sm">Clip {videoIndex + 1}.{segmentIndex + 1}</span>
-                              </div>
-                              <span className="text-gray-500 text-xs">
-                                {(parseFloat(segment.endTime) - parseFloat(segment.startTime)).toFixed(1)}s
-                              </span>
-                            </div>
-                            <div className="text-gray-400 text-xs line-clamp-2">
-                              {segment.text}
-                            </div>
-                          </div>
-                        ))
-                      )
-                    ) : (
-                      <div className="text-gray-400 text-xs sm:text-sm">No clips to display</div>
-                    )}
-                  </div>
-                  <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-[#2d2d2d] bg-[#151515] flex-shrink-0">
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate('/transcripts')}
-                        className="flex-1 bg-[#252525] py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-[#303030] transition-colors flex items-center justify-center gap-2"
-                      >
-                        <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-                        <span>Back to Clips</span>
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate('/explore')}
-                        className="flex-1 bg-[#6c5ce7] py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-[#5849e0] transition-colors flex items-center justify-center gap-2"
-                      >
-                        <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-                        <span>Back to Explore</span>
-                      </motion.button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                             {/* Information Panel */}
+               <div className="w-full lg:w-[260px] sm:w-[300px] flex flex-col gap-2 sm:gap-3 min-h-0">
+                 <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] shadow-lg overflow-hidden flex-shrink-0">
+                   <div className="px-2 sm:px-4 py-2 sm:py-3 border-b border-[#2d2d2d]">
+                     <h3 className="font-bold text-sm sm:text-base flex items-center gap-2">
+                       <FontAwesomeIcon icon={faVideo} className="text-[#6c5ce7] text-xs sm:text-sm" />
+                       Video Info
+                     </h3>
+                   </div>
+                   <div className="p-2 sm:p-4">
+                     <div className="grid grid-cols-2 gap-x-3 sm:gap-x-4 gap-y-2 sm:gap-y-3">
+                       <div>
+                         <div className="text-gray-500 text-xs mb-0.5">Duration</div>
+                         <div className="font-medium flex items-center text-xs sm:text-sm">
+                           <FontAwesomeIcon icon={faClock} className="text-[#6c5ce7] mr-1.5 text-xs" />
+                           {formatDuration(getTotalDuration())}
+                         </div>
+                       </div>
+                       <div>
+                         <div className="text-gray-500 text-xs mb-0.5">Format</div>
+                         <div className="font-medium text-xs sm:text-sm">MP4</div>
+                       </div>
+                       <div>
+                         <div className="text-gray-500 text-xs mb-0.5">Clips</div>
+                         <div className="font-medium text-xs sm:text-sm">{selectedClipsData.length}</div>
+                       </div>
+                       <div>
+                         <div className="text-gray-500 text-xs mb-0.5">Status</div>
+                         <div className="font-medium text-[#6c5ce7] text-xs sm:text-sm">Completed</div>
+                       </div>
+                     </div>
+                     <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-[#2d2d2d]">
+                       <div className="text-gray-500 text-xs mb-1.5">Video URL</div>
+                       <div className="bg-[#252525] rounded-lg p-1.5 sm:p-2 flex items-center justify-between">
+                         <div className="text-gray-300 text-xs truncate max-w-[160px] sm:max-w-[200px]">
+                           {videoUrl.substring(0, 25)}...
+                         </div>
+                         <motion.button
+                           whileHover={{ scale: 1.05 }}
+                           whileTap={{ scale: 0.95 }}
+                           onClick={copyToClipboard}
+                           className="bg-[#333333] p-1 sm:p-1.5 rounded-lg hover:bg-[#3a3a3a] transition-colors"
+                         >
+                           <FontAwesomeIcon icon={copied ? faCheckCircle : faCopy} className={copied ? "text-green-500" : "text-[#6c5ce7]"} />
+                         </motion.button>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+                 <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] shadow-lg flex flex-col min-h-0 flex-1">
+                   <div className="px-2 sm:px-4 py-2 sm:py-3 border-b border-[#2d2d2d] flex-shrink-0">
+                     <h3 className="font-bold text-sm sm:text-base flex items-center gap-2">
+                       <FontAwesomeIcon icon={faList} className="text-[#6c5ce7] text-xs sm:text-sm" />
+                       Merged Clips
+                     </h3>
+                   </div>
+                   <div className="p-1.5 sm:p-2 flex-1 overflow-y-auto custom-purple-scrollbar min-h-0">
+                     {selectedClipsData.length > 0 && selectedClipsData.some(video => video.segments && video.segments.length > 0) ? (
+                       selectedClipsData.flatMap((video, videoIndex) =>
+                         video.segments.map((segment, segmentIndex) => (
+                           <div
+                             key={`${videoIndex}-${segmentIndex}`}
+                             className="bg-[#252525] rounded-lg p-1.5 sm:p-2 mb-1.5 hover:bg-[#2a2a2a] transition-colors"
+                           >
+                             <div className="flex justify-between items-center mb-1">
+                               <div className="flex items-center">
+                                 <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#6c5ce7]/20 flex items-center justify-center mr-1.5">
+                                   <span className="text-xs text-[#6c5ce7] font-bold">{videoIndex + 1}.{segmentIndex + 1}</span>
+                                 </div>
+                                 <span className="font-medium text-xs">Clip {videoIndex + 1}.{segmentIndex + 1}</span>
+                               </div>
+                               <span className="text-gray-500 text-xs">
+                                 {(parseFloat(segment.endTime) - parseFloat(segment.startTime)).toFixed(1)}s
+                               </span>
+                             </div>
+                             <div className="text-gray-400 text-xs line-clamp-2">
+                               {segment.text}
+                             </div>
+                           </div>
+                         ))
+                       )
+                     ) : (
+                       <div className="text-gray-400 text-xs">No clips to display</div>
+                     )}
+                   </div>
+                   <div className="px-2 sm:px-4 py-2 sm:py-3 border-t border-[#2d2d2d] bg-[#151515] flex-shrink-0">
+                     <div className="flex flex-col sm:flex-row gap-1.5">
+                       <motion.button
+                         whileHover={{ scale: 1.02 }}
+                         whileTap={{ scale: 0.98 }}
+                         onClick={() => {
+                           clearStoredData();
+                           navigate('/transcripts');
+                         }}
+                         className="flex-1 bg-[#252525] py-1.5 sm:py-2 rounded-lg text-xs font-medium hover:bg-[#303030] transition-colors flex items-center justify-center gap-1.5"
+                       >
+                         <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
+                         <span>Back to Clips</span>
+                       </motion.button>
+                       <motion.button
+                         whileHover={{ scale: 1.02 }}
+                         whileTap={{ scale: 0.98 }}
+                         onClick={() => {
+                           clearStoredData();
+                           navigate('/explore');
+                         }}
+                         className="flex-1 bg-[#6c5ce7] py-1.5 sm:py-2 rounded-lg text-xs font-medium hover:bg-[#5849e0] transition-colors flex items-center justify-center gap-1.5"
+                       >
+                         <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
+                         <span>Back to Explore</span>
+                       </motion.button>
+                     </div>
+                   </div>
+                 </div>
+               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Empty State */}
-        <AnimatePresence>
-          {!videoUrl && !loading && !error && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="h-full flex items-center justify-center p-2"
-            >
-              <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] p-6 sm:p-8 shadow-lg max-w-md w-full">
+                 {/* Empty State */}
+         <AnimatePresence>
+           {!videoUrl && !loading && !error && (
+             <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               className="h-full flex items-center justify-center p-1"
+             >
+                             <div className="bg-[#1a1a1a] rounded-lg border border-[#2d2d2d] p-4 sm:p-6 shadow-lg max-w-sm w-full">
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-[#6c5ce7] flex items-center justify-center mb-4 sm:mb-6">
-                    <FontAwesomeIcon icon={faVideo} className="text-white text-lg sm:text-xl" />
-                  </div>
-                  <h2 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">No Video Generated</h2>
-                  <p className="text-gray-400 text-sm max-w-sm mb-4 sm:mb-6">Your clips need to be processed to generate a video. Please select clips to merge.</p>
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => navigate('/transcripts')}
-                      className="bg-[#6c5ce7] hover:bg-[#5849e0] px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium text-white flex items-center gap-2 transition-colors text-sm"
-                    >
-                      <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-                      <span>Select Clips</span>
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => navigate('/explore')}
-                      className="bg-[#252525] hover:bg-[#303030] px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium text-white flex items-center gap-2 transition-colors text-sm"
-                    >
-                      <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-                      <span>Back to Explore</span>
-                    </motion.button>
-                  </div>
+                                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#6c5ce7] flex items-center justify-center mb-3 sm:mb-4">
+                     <FontAwesomeIcon icon={faVideo} className="text-white text-sm sm:text-lg" />
+                   </div>
+                   <h2 className="text-base sm:text-lg font-bold text-white mb-1.5 sm:mb-2">No Video Generated</h2>
+                   <p className="text-gray-400 text-xs sm:text-sm max-w-xs mb-3 sm:mb-4">Your clips need to be processed to generate a video. Please select clips to merge.</p>
+                                     <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
+                     <motion.button
+                       whileHover={{ scale: 1.05 }}
+                       whileTap={{ scale: 0.95 }}
+                       onClick={() => {
+                         clearStoredData();
+                         navigate('/transcripts');
+                       }}
+                       className="bg-[#6c5ce7] hover:bg-[#5849e0] px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-white flex items-center gap-1.5 transition-colors text-xs sm:text-sm"
+                     >
+                       <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
+                       <span>Select Clips</span>
+                     </motion.button>
+                     <motion.button
+                       whileHover={{ scale: 1.05 }}
+                       whileTap={{ scale: 0.95 }}
+                       onClick={() => {
+                         clearStoredData();
+                         navigate('/explore');
+                       }}
+                       className="bg-[#252525] hover:bg-[#303030] px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-white flex items-center gap-1.5 transition-colors text-xs sm:text-sm"
+                     >
+                       <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
+                       <span>Back to Explore</span>
+                     </motion.button>
+                   </div>
                 </div>
               </div>
             </motion.div>
