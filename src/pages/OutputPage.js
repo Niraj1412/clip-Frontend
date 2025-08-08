@@ -718,10 +718,10 @@ const OutputPage = () => {
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
                exit={{ opacity: 0 }}
-               className="min-h-full md:h-full lg:h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
+               className="min-h-full lg:h-full flex flex-col lg:flex-row gap-2 sm:gap-3"
              >
                                                               {/* Enhanced Video Player */}
-                 <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] flex flex-col shadow-2xl flex-1 min-h-0 backdrop-blur-sm md:h-full lg:h-full">
+                 <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] flex flex-col shadow-2xl flex-1 min-h-0 backdrop-blur-sm lg:h-full">
                   <div className="border-b border-[#2d2d2d] px-3 sm:px-4 py-2 sm:py-3 flex justify-between items-center flex-shrink-0">
                     <h2 className="font-bold text-base sm:text-lg flex items-center gap-2">
                       <FontAwesomeIcon icon={faFilm} className="text-[#6c5ce7] text-sm sm:text-base" />
@@ -810,7 +810,7 @@ const OutputPage = () => {
               </div>
 
                                                                                                                                                                                    {/* Enhanced Information Panel */}
-                  <div className="w-full lg:w-[340px] md:w-full sm:w-full flex flex-col gap-2 sm:gap-3 lg:gap-3 min-h-0 md:h-full lg:h-full">
+                  <div className="w-full lg:w-[340px] md:w-full sm:w-full flex flex-col gap-2 sm:gap-3 lg:gap-3 min-h-0 lg:h-full">
                   <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] shadow-2xl overflow-hidden flex-shrink-0 backdrop-blur-sm">
                     <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-[#2d2d2d]">
                       <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
@@ -858,7 +858,7 @@ const OutputPage = () => {
                       </div>
                    </div>
                  </div>
-                                                                       <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] shadow-2xl flex flex-col min-h-0 flex-1 backdrop-blur-sm md:h-full lg:h-full">
+                                                                       <div className="bg-gradient-to-br from-[#1a1a1a] to-[#252525] rounded-2xl border border-[#2d2d2d] shadow-2xl flex flex-col min-h-0 flex-1 backdrop-blur-sm lg:h-full">
                      <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-[#2d2d2d] flex-shrink-0">
                        <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
                          <FontAwesomeIcon icon={faList} className="text-[#6c5ce7] text-sm sm:text-base" />
