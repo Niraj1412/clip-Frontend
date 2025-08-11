@@ -54,7 +54,7 @@ const HomePage = () => {
       <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} /> {/* Pass both props to Navbar */}
       <div className="flex">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <main className="ml-0 md:ml-[280px] mt-7 flex-1 p-6">
+        <main className="ml-0 lg:ml-[280px] mt-7 flex-1 p-3 sm:p-4 lg:p-6">
           <InputComponent />
         </main>
       </div>
