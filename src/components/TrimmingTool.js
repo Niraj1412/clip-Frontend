@@ -861,6 +861,7 @@ const TrimmingTool = ({
                   </button>
                 </div>
               </div>
+            </div>
             {/* Interactive Timeline Section - Moved closer to video */}
             <div className="px-3 sm:px-4 py-3">
               <div ref={timelineRef} className="w-full select-none relative touch-pan-y">
