@@ -892,7 +892,7 @@ const TrimmingTool = ({
               </div>
               
               {/* Utility Controls - 6 columns mobile, 3 columns desktop */}
-              <div className="col-span-6 sm:col-span-3 flex items-center justify-end gap-0.5 sm:gap-1">
+              <div className="col-span-3 sm:col-span-3 flex items-center justify-end gap-0.5 sm:gap-1">
                 <button
                   className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-[#0f172a] to-[#1e293b] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/30 shadow-inner"
                   onClick={toggleMute}
