@@ -805,14 +805,6 @@ const TrimmingTool = ({
           <div className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] p-1.5 sm:p-2 rounded-xl shadow-inner border border-[#6366f1]/10">
             {/* Mobile Primary Controls - Only visible on mobile */}
             <div className="sm:hidden space-y-2 mb-3">
-              {/* Timer Display Row */}
-              <div className="flex justify-center">
-                <div className="text-[#f9fafb] bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-3 py-2 rounded-lg flex items-center gap-2 border border-[#6366f1]/30 shadow-inner">
-                  <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-sm" />
-                  <span className="font-medium tabular-nums text-sm">{formatPreciseTime(currentTime)}</span>
-                </div>
-              </div>
-              
               {/* Play/Pause and Skip Controls Row */}
               <div className="flex justify-center items-center gap-3">
                 <button
@@ -843,16 +835,16 @@ const TrimmingTool = ({
 
             {/* Main Controls Row - Responsive Grid */}
             <div className="grid grid-cols-12 gap-1 sm:gap-2 items-center">
-              {/* Time Display - Hidden on mobile, 3 columns desktop */}
-              <div className="hidden sm:flex sm:col-span-3 items-center">
+              {/* Time Display - 3 columns mobile, 3 columns desktop */}
+              <div className="col-span-3 flex items-center">
                 <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1.5 py-1 rounded-lg flex items-center gap-1 border border-[#6366f1]/30 shadow-inner whitespace-nowrap w-full">
                   <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-xs" />
                   <span className="font-medium tabular-nums text-xs">{formatPreciseTime(currentTime)}</span>
                 </div>
               </div>
               
-              {/* Playback Rate with Speed Controls - 6 columns mobile, 3 columns desktop */}
-              <div className="col-span-6 sm:col-span-3 flex justify-center">
+              {/* Playback Rate with Speed Controls - 3 columns mobile, 3 columns desktop */}
+              <div className="col-span-3 flex justify-center">
                 <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1 sm:px-1.5 py-0.5 sm:py-1 rounded-lg flex items-center gap-0.5 sm:gap-1 border border-[#6366f1]/30 shadow-inner">
                   <button
                     className="w-3 h-3 sm:w-4 sm:h-4 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
