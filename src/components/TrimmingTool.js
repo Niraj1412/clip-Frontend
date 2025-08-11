@@ -813,10 +813,24 @@ const TrimmingTool = ({
                 </div>
               </div>
               
-              {/* Playback Rate - 2 columns */}
+              {/* Playback Rate with Speed Controls - 2 columns */}
               <div className="col-span-2 flex justify-center">
-                <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1.5 py-1 rounded-lg flex items-center border border-[#6366f1]/30 shadow-inner">
-                  <span className="tabular-nums font-medium">{playbackRate}x</span>
+                <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1.5 py-1 rounded-lg flex items-center gap-1 border border-[#6366f1]/30 shadow-inner">
+                  <button
+                    className="w-3 h-3 sm:w-4 sm:h-4 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
+                    onClick={() => adjustSpeed(false)}
+                    disabled={!ready}
+                  >
+                    <FontAwesomeIcon icon={faMinus} className="text-[10px]" />
+                  </button>
+                  <span className="tabular-nums font-medium min-w-[1.5rem] text-center">{playbackRate}x</span>
+                  <button
+                    className="w-3 h-3 sm:w-4 sm:h-4 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
+                    onClick={() => adjustSpeed(true)}
+                    disabled={!ready}
+                  >
+                    <FontAwesomeIcon icon={faPlus} className="text-[10px]" />
+                  </button>
                 </div>
               </div>
               
@@ -886,8 +900,8 @@ const TrimmingTool = ({
                 </div>
               </div>
               
-              {/* Start Time Controls - 4 columns */}
-              <div className="col-span-4 flex flex-col sm:flex-row items-start sm:items-center gap-1">
+              {/* Start Time Controls - 4.5 columns */}
+              <div className="col-span-5 flex flex-col sm:flex-row items-start sm:items-center gap-1">
                 <span className="text-[#9ca3af] text-xs font-medium whitespace-nowrap">Start:</span>
                 <div className="flex items-center gap-1 bg-gradient-to-r from-[#0f172a] to-[#1e293b] rounded-lg px-1.5 py-1 border border-[#6366f1]/30 shadow-inner w-full sm:w-auto">
                   <button
@@ -934,25 +948,7 @@ const TrimmingTool = ({
                 </div>
               </div>
               
-              {/* Speed Controls - 1 column */}
-              <div className="col-span-1 flex justify-end">
-                <div className="flex items-center gap-1">
-                  <button
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors bg-gradient-to-r from-[#0f172a] to-[#1e293b] border border-[#6366f1]/30"
-                    onClick={() => adjustSpeed(false)}
-                    disabled={!ready}
-                  >
-                    <FontAwesomeIcon icon={faMinus} className="text-xs" />
-                  </button>
-                  <button
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors bg-gradient-to-r from-[#0f172a] to-[#1e293b] border border-[#6366f1]/30"
-                    onClick={() => adjustSpeed(true)}
-                    disabled={!ready}
-                  >
-                    <FontAwesomeIcon icon={faPlus} className="text-xs" />
-                  </button>
-                </div>
-              </div>
+
             </div>
           </div>
 
