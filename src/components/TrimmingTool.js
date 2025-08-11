@@ -803,29 +803,56 @@ const TrimmingTool = ({
 
           {/* Ultra-Compact Controls - Mobile First Design */}
           <div className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] p-1.5 sm:p-2 rounded-xl shadow-inner border border-[#6366f1]/10">
-            {/* Mobile Play/Pause Button Row - Only visible on mobile */}
-            <div className="flex justify-center mb-2 sm:hidden">
-              <button
-                className="w-12 h-12 text-[#f9fafb] text-lg bg-gradient-to-r from-[#6366f1] to-[#4f46e5] rounded-full flex items-center justify-center hover:from-[#4f46e5] hover:to-[#4338ca] transition-all shadow-lg border border-[#6366f1]/30"
-                onClick={handlePlayPause}
-                disabled={!ready}
-              >
-                <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
-              </button>
+            {/* Mobile Primary Controls - Only visible on mobile */}
+            <div className="sm:hidden space-y-2 mb-3">
+              {/* Timer Display Row */}
+              <div className="flex justify-center">
+                <div className="text-[#f9fafb] bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-3 py-2 rounded-lg flex items-center gap-2 border border-[#6366f1]/30 shadow-inner">
+                  <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-sm" />
+                  <span className="font-medium tabular-nums text-sm">{formatPreciseTime(currentTime)}</span>
+                </div>
+              </div>
+              
+              {/* Play/Pause and Skip Controls Row */}
+              <div className="flex justify-center items-center gap-3">
+                <button
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0f172a] to-[#1e293b] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/30 shadow-inner"
+                  onClick={skipToStart}
+                  disabled={!ready}
+                >
+                  <FontAwesomeIcon icon={faBackwardStep} className="text-sm" />
+                </button>
+                
+                <button
+                  className="w-14 h-14 text-[#f9fafb] text-xl bg-gradient-to-r from-[#6366f1] to-[#4f46e5] rounded-full flex items-center justify-center hover:from-[#4f46e5] hover:to-[#4338ca] transition-all shadow-lg border border-[#6366f1]/30"
+                  onClick={handlePlayPause}
+                  disabled={!ready}
+                >
+                  <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
+                </button>
+                
+                <button
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0f172a] to-[#1e293b] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/30 shadow-inner"
+                  onClick={skipToEnd}
+                  disabled={!ready}
+                >
+                  <FontAwesomeIcon icon={faForwardStep} className="text-sm" />
+                </button>
+              </div>
             </div>
 
             {/* Main Controls Row - Responsive Grid */}
             <div className="grid grid-cols-12 gap-1 sm:gap-2 items-center">
-              {/* Time Display - 4 columns mobile, 3 columns desktop */}
-              <div className="col-span-4 sm:col-span-3 flex items-center">
-                <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1 sm:px-1.5 py-0.5 sm:py-1 rounded-lg flex items-center gap-0.5 sm:gap-1 border border-[#6366f1]/30 shadow-inner whitespace-nowrap w-full">
-                  <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-[10px] sm:text-xs" />
-                  <span className="font-medium tabular-nums text-[10px] sm:text-xs">{formatPreciseTime(currentTime)}</span>
+              {/* Time Display - Hidden on mobile, 3 columns desktop */}
+              <div className="hidden sm:flex sm:col-span-3 items-center">
+                <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1.5 py-1 rounded-lg flex items-center gap-1 border border-[#6366f1]/30 shadow-inner whitespace-nowrap w-full">
+                  <FontAwesome icon={faClock} className="text-[#22d3ee] text-xs" />
+                  <span className="font-medium tabular-nums text-xs">{formatPreciseTime(currentTime)}</span>
                 </div>
               </div>
               
-              {/* Playback Rate with Speed Controls - 4 columns mobile, 3 columns desktop */}
-              <div className="col-span-4 sm:col-span-3 flex justify-center">
+              {/* Playback Rate with Speed Controls - 6 columns mobile, 3 columns desktop */}
+              <div className="col-span-6 sm:col-span-3 flex justify-center">
                 <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1 sm:px-1.5 py-0.5 sm:py-1 rounded-lg flex items-center gap-0.5 sm:gap-1 border border-[#6366f1]/30 shadow-inner">
                   <button
                     className="w-3 h-3 sm:w-4 sm:h-4 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
@@ -845,23 +872,7 @@ const TrimmingTool = ({
                 </div>
               </div>
               
-              {/* Skip Controls - 2 columns mobile only */}
-              <div className="col-span-2 sm:hidden flex items-center justify-center gap-1">
-                <button
-                  className="w-4 h-4 rounded-full bg-gradient-to-br from-[#0f172a] to-[#1e293b] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/30 shadow-inner"
-                  onClick={skipToStart}
-                  disabled={!ready}
-                >
-                  <FontAwesomeIcon icon={faBackwardStep} className="text-[10px]" />
-                </button>
-                <button
-                  className="w-4 h-4 rounded-full bg-gradient-to-br from-[#0f172a] to-[#1e293b] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/30 shadow-inner"
-                  onClick={skipToEnd}
-                  disabled={!ready}
-                >
-                  <FontAwesomeIcon icon={faForwardStep} className="text-[10px]" />
-                </button>
-              </div>
+
 
               {/* Playback Controls - Hidden on mobile, 3 columns desktop */}
               <div className="hidden sm:flex sm:col-span-3 items-center justify-center gap-1">
@@ -888,8 +899,8 @@ const TrimmingTool = ({
                 </button>
               </div>
               
-              {/* Utility Controls - 2 columns mobile, 3 columns desktop */}
-              <div className="col-span-2 sm:col-span-3 flex items-center justify-end gap-0.5 sm:gap-1">
+              {/* Utility Controls - 6 columns mobile, 3 columns desktop */}
+              <div className="col-span-6 sm:col-span-3 flex items-center justify-end gap-0.5 sm:gap-1">
                 <button
                   className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-[#0f172a] to-[#1e293b] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/30 shadow-inner"
                   onClick={toggleMute}
