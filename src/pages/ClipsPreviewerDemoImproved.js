@@ -120,9 +120,47 @@ const ClipsPreviewerDemo = () => {
   useEffect(() => {
     const fetchClips = async () => {
       try {
+        // Try to restore from localStorage if no selectedClipsData
         if (!selectedClipsData || selectedClipsData.length === 0) {
-          throw new Error('No transcript data available');
+          const savedTranscriptData = localStorage.getItem('transcriptData');
+          const savedSelectedClipsData = localStorage.getItem('selectedClipsData');
+          
+          if (savedTranscriptData) {
+            try {
+              const parsedTranscriptData = JSON.parse(savedTranscriptData);
+              if (parsedTranscriptData && parsedTranscriptData.length > 0) {
+                console.log('Restoring transcript data from localStorage');
+                // Set the transcript data back to context if available
+                if (setSelectedClipsData) {
+                  setSelectedClipsData(parsedTranscriptData);
+                }
+                return; // Let the effect run again with restored data
+              }
+            } catch (err) {
+              console.error('Error parsing saved transcript data:', err);
+            }
+          }
+          
+          if (savedSelectedClipsData) {
+            try {
+              const parsedSelectedClipsData = JSON.parse(savedSelectedClipsData);
+              if (parsedSelectedClipsData && parsedSelectedClipsData.length > 0) {
+                console.log('Restoring selected clips data from localStorage');
+                if (setSelectedClipsData) {
+                  setSelectedClipsData(parsedSelectedClipsData);
+                }
+                return; // Let the effect run again with restored data
+              }
+            } catch (err) {
+              console.error('Error parsing saved selected clips data:', err);
+            }
+          }
+          
+          throw new Error('No transcript data available. Please go back and select a video.');
         }
+
+        // Save current data to localStorage for persistence
+        localStorage.setItem('selectedClipsData', JSON.stringify(selectedClipsData));
 
         setLoading(true);
         setError(null);
@@ -332,8 +370,32 @@ const ClipsPreviewerDemo = () => {
     console.log('Updated clips data:', JSON.stringify(updatedClipsData, null, 2)); // Debugging log
     setSelectedClipsData(updatedClipsData);
     showFeedback('Clips saved successfully! Redirecting to merge page...', 'success');
+    
+    // Clear localStorage when navigating to merge page
+    localStorage.removeItem('selectedClipsData');
+    localStorage.removeItem('transcriptData');
+    
     setTimeout(() => navigate('/merge'), 1500);
   };
+
+  // Add cleanup effect for navigation (but not reload)
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      // Don't clear on page reload, only on navigation away
+      if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_RELOAD) {
+        return;
+      }
+      // Clear localStorage when navigating away
+      localStorage.removeItem('selectedClipsData');
+      localStorage.removeItem('transcriptData');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   // Format time function
   const formatTimeRange = (startTime, endTime) => {

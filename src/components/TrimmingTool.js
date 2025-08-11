@@ -887,21 +887,21 @@ const TrimmingTool = ({
               </div>
               
               {/* Start Time Controls - 4 columns */}
-              <div className="col-span-4 flex items-center gap-1">
-                <span className="text-[#9ca3af] text-xs font-medium">Start:</span>
-                <div className="flex items-center gap-1 bg-gradient-to-r from-[#0f172a] to-[#1e293b] rounded-lg px-1.5 py-1 border border-[#6366f1]/30 shadow-inner">
+              <div className="col-span-4 flex flex-col sm:flex-row items-start sm:items-center gap-1">
+                <span className="text-[#9ca3af] text-xs font-medium whitespace-nowrap">Start:</span>
+                <div className="flex items-center gap-1 bg-gradient-to-r from-[#0f172a] to-[#1e293b] rounded-lg px-1.5 py-1 border border-[#6366f1]/30 shadow-inner w-full sm:w-auto">
                   <button
-                    className="w-5 h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors"
+                    className="w-5 h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
                     onClick={() => adjustStartTime(false)}
                     disabled={!ready || startTime <= 0}
                   >
                     <FontAwesomeIcon icon={faMinus} className="text-xs" />
                   </button>
-                  <div className="text-[#f9fafb] text-xs font-medium min-w-[2.5rem] text-center tabular-nums">
+                  <div className="text-[#f9fafb] text-xs font-medium min-w-[2.5rem] text-center tabular-nums flex-1">
                     {formatTime(startTime)}
                   </div>
                   <button
-                    className="w-5 h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors"
+                    className="w-5 h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
                     onClick={() => adjustStartTime(true)}
                     disabled={!ready || startTime >= endTime - 1}
                   >
@@ -911,21 +911,21 @@ const TrimmingTool = ({
               </div>
               
               {/* End Time Controls - 4 columns */}
-              <div className="col-span-4 flex items-center gap-1">
-                <span className="text-[#9ca3af] text-xs font-medium">End:</span>
-                <div className="flex items-center gap-1 bg-gradient-to-r from-[#0f172a] to-[#1e293b] rounded-lg px-1.5 py-1 border border-[#6366f1]/30 shadow-inner">
+              <div className="col-span-4 flex flex-col sm:flex-row items-start sm:items-center gap-1">
+                <span className="text-[#9ca3af] text-xs font-medium whitespace-nowrap">End:</span>
+                <div className="flex items-center gap-1 bg-gradient-to-r from-[#0f172a] to-[#1e293b] rounded-lg px-1.5 py-1 border border-[#6366f1]/30 shadow-inner w-full sm:w-auto">
                   <button
-                    className="w-5 h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors"
+                    className="w-5 h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
                     onClick={() => adjustEndTime(false)}
                     disabled={!ready || endTime <= startTime + 1}
                   >
                     <FontAwesomeIcon icon={faMinus} className="text-xs" />
                   </button>
-                  <div className="text-[#f9fafb] text-xs font-medium min-w-[2.5rem] text-center tabular-nums">
+                  <div className="text-[#f9fafb] text-xs font-medium min-w-[2.5rem] text-center tabular-nums flex-1">
                     {formatTime(endTime)}
                   </div>
                   <button
-                    className="w-5 h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors"
+                    className="w-5 h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
                     onClick={() => adjustEndTime(true)}
                     disabled={!ready || endTime >= duration}
                   >
