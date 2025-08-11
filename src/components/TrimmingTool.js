@@ -846,7 +846,7 @@ const TrimmingTool = ({
               {/* Time Display - Hidden on mobile, 3 columns desktop */}
               <div className="hidden sm:flex sm:col-span-3 items-center">
                 <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1.5 py-1 rounded-lg flex items-center gap-1 border border-[#6366f1]/30 shadow-inner whitespace-nowrap w-full">
-                  <FontAwesome icon={faClock} className="text-[#22d3ee] text-xs" />
+                  <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-xs" />
                   <span className="font-medium tabular-nums text-xs">{formatPreciseTime(currentTime)}</span>
                 </div>
               </div>
