@@ -835,16 +835,16 @@ const TrimmingTool = ({
 
             {/* Main Controls Row - Responsive Grid */}
             <div className="grid grid-cols-12 gap-1 sm:gap-2 items-center">
-              {/* Time Display - 3 columns mobile, 3 columns desktop */}
-              <div className="col-span-3 flex items-center">
-                <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1.5 py-1 rounded-lg flex items-center gap-1 border border-[#6366f1]/30 shadow-inner whitespace-nowrap w-full">
-                  <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-xs" />
-                  <span className="font-medium tabular-nums text-xs">{formatPreciseTime(currentTime)}</span>
+              {/* Time Display - 2 columns mobile, 3 columns desktop */}
+              <div className="col-span-2 sm:col-span-3 flex items-center">
+                <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1 sm:px-1.5 py-0.5 sm:py-1 rounded-lg flex items-center gap-0.5 sm:gap-1 border border-[#6366f1]/30 shadow-inner whitespace-nowrap w-full">
+                  <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-[10px] sm:text-xs" />
+                  <span className="font-medium tabular-nums text-[10px] sm:text-xs">{formatPreciseTime(currentTime)}</span>
                 </div>
               </div>
               
-              {/* Playback Rate with Speed Controls - 3 columns mobile, 3 columns desktop */}
-              <div className="col-span-3 flex justify-center">
+              {/* Playback Rate with Speed Controls - 4 columns mobile, 3 columns desktop */}
+              <div className="col-span-4 sm:col-span-3 flex justify-center">
                 <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1 sm:px-1.5 py-0.5 sm:py-1 rounded-lg flex items-center gap-0.5 sm:gap-1 border border-[#6366f1]/30 shadow-inner">
                   <button
                     className="w-3 h-3 sm:w-4 sm:h-4 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
