@@ -844,7 +844,7 @@ const TrimmingTool = ({
               </div>
               
               {/* Playback Rate with Speed Controls - 3 columns mobile, 3 columns desktop */}
-              <div className="col-span-3 flex justify-center ml-2 sm:ml-4">
+              <div className="col-span-3 flex justify-center ml-4 sm:ml-4">
                 <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1 sm:px-1.5 py-0.5 sm:py-1 rounded-lg flex items-center gap-0.5 sm:gap-1 border border-[#6366f1]/30 shadow-inner">
                   <button
                     className="w-3 h-3 sm:w-4 sm:h-4 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
