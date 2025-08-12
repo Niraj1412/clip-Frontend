@@ -834,9 +834,9 @@ const TrimmingTool = ({
             </div>
 
             {/* Main Controls Row - Responsive Grid */}
-            <div className="grid grid-cols-12 gap-0.5 sm:gap-2 items-center">
+            <div className="grid grid-cols-12 gap-1 sm:gap-2 items-center">
               {/* Time Display - 4 columns mobile, 3 columns desktop */}
-              <div className="col-span-4 sm:col-span-3 flex items-center">
+              <div className="col-span-4 sm:col-span-3 flex items-center pr-1 sm:pr-0">
                 <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-2 py-1 rounded-lg flex items-center gap-1 border border-[#6366f1]/30 shadow-inner w-full">
                   <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-xs flex-shrink-0" />
                   <span className="font-medium tabular-nums text-xs truncate">{formatPreciseTime(currentTime)}</span>
@@ -844,7 +844,7 @@ const TrimmingTool = ({
               </div>
               
               {/* Playback Rate with Speed Controls - 4 columns mobile, 3 columns desktop */}
-              <div className="col-span-4 sm:col-span-3 flex justify-center">
+              <div className="col-span-4 sm:col-span-3 flex justify-center pl-1 sm:pl-0">
                 <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1.5 sm:px-2 py-1 rounded-lg flex items-center gap-1 border border-[#6366f1]/30 shadow-inner">
                   <button
                     className="w-4 h-4 sm:w-5 sm:h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
