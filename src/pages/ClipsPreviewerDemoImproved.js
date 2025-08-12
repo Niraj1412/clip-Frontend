@@ -371,9 +371,10 @@ const ClipsPreviewerDemo = () => {
     setSelectedClipsData(updatedClipsData);
     showFeedback('Clips saved successfully! Redirecting to merge page...', 'success');
     
-    // Clear localStorage when navigating to merge page
+    // Clear localStorage when navigating to merge page, including any previous output
     localStorage.removeItem('selectedClipsData');
     localStorage.removeItem('transcriptData');
+    localStorage.removeItem('processedVideoUrl');
     
     setTimeout(() => navigate('/merge'), 1500);
   };

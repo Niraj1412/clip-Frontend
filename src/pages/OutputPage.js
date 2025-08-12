@@ -83,18 +83,14 @@ const OutputPage = () => {
       return;
     }
 
+    // Clear any previous processed video URL to ensure we process new data
+    localStorage.removeItem('processedVideoUrl');
+    
     // Save clips to localStorage for persistence
     localStorage.setItem('selectedClipsData', JSON.stringify(selectedClipsData));
     
-    // Only merge if we haven't already processed this data
-    const processedVideoUrl = localStorage.getItem('processedVideoUrl');
-    if (!processedVideoUrl) {
-      mergeClips();
-    } else {
-      // If we have a processed video URL, restore it
-      setVideoUrl(processedVideoUrl);
-      setLoading(false);
-    }
+    // Always process new clips data
+    mergeClips();
   }, [selectedClipsData, setSelectedClipsData]);
 
   // Function to validate and clean video URL
@@ -455,6 +451,7 @@ const OutputPage = () => {
   const clearStoredData = () => {
     localStorage.removeItem('selectedClipsData');
     localStorage.removeItem('processedVideoUrl');
+    localStorage.removeItem('transcriptData');
   };
 
   // Clear stored data when component unmounts or when user navigates away
