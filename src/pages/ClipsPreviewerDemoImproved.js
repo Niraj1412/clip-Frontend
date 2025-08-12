@@ -342,12 +342,13 @@ const ClipsPreviewerDemo = () => {
   };
 
   const handleFinishAndSave = () => {
-    if (processedClips.length === 0) {
-      showFeedback('No clips to save. Please create some clips first.', 'error');
+    if (selectedClips.length === 0) {
+      showFeedback('No clips selected. Please select clips to save.', 'error');
       return;
     }
 
-    const clipsByVideo = processedClips.reduce((acc, clip) => {
+    // Only process SELECTED clips, not all processed clips
+    const clipsByVideo = selectedClips.reduce((acc, clip) => {
       if (!acc[clip.videoId]) acc[clip.videoId] = [];
       acc[clip.videoId].push(clip);
       return acc;
@@ -367,9 +368,11 @@ const ClipsPreviewerDemo = () => {
       };
     });
 
-    console.log('Updated clips data:', JSON.stringify(updatedClipsData, null, 2)); // Debugging log
+    console.log('Updated clips data (selected only):', JSON.stringify(updatedClipsData, null, 2)); // Debugging log
+    console.log('Selected clips count:', selectedClips.length, 'Total clips count:', processedClips.length);
+    
     setSelectedClipsData(updatedClipsData);
-    showFeedback('Clips saved successfully! Redirecting to merge page...', 'success');
+    showFeedback(`${selectedClips.length} clips saved successfully! Redirecting to merge page...`, 'success');
     
     // Clear localStorage when navigating to merge page, including any previous output
     localStorage.removeItem('selectedClipsData');
@@ -977,7 +980,7 @@ const ClipsPreviewerDemo = () => {
                 <button
                   className="relative group w-full py-3 sm:py-4 bg-gradient-to-r from-[#6c5ce7] via-[#7c66ff] to-[#8b7cf7] hover:from-[#5849e0] hover:via-[#6c5ce7] hover:to-[#7a6af6] text-white rounded-xl text-sm sm:text-base font-bold transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none shadow-xl shadow-[#6c5ce7]/25 border border-[#6c5ce7]/30 backdrop-blur-sm overflow-hidden"
                   onClick={handleFinishAndSave}
-                  disabled={processedClips.length === 0 || selectedClips.length === 0}
+                  disabled={selectedClips.length === 0}
                 >
                   {/* Shimmer Effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
@@ -996,8 +999,12 @@ const ClipsPreviewerDemo = () => {
                   
                   {/* Text */}
                   <span className="relative z-10 font-bold tracking-wide drop-shadow-sm">
-                    <span className="hidden sm:inline">Save & Continue</span>
-                    <span className="sm:hidden">Save</span>
+                    <span className="hidden sm:inline">
+                      Save {selectedClips.length} Clip{selectedClips.length !== 1 ? 's' : ''} & Continue
+                    </span>
+                    <span className="sm:hidden">
+                      Save ({selectedClips.length})
+                    </span>
                   </span>
                   
                   {/* Arrow Icon */}

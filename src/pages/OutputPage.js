@@ -83,13 +83,31 @@ const OutputPage = () => {
       return;
     }
 
-    // Clear any previous processed video URL to ensure we process new data
-    localStorage.removeItem('processedVideoUrl');
+    // Check if this is a page reload or fresh navigation
+    const isPageReload = window.performance && 
+      (window.performance.navigation.type === window.performance.navigation.TYPE_RELOAD ||
+       window.performance.getEntriesByType('navigation')[0]?.type === 'reload');
+    
+    // For page reload, check if we have a processed video URL
+    if (isPageReload) {
+      const processedVideoUrl = localStorage.getItem('processedVideoUrl');
+      if (processedVideoUrl) {
+        console.log('Page reload detected, using cached video URL');
+        setVideoUrl(processedVideoUrl);
+        setLoading(false);
+        return;
+      }
+    }
+    
+    // For fresh navigation or no cached video, clear cache and process new data
+    if (!isPageReload) {
+      localStorage.removeItem('processedVideoUrl');
+    }
     
     // Save clips to localStorage for persistence
     localStorage.setItem('selectedClipsData', JSON.stringify(selectedClipsData));
     
-    // Always process new clips data
+    // Process clips data
     mergeClips();
   }, [selectedClipsData, setSelectedClipsData]);
 
