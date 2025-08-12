@@ -834,32 +834,32 @@ const TrimmingTool = ({
             </div>
 
             {/* Main Controls Row - Responsive Grid */}
-            <div className="grid grid-cols-12 gap-1 sm:gap-2 items-center">
-              {/* Time Display - 3 columns mobile, 3 columns desktop */}
-              <div className="col-span-3 flex items-center">
-                <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1.5 py-1 rounded-lg flex items-center gap-1 border border-[#6366f1]/30 shadow-inner whitespace-nowrap w-full">
-                  <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-xs" />
-                  <span className="font-medium tabular-nums text-xs">{formatPreciseTime(currentTime)}</span>
+            <div className="grid grid-cols-12 gap-0.5 sm:gap-2 items-center">
+              {/* Time Display - 4 columns mobile, 3 columns desktop */}
+              <div className="col-span-4 sm:col-span-3 flex items-center">
+                <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-2 py-1 rounded-lg flex items-center gap-1 border border-[#6366f1]/30 shadow-inner w-full">
+                  <FontAwesomeIcon icon={faClock} className="text-[#22d3ee] text-xs flex-shrink-0" />
+                  <span className="font-medium tabular-nums text-xs truncate">{formatPreciseTime(currentTime)}</span>
                 </div>
               </div>
               
-              {/* Playback Rate with Speed Controls - 3 columns mobile, 3 columns desktop */}
-              <div className="col-span-3 flex justify-center ml-4 sm:ml-4">
-                <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1 sm:px-1.5 py-0.5 sm:py-1 rounded-lg flex items-center gap-0.5 sm:gap-1 border border-[#6366f1]/30 shadow-inner">
+              {/* Playback Rate with Speed Controls - 4 columns mobile, 3 columns desktop */}
+              <div className="col-span-4 sm:col-span-3 flex justify-center">
+                <div className="text-[#f9fafb] text-xs bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-1.5 sm:px-2 py-1 rounded-lg flex items-center gap-1 border border-[#6366f1]/30 shadow-inner">
                   <button
-                    className="w-3 h-3 sm:w-4 sm:h-4 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
                     onClick={() => adjustSpeed(false)}
                     disabled={!ready}
                   >
-                    <FontAwesomeIcon icon={faMinus} className="text-[8px] sm:text-[10px]" />
+                    <FontAwesomeIcon icon={faMinus} className="text-[10px] sm:text-xs" />
                   </button>
-                  <span className="tabular-nums font-medium min-w-[1.2rem] sm:min-w-[1.5rem] text-center text-[10px] sm:text-xs">{playbackRate}x</span>
+                  <span className="tabular-nums font-medium min-w-[1.5rem] sm:min-w-[2rem] text-center text-xs">{playbackRate}x</span>
                   <button
-                    className="w-3 h-3 sm:w-4 sm:h-4 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-[#f9fafb]/80 text-xs flex items-center justify-center hover:bg-[#6366f1]/20 rounded transition-colors flex-shrink-0"
                     onClick={() => adjustSpeed(true)}
                     disabled={!ready}
                   >
-                    <FontAwesomeIcon icon={faPlus} className="text-[8px] sm:text-[10px]" />
+                    <FontAwesomeIcon icon={faPlus} className="text-[10px] sm:text-xs" />
                   </button>
                 </div>
               </div>
@@ -891,8 +891,8 @@ const TrimmingTool = ({
                 </button>
               </div>
               
-              {/* Utility Controls - 6 columns mobile, 3 columns desktop */}
-              <div className="col-span-6 sm:col-span-3 flex items-center justify-end gap-0.5 sm:gap-1">
+              {/* Utility Controls - 4 columns mobile, 3 columns desktop */}
+              <div className="col-span-4 sm:col-span-3 flex items-center justify-end gap-0.5 sm:gap-1">
                 <button
                   className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-[#0f172a] to-[#1e293b] flex items-center justify-center text-[#f9fafb] hover:bg-[#6366f1]/70 transition-all duration-300 border border-[#6366f1]/30 shadow-inner"
                   onClick={toggleMute}
