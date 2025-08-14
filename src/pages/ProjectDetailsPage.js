@@ -61,6 +61,7 @@ const ProjectDetailsPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoError, setVideoError] = useState(null);
+  const [videoUrlWithTimestamp, setVideoUrlWithTimestamp] = useState(null);
 
   // Add simple click-outside-to-close functionality
   useEffect(() => {
@@ -90,6 +91,13 @@ const ProjectDetailsPage = () => {
   useEffect(() => {
     fetchProjectDetails();
   }, [id]);
+
+  // Update video URL when project data changes
+  useEffect(() => {
+    if (project?.s3Url) {
+      setVideoUrlWithTimestamp(project.s3Url);
+    }
+  }, [project?.s3Url]);
 
   const fetchProjectDetails = async () => {
     if (!id) {
@@ -229,12 +237,43 @@ const ProjectDetailsPage = () => {
 
   const handleVideoError = (e) => {
     console.error('Video error:', e);
-    setVideoError('Failed to load video. Please check your connection and try again.');
+    
+    // Get more detailed error information
+    const video = e.target;
+    const error = video.error;
+    let errorMessage = 'Failed to load video.';
+    
+    if (error) {
+      switch (error.code) {
+        case 1:
+          errorMessage = 'Video loading was aborted.';
+          break;
+        case 2:
+          errorMessage = 'Network error occurred while loading video.';
+          break;
+        case 3:
+          errorMessage = 'Video format is corrupted or unsupported.';
+          break;
+        case 4:
+          errorMessage = 'Video format is not supported by this browser.';
+          break;
+        default:
+          errorMessage = 'Unknown video error occurred.';
+      }
+    }
+    
+    // Check if it's a 403 error (forbidden) which is common with S3
+    if (project?.s3Url && project.s3Url.includes('s3.amazonaws.com')) {
+      errorMessage += ' This may be due to expired access permissions. Please refresh the page or contact support.';
+    }
+    
+    setVideoError(errorMessage);
     setVideoLoading(false);
     setIsPlaying(false);
   };
 
   const handleVideoLoadStart = () => {
+    console.log('Video load start, S3 URL:', project?.s3Url);
     setVideoLoading(true);
     setVideoError(null);
   };
@@ -403,8 +442,13 @@ const ProjectDetailsPage = () => {
           <div>Video Error: {videoError ? '❌ YES' : '✅ NO'}</div>
           <div>Is Playing: {isPlaying ? '▶️ YES' : '⏸️ NO'}</div>
           {project?.s3Url && (
-            <div style={{ marginTop: '4px', wordBreak: 'break-all' }}>
-              URL: {project.s3Url.substring(0, 50)}...
+            <div style={{ marginTop: '4px', wordBreak: 'break-all', fontSize: '8px' }}>
+              URL: {project.s3Url}
+            </div>
+          )}
+          {videoError && (
+            <div style={{ marginTop: '4px', color: 'red', fontSize: '8px', wordBreak: 'break-all' }}>
+              Error: {videoError}
             </div>
           )}
           <button 
@@ -460,7 +504,7 @@ const ProjectDetailsPage = () => {
                         <video
                           ref={videoRef}
                           className="w-full h-full object-contain bg-black"
-                          src={project.s3Url}
+                          src={videoUrlWithTimestamp || project.s3Url}
                           poster={project.thumbnailUrl}
                           onTimeUpdate={handleTimeUpdate}
                           onLoadedMetadata={handleLoadedMetadata}
@@ -471,7 +515,6 @@ const ProjectDetailsPage = () => {
                           playsInline
                           controls={false}
                           preload="metadata"
-                          crossOrigin="anonymous"
                         />
                         {/* Loading State */}
                         {videoLoading && (
@@ -489,17 +532,29 @@ const ProjectDetailsPage = () => {
                             <div className="text-center">
                               <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-400 text-2xl mb-2" />
                               <p className="text-red-400 text-sm mb-4">{videoError}</p>
-                              <button
-                                onClick={() => {
-                                  setVideoError(null);
-                                  if (videoRef.current) {
-                                    videoRef.current.load();
-                                  }
-                                }}
-                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                              >
-                                Retry
-                              </button>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setVideoError(null);
+                                    if (videoRef.current) {
+                                      videoRef.current.load();
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                >
+                                  Retry
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setVideoError(null);
+                                    setVideoLoading(true);
+                                    fetchProjectDetails();
+                                  }}
+                                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                  Refresh URL
+                                </button>
+                              </div>
                             </div>
                           </div>
                         )}
@@ -774,7 +829,6 @@ const ProjectDetailsPage = () => {
                   controls
                   playsInline
                   preload="metadata"
-                  crossOrigin="anonymous"
                   onError={(e) => {
                     console.error('Modal video error:', e);
                     setError('Failed to load video in modal. Please try again.');
