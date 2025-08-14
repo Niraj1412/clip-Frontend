@@ -59,6 +59,8 @@ const ProjectDetailsPage = () => {
     isGuest: true
   });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(false);
+  const [videoError, setVideoError] = useState(null);
 
   // Add simple click-outside-to-close functionality
   useEffect(() => {
@@ -186,14 +188,21 @@ const ProjectDetailsPage = () => {
     }
   };
 
-  const handleVideoPlay = () => {
+  const handleVideoPlay = async () => {
     if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
+      try {
+        if (isPlaying) {
+          videoRef.current.pause();
+          setIsPlaying(false);
+        } else {
+          await videoRef.current.play();
+          setIsPlaying(true);
+        }
+      } catch (error) {
+        console.error('Error playing video:', error);
+        setError('Failed to play video. Please check the video URL or try refreshing the page.');
+        setTimeout(() => setError(null), 5000);
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
@@ -206,6 +215,8 @@ const ProjectDetailsPage = () => {
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
       setDuration(videoRef.current.duration);
+      setVideoLoading(false);
+      setVideoError(null);
     }
   };
 
@@ -214,6 +225,23 @@ const ProjectDetailsPage = () => {
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
     }
+  };
+
+  const handleVideoError = (e) => {
+    console.error('Video error:', e);
+    setVideoError('Failed to load video. Please check your connection and try again.');
+    setVideoLoading(false);
+    setIsPlaying(false);
+  };
+
+  const handleVideoLoadStart = () => {
+    setVideoLoading(true);
+    setVideoError(null);
+  };
+
+  const handleVideoCanPlay = () => {
+    setVideoLoading(false);
+    setVideoError(null);
   };
 
   const handleMuteToggle = () => {
@@ -365,11 +393,20 @@ const ProjectDetailsPage = () => {
     <>
       <Navbar setSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
       
-      {/* Simple debug for ProjectDetails */}
+      {/* Debug for ProjectDetails and Video */}
       {process.env.NODE_ENV === 'development' && (
-        <div style={{ position: 'fixed', top: '150px', right: '10px', zIndex: 9999, background: 'navy', color: 'white', padding: '8px', fontSize: '12px', borderRadius: '4px' }}>
+        <div style={{ position: 'fixed', top: '150px', right: '10px', zIndex: 9999, background: 'navy', color: 'white', padding: '8px', fontSize: '10px', borderRadius: '4px', maxWidth: '200px' }}>
           <div>ProjectDetails: {isSidebarOpen ? '🟢 OPEN' : '🔴 CLOSED'}</div>
           <div>Mobile: {window.innerWidth < 1024 ? '📱 YES' : '💻 NO'}</div>
+          <div>Video URL: {project?.s3Url ? '✅ YES' : '❌ NO'}</div>
+          <div>Video Loading: {videoLoading ? '⏳ YES' : '✅ NO'}</div>
+          <div>Video Error: {videoError ? '❌ YES' : '✅ NO'}</div>
+          <div>Is Playing: {isPlaying ? '▶️ YES' : '⏸️ NO'}</div>
+          {project?.s3Url && (
+            <div style={{ marginTop: '4px', wordBreak: 'break-all' }}>
+              URL: {project.s3Url.substring(0, 50)}...
+            </div>
+          )}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             style={{ background: 'green', color: 'white', padding: '2px 4px', fontSize: '10px', border: 'none', marginTop: '4px' }}
@@ -428,21 +465,61 @@ const ProjectDetailsPage = () => {
                           onTimeUpdate={handleTimeUpdate}
                           onLoadedMetadata={handleLoadedMetadata}
                           onEnded={handleVideoEnded}
+                          onError={handleVideoError}
+                          onLoadStart={handleVideoLoadStart}
+                          onCanPlay={handleVideoCanPlay}
                           playsInline
+                          controls={false}
+                          preload="metadata"
+                          crossOrigin="anonymous"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={handleVideoPlay}
-                            className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center shadow-lg"
-                          >
-                            <FontAwesomeIcon 
-                              icon={isPlaying ? faPause : faPlay} 
-                              className="text-white text-xl ml-1"
-                            />
-                          </motion.button>
-                        </div>
+                        {/* Loading State */}
+                        {videoLoading && (
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <div className="text-center">
+                              <FontAwesomeIcon icon={faSpinner} className="text-white text-2xl animate-spin mb-2" />
+                              <p className="text-white text-sm">Loading video...</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Error State */}
+                        {videoError && (
+                          <div className="absolute inset-0 bg-red-900/20 flex items-center justify-center p-4">
+                            <div className="text-center">
+                              <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-400 text-2xl mb-2" />
+                              <p className="text-red-400 text-sm mb-4">{videoError}</p>
+                              <button
+                                onClick={() => {
+                                  setVideoError(null);
+                                  if (videoRef.current) {
+                                    videoRef.current.load();
+                                  }
+                                }}
+                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                              >
+                                Retry
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Play/Pause Button */}
+                        {!videoLoading && !videoError && (
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={handleVideoPlay}
+                              className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center shadow-lg"
+                            >
+                              <FontAwesomeIcon 
+                                icon={isPlaying ? faPause : faPlay} 
+                                className="text-white text-xl ml-1"
+                              />
+                            </motion.button>
+                          </div>
+                        )}
                         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="flex items-center gap-4 text-white">
                             <div className="flex-1">
@@ -696,6 +773,13 @@ const ProjectDetailsPage = () => {
                   src={project.s3Url}
                   controls
                   playsInline
+                  preload="metadata"
+                  crossOrigin="anonymous"
+                  onError={(e) => {
+                    console.error('Modal video error:', e);
+                    setError('Failed to load video in modal. Please try again.');
+                    setTimeout(() => setError(null), 5000);
+                  }}
                 />
               </div>
             </motion.div>
