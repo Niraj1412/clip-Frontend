@@ -62,6 +62,8 @@ const ProjectDetailsPage = () => {
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoError, setVideoError] = useState(null);
   const [videoUrlWithTimestamp, setVideoUrlWithTimestamp] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [useDirectUrl, setUseDirectUrl] = useState(false);
 
   // Add simple click-outside-to-close functionality
   useEffect(() => {
@@ -92,12 +94,36 @@ const ProjectDetailsPage = () => {
     fetchProjectDetails();
   }, [id]);
 
+  // Function to get video URL with fallback options
+  const getVideoUrl = () => {
+    if (!project?.s3Url) return null;
+    
+    let url = project.s3Url;
+    
+    // Try direct URL without query parameters if signed URL fails
+    if (useDirectUrl && url.includes('?')) {
+      url = url.split('?')[0];
+      console.log('Using direct URL without signatures:', url);
+    }
+    
+    // Add cache-busting parameter on retry
+    if (retryCount > 0) {
+      const separator = url.includes('?') ? '&' : '?';
+      url += `${separator}t=${Date.now()}-${retryCount}`;
+      console.log('Adding cache-buster:', url);
+    }
+    
+    return url;
+  };
+
   // Update video URL when project data changes
   useEffect(() => {
     if (project?.s3Url) {
-      setVideoUrlWithTimestamp(project.s3Url);
+      const url = getVideoUrl();
+      setVideoUrlWithTimestamp(url);
+      console.log('Setting video URL:', url);
     }
-  }, [project?.s3Url]);
+  }, [project?.s3Url, retryCount, useDirectUrl]);
 
   const fetchProjectDetails = async () => {
     if (!id) {
@@ -243,33 +269,77 @@ const ProjectDetailsPage = () => {
     const error = video.error;
     let errorMessage = 'Failed to load video.';
     
+    // Log detailed error information
+    console.log('Video element:', video);
+    console.log('Video error object:', error);
+    console.log('Video src:', video.src);
+    console.log('Video readyState:', video.readyState);
+    console.log('Video networkState:', video.networkState);
+    
     if (error) {
+      console.log('Error code:', error.code);
+      console.log('Error message:', error.message);
+      
       switch (error.code) {
         case 1:
-          errorMessage = 'Video loading was aborted.';
+          errorMessage = 'Video loading was aborted by user or network.';
           break;
         case 2:
-          errorMessage = 'Network error occurred while loading video.';
+          errorMessage = 'Network error while loading video. Check your connection.';
           break;
         case 3:
-          errorMessage = 'Video format is corrupted or unsupported.';
+          errorMessage = 'Video format is corrupted or decoding failed.';
           break;
         case 4:
           errorMessage = 'Video format is not supported by this browser.';
           break;
         default:
-          errorMessage = 'Unknown video error occurred.';
+          errorMessage = `Unknown video error (code: ${error.code}).`;
       }
     }
     
-    // Check if it's a 403 error (forbidden) which is common with S3
-    if (project?.s3Url && project.s3Url.includes('s3.amazonaws.com')) {
-      errorMessage += ' This may be due to expired access permissions. Please refresh the page or contact support.';
+    // Test URL accessibility
+    if (project?.s3Url) {
+      console.log('Testing S3 URL accessibility...');
+      fetch(project.s3Url, { method: 'HEAD' })
+        .then(response => {
+          console.log('S3 URL test response:', response.status, response.statusText);
+          if (!response.ok) {
+            console.error('S3 URL is not accessible:', response.status);
+          }
+        })
+        .catch(fetchError => {
+          console.error('S3 URL fetch failed:', fetchError);
+        });
+      
+      errorMessage += ' S3 video access issue detected.';
     }
     
     setVideoError(errorMessage);
     setVideoLoading(false);
     setIsPlaying(false);
+    
+    // Auto-retry with different strategies
+    if (retryCount < 2) {
+      console.log(`Auto-retry attempt ${retryCount + 1}...`);
+      setTimeout(() => {
+        if (retryCount === 0) {
+          // First retry: try direct URL
+          setUseDirectUrl(true);
+          setRetryCount(1);
+        } else if (retryCount === 1) {
+          // Second retry: refresh project data
+          setRetryCount(2);
+          fetchProjectDetails();
+          return;
+        }
+        
+        setVideoError(null);
+        if (videoRef.current) {
+          videoRef.current.load();
+        }
+      }, 1000);
+    }
   };
 
   const handleVideoLoadStart = () => {
@@ -443,9 +513,17 @@ const ProjectDetailsPage = () => {
           <div>Is Playing: {isPlaying ? '▶️ YES' : '⏸️ NO'}</div>
           {project?.s3Url && (
             <div style={{ marginTop: '4px', wordBreak: 'break-all', fontSize: '8px' }}>
-              URL: {project.s3Url}
+              Original: {project.s3Url.substring(0, 80)}...
             </div>
           )}
+          {videoUrlWithTimestamp && (
+            <div style={{ marginTop: '4px', wordBreak: 'break-all', fontSize: '8px', color: 'cyan' }}>
+              Current: {videoUrlWithTimestamp.substring(0, 80)}...
+            </div>
+          )}
+          <div style={{ marginTop: '4px', fontSize: '8px' }}>
+            Retry: {retryCount} | Direct: {useDirectUrl ? 'YES' : 'NO'}
+          </div>
           {videoError && (
             <div style={{ marginTop: '4px', color: 'red', fontSize: '8px', wordBreak: 'break-all' }}>
               Error: {videoError}
@@ -532,27 +610,47 @@ const ProjectDetailsPage = () => {
                             <div className="text-center">
                               <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-400 text-2xl mb-2" />
                               <p className="text-red-400 text-sm mb-4">{videoError}</p>
-                              <div className="flex gap-2">
+                              <div className="flex flex-col gap-2">
                                 <button
                                   onClick={() => {
                                     setVideoError(null);
-                                    if (videoRef.current) {
-                                      videoRef.current.load();
-                                    }
+                                    setRetryCount(prev => prev + 1);
+                                    setTimeout(() => {
+                                      if (videoRef.current) {
+                                        videoRef.current.load();
+                                      }
+                                    }, 100);
                                   }}
-                                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                  className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
                                 >
-                                  Retry
+                                  Retry ({retryCount + 1})
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setVideoError(null);
+                                    setUseDirectUrl(!useDirectUrl);
+                                    setRetryCount(0);
+                                    setTimeout(() => {
+                                      if (videoRef.current) {
+                                        videoRef.current.load();
+                                      }
+                                    }, 100);
+                                  }}
+                                  className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
+                                >
+                                  {useDirectUrl ? 'Use Signed URL' : 'Try Direct URL'}
                                 </button>
                                 <button
                                   onClick={() => {
                                     setVideoError(null);
                                     setVideoLoading(true);
+                                    setRetryCount(0);
+                                    setUseDirectUrl(false);
                                     fetchProjectDetails();
                                   }}
-                                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                  className="px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm"
                                 >
-                                  Refresh URL
+                                  Refresh Project
                                 </button>
                               </div>
                             </div>
